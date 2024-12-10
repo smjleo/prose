@@ -1,0 +1,4 @@
+(executable
+ (public_name spmpst)
+ (name main)
+ (libraries spmpst))
