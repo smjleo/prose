@@ -1,4 +1,10 @@
+(menhir
+ (modules parser))
+
+(ocamllex lexer)
+
 (executable
- (public_name spmpst)
+ (public_name prose)
  (name main)
- (libraries spmpst))
+ (preprocess (pps ppx_jane))
+ (libraries core core_unix.command_unix prose))

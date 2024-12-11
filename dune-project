@@ -1,22 +1,24 @@
 (lang dune 3.12)
 
-(name spmpst)
+(name prose)
 
 (generate_opam_files true)
 
 (source
- (github username/reponame))
+ (github smjleo/prose))
 
-(authors "Author Name")
+(authors "Leo Lee")
 
-(maintainers "Maintainer Name")
+(maintainers "Leo Lee")
 
 (license LICENSE)
 
 (documentation https://url/to/documentation)
 
+(using menhir 2.1)
+
 (package
- (name spmpst)
+ (name prose)
  (synopsis "A short synopsis")
  (description "A longer description")
  (depends ocaml dune)
