@@ -1,4 +1,7 @@
 open Core
+module Parser = Prose.Parser
+module Lexer = Prose.Lexer
+module Ast = Prose.Ast
 
 let read lexbuf =
   let context = Parser.context Lexer.read lexbuf in
