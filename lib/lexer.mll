@@ -20,7 +20,7 @@ rule read =
   | ","      { COMMA }
   | "end"    { END }
   | "mu"     { MU }    (* TODO: maybe use unicode for these *)
-  | "+"      { OPLUS }
+  | "(+)"      { OPLUS }
   | "&"      { AND }
   | "{"      { LBRACE }
   | "}"      { RBRACE }

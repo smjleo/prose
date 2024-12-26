@@ -1,16 +1,16 @@
-alice: shop+query(Str) .
+alice: shop(+)query(Str) .
        shop&price(Int) .
        mu t .
-          bob + {
-              0.5 : split(Int) . bob & {yes . shop + buy . end, no . t},
-              0.5 : cancel . shop + no . end
+          bob (+) {
+              0.5 : split(Int) . bob & {yes . shop (+) buy . end, no . t},
+              0.5 : cancel . shop (+) no . end
           }
 
-shop: alice&query(Str) . alice+price(Int) . alice&{buy.end, no.end}
+shop: alice&query(Str) . alice(+)price(Int) . alice&{buy.end, no.end}
 
 bob: mu t .
        alice & {
-         split(Int) . alice + {0.5 : yes.end, 0.5 : no.t},
+         split(Int) . alice (+) {0.5 : yes.end, 0.5 : no.t},
          cancel . end
        }
               
