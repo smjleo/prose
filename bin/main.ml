@@ -13,7 +13,7 @@ let main filename () =
   let context = parse lexbuf in
   print_s [%message (context : Ast.context)];
   let labels = Label.in_context context in
-  print_s [%message (labels : Label.LSet.t)];
+  print_s [%message (labels : Label.t list)];
   In_channel.close inx
 ;;
 
