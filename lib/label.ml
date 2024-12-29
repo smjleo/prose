@@ -36,6 +36,10 @@ module ID_Map = struct
   type t = (Key.t, label list, Key.comparator_witness) Map.t
 
   let of_list list =
+    (* Populate the map by setting the key to the participants in the
+       label. The IDs are simply the indices (1-indexed) of the
+       corresponding labels within the list per each (key, value) pair.
+       See details of the ID(-) function in the paper. *)
     List.fold_left
       list
       ~init:(Map.empty (module Key))
