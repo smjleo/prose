@@ -10,7 +10,7 @@ and pmodule =
 and participant = string
 
 and command =
-  { label : Label.t
+  { action : Action.t
   ; guard : bool expr
   ; updates : (probability * update) list
   }
@@ -26,7 +26,7 @@ and _ expr =
 
 and _ variable =
   | IntVar : string -> int variable
-  | LabelVar : Label.t -> int variable
+  | ActionVar : Action.t -> int variable
   | BoolVar : string -> bool variable
 
 and probability = float

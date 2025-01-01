@@ -10,14 +10,14 @@ type t =
 
 (** Stores the mapping between each label and its ID. *)
 module Id_map : sig
-  type nonrec label = t
+  type nonrec action = t
   type t
 
-  val of_list : label list -> t
-  val id : t -> label:label -> int option
+  val of_list : action list -> t
+  val id : t -> action:action -> int option
 
   (** This corresponds to the domid(ID, p, q) function in the paper. *)
-  val labels : t -> from_participant:string -> to_participant:string -> label list
+  val actions : t -> from_participant:string -> to_participant:string -> action list
 end
 
 val to_string : t -> string

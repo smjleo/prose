@@ -2,7 +2,7 @@ open Core
 module Parser = Prose.Parser
 module Lexer = Prose.Lexer
 module Ast = Prose.Ast
-module Label = Prose.Label
+module Action = Prose.Action
 
 let parse lexbuf = Parser.context Lexer.read lexbuf
 
@@ -12,8 +12,8 @@ let main filename () =
   lexbuf.lex_curr_p <- { lexbuf.lex_curr_p with pos_fname = filename };
   let context = parse lexbuf in
   print_s [%message (context : Ast.context)];
-  let labels = Label.in_context context in
-  print_s [%message (labels : Label.t list)];
+  let actions = Action.in_context context in
+  print_s [%message (actions : Action.t list)];
   In_channel.close inx
 ;;
 

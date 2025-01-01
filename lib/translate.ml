@@ -22,40 +22,41 @@ let rec state_space = function
 ;;
 
 (** Calculate the big summation in the paper:
-      \sum_{i | ID(p::q::l_i) < ID(label)} SS(T_i)
-    where label is p::q::l_j for some j
-          labels contains all p::q::l_i
+      \sum_{i | ID(p::q::l_i) < ID(action)} SS(T_i)
+    where action is p::q::l_j for some j
+          actionss contains all p::q::l_i
       and choices contains l_i and T_i for all p::q choices *)
-let sum_states_until label ~labels ~choices ~id_map =
+let sum_states_until action ~actions ~choices ~id_map =
   (* TODO: This currently contains a lot of redundant list traversals - probably fine
      since we don't expect a large list, but it'd be nice if it can be made more
      efficient. *)
   let id =
-    match Label.Id_map.id id_map ~label with
-    | None -> error_s [%message "can't find label in ID map" (label : Label.t)] |> ok_exn
+    match Action.Id_map.id id_map ~action with
+    | None ->
+      error_s [%message "can't find action in ID map" (action : Action.t)] |> ok_exn
     | Some id -> id
   in
-  List.filter labels ~f:(fun label ->
+  List.filter actions ~f:(fun action ->
     let id' =
-      match Label.Id_map.id id_map ~label with
+      match Action.Id_map.id id_map ~action with
       | None ->
         error_s
           [%message
-            "can't find label within provided labels in ID map"
-              (label : Label.t)
-              (labels : Label.t list)]
+            "can't find action within provided actions in ID map"
+              (action : Action.t)
+              (actions : Action.t list)]
         |> ok_exn
       | Some id' -> id'
     in
     id' < id)
   |> List.sum
        (module Int)
-       ~f:(fun l ->
-         match Label.find_choice l choices with
+       ~f:(fun a ->
+         match Action.find_choice a choices with
          | None ->
            error_s
              [%message
-               "can't find choice with label" (l : Label.t) (choices : Ast.choice list)]
+               "can't find choice with action" (a : Action.t) (choices : Ast.choice list)]
            |> ok_exn
          | Some { ch_cont; _ } -> state_space ch_cont)
 ;;
@@ -84,8 +85,8 @@ let rec translate_type ~id_map ~participant ~state ~state_size ~var_map ty =
   | Internal { int_part; int_choices } -> (* TODO *) []
   | External { ext_part; ext_choices } ->
     let initial =
-      { label =
-          { Label.from_participant = ext_part
+      { action =
+          { Action.from_participant = ext_part
           ; to_participant = participant
           ; label = None
           }
@@ -94,19 +95,19 @@ let rec translate_type ~id_map ~participant ~state ~state_size ~var_map ty =
       ; updates = [ 1.0, IntUpdate (state_var, IntConst (state + 1)) ]
       }
     in
-    let labels =
-      Label.Id_map.labels id_map ~from_participant:ext_part ~to_participant:participant
+    let actions =
+      Action.Id_map.actions id_map ~from_participant:ext_part ~to_participant:participant
     in
-    let present_labels =
-      (* Only labels of the form p::q::l_i where l_i is present in ext_choices *)
-      List.filter labels ~f:(fun label ->
-        Label.find_choice label ext_choices |> Option.is_some)
+    let present_actions =
+      (* Only actions of the form p::q::l_i where l_i is present in ext_choices *)
+      List.filter actions ~f:(fun action ->
+        Action.find_choice action ext_choices |> Option.is_some)
     in
     let choices =
-      List.map labels ~f:(fun label ->
-        match Label.find_choice label ext_choices with
+      List.map actions ~f:(fun action ->
+        match Action.find_choice action ext_choices with
         | None ->
-          { label
+          { action
           ; guard = BoolConst false
           ; updates = [ 1.0, IntUpdate (state_var, IntConst (state + 1)) ]
           }
@@ -118,21 +119,25 @@ let rec translate_type ~id_map ~participant ~state ~state_size ~var_map ty =
             | Mu _ | Internal _ | External _ ->
               state
               + 2
-              + sum_states_until label ~labels:present_labels ~choices:ext_choices ~id_map
+              + sum_states_until
+                  action
+                  ~actions:present_actions
+                  ~choices:ext_choices
+                  ~id_map
           in
-          let id = Label.Id_map.id id_map ~label |> Option.value_exn in
-          { label
+          let id = Action.Id_map.id id_map ~action |> Option.value_exn in
+          { action
           ; guard =
               And
                 ( Eq (Local state_var, IntConst (state + 1))
-                , Eq (Local (LabelVar label), IntConst id) )
+                , Eq (Local (ActionVar action), IntConst id) )
           ; updates = [ 1.0, IntUpdate (state_var, IntConst new_state) ]
           })
     in
     let continuations =
       List.concat_map ext_choices ~f:(fun { ch_cont; ch_label; ch_sort = _ } ->
-        let label =
-          { Label.from_participant = ext_part
+        let action =
+          { Action.from_participant = ext_part
           ; to_participant = participant
           ; label = Some ch_label
           }
@@ -141,7 +146,7 @@ let rec translate_type ~id_map ~participant ~state ~state_size ~var_map ty =
           ch_cont
           ~id_map
           ~participant
-          ~state:(sum_states_until label ~labels ~choices:ext_choices ~id_map)
+          ~state:(sum_states_until action ~actions ~choices:ext_choices ~id_map)
           ~state_size
           ~var_map)
     in
@@ -162,6 +167,6 @@ let translate_ctx_item ~id_map { Ast.ctx_part; ctx_type } =
 ;;
 
 let translate context =
-  let id_map = Label.in_context context |> Label.Id_map.of_list in
+  let id_map = Action.in_context context |> Action.Id_map.of_list in
   List.map ~f:(translate_ctx_item ~id_map) context
 ;;

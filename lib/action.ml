@@ -1,5 +1,3 @@
-(* TODO: The term "label" is actuall a misnomer, because these represent PRISM actions. This also introduces ambiguity with "label" within session types. Every reference to label in this context should be refactored to be actions, and this module renamed. *)
-
 open! Core
 
 module T = struct
@@ -16,7 +14,7 @@ include T
 module LSet = Set.Make (T)
 
 module Id_map = struct
-  type nonrec label = t
+  type nonrec action = t
 
   module Key = struct
     module KT = struct
@@ -30,42 +28,42 @@ module Id_map = struct
     include KT
     include Comparator.Make (KT)
 
-    let of_label { T.from_participant; to_participant; _ } =
+    let of_action { T.from_participant; to_participant; _ } =
       { from_participant; to_participant }
     ;;
   end
 
-  type t = (Key.t, label list, Key.comparator_witness) Map.t
+  type t = (Key.t, action list, Key.comparator_witness) Map.t
 
   let of_list list =
     (* Populate the map by setting the key to the participants in the
-       label. The IDs are simply the indices (1-indexed) of the
-       corresponding labels within the list per each (key, value) pair.
+       action. The IDs are simply the indices (1-indexed) of the
+       corresponding actions within the list per each (key, value) pair.
        See details of the ID(-) function in the paper. *)
     List.fold_left
       list
       ~init:(Map.empty (module Key))
-      ~f:(fun accum label ->
-        let key = Key.of_label label in
-        Map.add_multi accum ~key ~data:label)
+      ~f:(fun accum action ->
+        let key = Key.of_action action in
+        Map.add_multi accum ~key ~data:action)
   ;;
 
-  let id t ~label =
-    let key = Key.of_label label in
+  let id t ~action =
+    let key = Key.of_action action in
     let open Option.Let_syntax in
     let%bind data = Map.find t key in
     let%map id =
       (* This is a linear time traversal, but we expect this list to
          be small as it is for a particular (from, to) pair *)
-      List.find_mapi data ~f:(fun i l ->
-        match equal l label with
+      List.find_mapi data ~f:(fun i a ->
+        match equal a action with
         | false -> None
         | true -> Some (i + 1))
     in
     id
   ;;
 
-  let labels t ~from_participant ~to_participant =
+  let actions t ~from_participant ~to_participant =
     let key = { Key.from_participant; to_participant } in
     Map.find t key |> Option.value ~default:[]
   ;;
