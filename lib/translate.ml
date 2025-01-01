@@ -24,7 +24,7 @@ let rec state_space = function
 (** Calculate the big summation in the paper:
       \sum_{i | ID(p::q::l_i) < ID(action)} SS(T_i)
     where action is p::q::l_j for some j
-          actionss contains all p::q::l_i
+          actions contains all p::q::l_i
       and choices contains l_i and T_i for all p::q choices *)
 let sum_states_until action ~actions ~choices ~id_map =
   (* TODO: This currently contains a lot of redundant list traversals - probably fine
@@ -82,7 +82,79 @@ let rec translate_type ~id_map ~participant ~state ~state_size ~var_map ty =
       ~var_map:(Map.set var_map ~key:var ~data:state)
       ty
   | Variable _var -> []
-  | Internal { int_part; int_choices } -> (* TODO *) []
+  | Internal { int_part; int_choices } ->
+    let new_action label =
+      { Action.from_participant = participant; to_participant = int_part; label }
+    in
+    let label_var =
+      (* TODO: Ideally should have a separate field/type/variant for this,
+         rather than reusing the label field of Action.t *)
+      ActionVar (new_action (Some "label"))
+    in
+    let initial =
+      { action = new_action None
+      ; guard =
+          And (Eq (Local state_var, IntConst state), Eq (Global fail_var, BoolConst false))
+      ; updates =
+          ( 1.0 -. List.sum (module Float) int_choices ~f:(fun (p, _c) -> p)
+          , [ IntUpdate (state_var, IntConst (state_size + 1)) ] )
+          :: List.map int_choices ~f:(fun (prob, { ch_label; _ }) ->
+            let action =
+              { Action.from_participant = participant
+              ; to_participant = int_part
+              ; label = Some ch_label
+              }
+            in
+            let id = Action.Id_map.id id_map ~action |> Option.value_exn in
+            ( prob
+            , [ IntUpdate (state_var, IntConst (state + id))
+              ; IntUpdate (label_var, IntConst id)
+              ] ))
+      }
+    in
+    let actions =
+      List.map int_choices ~f:(fun (_p, { ch_label; _ }) -> new_action (Some ch_label))
+    in
+    let bald_choices =
+      (* Choices without probabilities *)
+      List.map int_choices ~f:(fun (_p, c) -> c)
+    in
+    let choices =
+      List.map bald_choices ~f:(fun { ch_label; ch_cont; _ } ->
+        let action = new_action (Some ch_label) in
+        let id = Action.Id_map.id id_map ~action |> Option.value_exn in
+        let new_state =
+          match ch_cont with
+          | End -> state_size
+          | Variable t -> Map.find_exn var_map t
+          | Mu _ | Internal _ | External _ ->
+            state
+            + 1
+            + List.length int_choices
+            + sum_states_until action ~actions ~choices:bald_choices ~id_map
+        in
+        { action
+        ; guard = Eq (Local state_var, IntConst (state + id))
+        ; updates =
+            [ ( 1.0
+              , [ IntUpdate (state_var, IntConst new_state)
+                ; IntUpdate (label_var, IntConst 0)
+                ] )
+            ]
+        })
+    in
+    let continuations =
+      List.concat_map bald_choices ~f:(fun { ch_cont; ch_label; ch_sort = _ } ->
+        let action = new_action (Some ch_label) in
+        let new_state =
+          state
+          + 1
+          + List.length int_choices
+          + sum_states_until action ~actions ~choices:bald_choices ~id_map
+        in
+        translate_type ch_cont ~id_map ~participant ~state:new_state ~state_size ~var_map)
+    in
+    List.concat [ [ initial ]; choices; continuations ]
   | External { ext_part; ext_choices } ->
     let initial =
       { action =
@@ -92,7 +164,7 @@ let rec translate_type ~id_map ~participant ~state ~state_size ~var_map ty =
           }
       ; guard =
           And (Eq (Local state_var, IntConst state), Eq (Global fail_var, BoolConst false))
-      ; updates = [ 1.0, IntUpdate (state_var, IntConst (state + 1)) ]
+      ; updates = [ 1.0, [ IntUpdate (state_var, IntConst (state + 1)) ] ]
       }
     in
     let actions =
@@ -109,7 +181,7 @@ let rec translate_type ~id_map ~participant ~state ~state_size ~var_map ty =
         | None ->
           { action
           ; guard = BoolConst false
-          ; updates = [ 1.0, IntUpdate (state_var, IntConst (state + 1)) ]
+          ; updates = [ 1.0, [ IntUpdate (state_var, IntConst (state + 1)) ] ]
           }
         | Some { ch_cont; _ } ->
           let new_state =
@@ -131,7 +203,7 @@ let rec translate_type ~id_map ~participant ~state ~state_size ~var_map ty =
               And
                 ( Eq (Local state_var, IntConst (state + 1))
                 , Eq (Local (ActionVar action), IntConst id) )
-          ; updates = [ 1.0, IntUpdate (state_var, IntConst new_state) ]
+          ; updates = [ 1.0, [ IntUpdate (state_var, IntConst new_state) ] ]
           })
     in
     let continuations =
@@ -142,13 +214,12 @@ let rec translate_type ~id_map ~participant ~state ~state_size ~var_map ty =
           ; label = Some ch_label
           }
         in
-        translate_type
-          ch_cont
-          ~id_map
-          ~participant
-          ~state:(sum_states_until action ~actions ~choices:ext_choices ~id_map)
-          ~state_size
-          ~var_map)
+        let new_state =
+          state
+          + 2
+          + sum_states_until action ~actions:present_actions ~choices:ext_choices ~id_map
+        in
+        translate_type ch_cont ~id_map ~participant ~state:new_state ~state_size ~var_map)
     in
     List.concat [ [ initial ]; choices; continuations ]
 ;;

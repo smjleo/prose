@@ -3,6 +3,8 @@ module Parser = Prose.Parser
 module Lexer = Prose.Lexer
 module Ast = Prose.Ast
 module Action = Prose.Action
+module Translate = Prose.Translate
+module Prism = Prose.Prism
 
 let parse lexbuf = Parser.context Lexer.read lexbuf
 
@@ -12,8 +14,8 @@ let main filename () =
   lexbuf.lex_curr_p <- { lexbuf.lex_curr_p with pos_fname = filename };
   let context = parse lexbuf in
   print_s [%message (context : Ast.context)];
-  let actions = Action.in_context context in
-  print_s [%message (actions : Action.t list)];
+  let translated = Translate.translate context in
+  print_s [%message (translated : Prism.model)];
   In_channel.close inx
 ;;
 

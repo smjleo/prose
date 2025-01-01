@@ -1,6 +1,6 @@
 open! Core
 
-type model = pmodule list (* TODO: labels in composition?? *)
+type model = pmodule list [@@deriving sexp_of]
 
 and pmodule =
   { participant : participant
@@ -12,7 +12,7 @@ and participant = string
 and command =
   { action : Action.t
   ; guard : bool expr
-  ; updates : (probability * update) list
+  ; updates : (probability * update list) list
   }
 
 and _ expr =
