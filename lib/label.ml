@@ -1,3 +1,5 @@
+(* TODO: The term "label" is actuall a misnomer, because these represent PRISM actions. This also introduces ambiguity with "label" within session types. Every reference to label in this context should be refactored to be actions, and this module renamed. *)
+
 open! Core
 
 module T = struct
@@ -13,7 +15,7 @@ end
 include T
 module LSet = Set.Make (T)
 
-module ID_Map = struct
+module Id_map = struct
   type nonrec label = t
 
   module Key = struct
@@ -116,4 +118,11 @@ let in_context_item { Ast.ctx_part; ctx_type } =
 
 let in_context context =
   List.map ~f:in_context_item context |> LSet.union_list |> Set.to_list
+;;
+
+let find_choice { label; _ } choices =
+  match label with
+  | None -> None
+  | Some label ->
+    List.find choices ~f:(fun { Ast.ch_label; _ } -> String.equal ch_label label)
 ;;

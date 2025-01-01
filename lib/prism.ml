@@ -10,25 +10,27 @@ and pmodule =
 and participant = string
 
 and command =
-  { label : label
-  ; guard : int expr
+  { label : Label.t
+  ; guard : bool expr
   ; updates : (probability * update) list
   }
-
-and label = string
 
 and _ expr =
   | IntConst : int -> int expr
   | BoolConst : bool -> bool expr
-  | IntVar : variable -> int expr
-  | BoolVar : variable -> bool expr
+  | Local : 'a variable -> 'a expr
+  | Global : 'a variable -> 'a expr
   | Eq : 'a expr * 'a expr -> bool expr
   | Add : int expr * int expr -> int expr
+  | And : bool expr * bool expr -> bool expr
 
-and variable = string
+and _ variable =
+  | IntVar : string -> int variable
+  | LabelVar : Label.t -> int variable
+  | BoolVar : string -> bool variable
+
 and probability = float
-and update = variable * var_value
 
-and var_value =
-  | Int of int
-  | Bool of bool
+and update =
+  | IntUpdate of int variable * int expr
+  | BoolUpdate of bool variable * bool expr

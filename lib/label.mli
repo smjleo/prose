@@ -8,7 +8,8 @@ type t =
   }
 [@@deriving sexp]
 
-module ID_Map : sig
+(** Stores the mapping between each label and its ID. *)
+module Id_map : sig
   type nonrec label = t
   type t
 
@@ -21,3 +22,4 @@ end
 
 val to_string : t -> string
 val in_context : Ast.context -> t list
+val find_choice : t -> Ast.choice list -> Ast.choice option
