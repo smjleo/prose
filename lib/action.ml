@@ -2,11 +2,13 @@ open! Core
 
 module T = struct
   type t =
-    { (* TODO: consider using custom types for participants and labels *)
-      from_participant : string
-    ; to_participant : string
-    ; label : string option
-    }
+    | Blank
+    | Communication of
+        { (* TODO: consider using custom types for participants and labels *)
+          from_participant : string
+        ; to_participant : string
+        ; label : string option
+        }
   [@@deriving compare, equal, sexp]
 end
 
@@ -28,8 +30,12 @@ module Id_map = struct
     include KT
     include Comparator.Make (KT)
 
-    let of_action { T.from_participant; to_participant; _ } =
-      { from_participant; to_participant }
+    let of_action = function
+      | Blank ->
+        (* TODO: This is hacky, should clean up later *)
+        { from_participant = ""; to_participant = "" }
+      | Communication { from_participant; to_participant; _ } ->
+        { from_participant; to_participant }
     ;;
   end
 
@@ -69,11 +75,32 @@ module Id_map = struct
   ;;
 end
 
-let to_string { from_participant; to_participant; label } =
-  let parts = from_participant ^ "_" ^ to_participant in
-  match label with
-  | None -> parts
-  | Some label -> parts ^ "_" ^ label
+let blank = Blank
+
+let communication ~from_participant ~to_participant ?label () =
+  Communication { from_participant; to_participant; label }
+;;
+
+let label ~from_participant ~to_participant =
+  (* TODO: Ideally should have a separate variant for this, rather
+     than reusing label *)
+  Communication { from_participant; to_participant; label = Some "label" }
+;;
+
+let label_of_communication_exn t =
+  match t with
+  | Blank -> error_s [%message "can't convert blank to a label action" (t : t)] |> ok_exn
+  | Communication { from_participant; to_participant; _ } ->
+    label ~from_participant ~to_participant
+;;
+
+let to_string = function
+  | Blank -> ""
+  | Communication { from_participant; to_participant; label } ->
+    let parts = from_participant ^ "_" ^ to_participant in
+    (match label with
+     | None -> parts
+     | Some label -> parts ^ "_" ^ label)
 ;;
 
 let in_context_item { Ast.ctx_part; ctx_type } =
@@ -84,10 +111,11 @@ let in_context_item { Ast.ctx_part; ctx_type } =
     | Internal { int_part; int_choices } ->
       let each_choice (_p, { Ast.ch_label; ch_sort = _; ch_cont }) =
         let cur =
-          { from_participant = participant
-          ; to_participant = int_part
-          ; label = Some ch_label
-          }
+          Communication
+            { from_participant = participant
+            ; to_participant = int_part
+            ; label = Some ch_label
+            }
         in
         let rest = recurse direction participant ch_cont in
         match direction with
@@ -99,10 +127,11 @@ let in_context_item { Ast.ctx_part; ctx_type } =
       (* TODO: clean up dup with above *)
       let each_choice { Ast.ch_label; ch_sort = _; ch_cont } =
         let cur =
-          { from_participant = ext_part
-          ; to_participant = participant
-          ; label = Some ch_label
-          }
+          Communication
+            { from_participant = ext_part
+            ; to_participant = participant
+            ; label = Some ch_label
+            }
         in
         let rest = recurse direction participant ch_cont in
         match direction with
@@ -118,9 +147,12 @@ let in_context context =
   List.map ~f:in_context_item context |> LSet.union_list |> Set.to_list
 ;;
 
-let find_choice { label; _ } choices =
-  match label with
-  | None -> None
-  | Some label ->
-    List.find choices ~f:(fun { Ast.ch_label; _ } -> String.equal ch_label label)
+let find_choice t choices =
+  match t with
+  | Blank -> None
+  | Communication { label; _ } ->
+    (match label with
+     | None -> None
+     | Some label ->
+       List.find choices ~f:(fun { Ast.ch_label; _ } -> String.equal ch_label label))
 ;;

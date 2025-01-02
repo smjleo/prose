@@ -84,12 +84,14 @@ let rec translate_type ~id_map ~participant ~state ~state_size ~var_map ty =
   | Variable _var -> []
   | Internal { int_part; int_choices } ->
     let new_action label =
-      { Action.from_participant = participant; to_participant = int_part; label }
+      Action.communication
+        ~from_participant:participant
+        ~to_participant:int_part
+        ?label
+        ()
     in
     let label_var =
-      (* TODO: Ideally should have a separate field/type/variant for this,
-         rather than reusing the label field of Action.t *)
-      ActionVar (new_action (Some "label"))
+      ActionVar (Action.label ~from_participant:participant ~to_participant:int_part)
     in
     let initial =
       { action = new_action None
@@ -100,10 +102,11 @@ let rec translate_type ~id_map ~participant ~state ~state_size ~var_map ty =
           , [ IntUpdate (state_var, IntConst (state_size + 1)) ] )
           :: List.map int_choices ~f:(fun (prob, { ch_label; _ }) ->
             let action =
-              { Action.from_participant = participant
-              ; to_participant = int_part
-              ; label = Some ch_label
-              }
+              Action.communication
+                ~from_participant:participant
+                ~to_participant:int_part
+                ~label:ch_label
+                ()
             in
             let id = Action.Id_map.id id_map ~action |> Option.value_exn in
             ( prob
@@ -158,10 +161,7 @@ let rec translate_type ~id_map ~participant ~state ~state_size ~var_map ty =
   | External { ext_part; ext_choices } ->
     let initial =
       { action =
-          { Action.from_participant = ext_part
-          ; to_participant = participant
-          ; label = None
-          }
+          Action.communication ~from_participant:ext_part ~to_participant:participant ()
       ; guard =
           And (Eq (Local state_var, IntConst state), Eq (Global fail_var, BoolConst false))
       ; updates = [ 1.0, [ IntUpdate (state_var, IntConst (state + 1)) ] ]
@@ -198,21 +198,23 @@ let rec translate_type ~id_map ~participant ~state ~state_size ~var_map ty =
                   ~id_map
           in
           let id = Action.Id_map.id id_map ~action |> Option.value_exn in
+          let label_var = ActionVar (Action.label_of_communication_exn action) in
           { action
           ; guard =
               And
                 ( Eq (Local state_var, IntConst (state + 1))
-                , Eq (Local (ActionVar action), IntConst id) )
+                , Eq (Local label_var, IntConst id) )
           ; updates = [ 1.0, [ IntUpdate (state_var, IntConst new_state) ] ]
           })
     in
     let continuations =
       List.concat_map ext_choices ~f:(fun { ch_cont; ch_label; ch_sort = _ } ->
         let action =
-          { Action.from_participant = ext_part
-          ; to_participant = participant
-          ; label = Some ch_label
-          }
+          Action.communication
+            ~from_participant:ext_part
+            ~to_participant:participant
+            ~label:ch_label
+            ()
         in
         let new_state =
           state
@@ -225,15 +227,20 @@ let rec translate_type ~id_map ~participant ~state ~state_size ~var_map ty =
 ;;
 
 let translate_ctx_item ~id_map { Ast.ctx_part; ctx_type } =
-  { Prism.participant = ctx_part
+  let open Prism in
+  { participant = ctx_part
   ; commands =
-      translate_type
-        ~id_map
-        ~participant:ctx_part
-        ~state:0
-        ~state_size:(state_space ctx_type)
-        ~var_map:String.Map.empty
-        ctx_type
+      { action = Action.blank
+      ; guard = Eq (Local (IntVar ctx_part), IntConst (state_space ctx_type + 1))
+      ; updates = [ 1.0, [ BoolUpdate (BoolVar "fail", BoolConst true) ] ]
+      }
+      :: translate_type
+           ~id_map
+           ~participant:ctx_part
+           ~state:0
+           ~state_size:(state_space ctx_type)
+           ~var_map:String.Map.empty
+           ctx_type
   }
 ;;
 

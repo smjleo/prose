@@ -1,12 +1,6 @@
 open! Core
 
-type t =
-  { (* TODO: consider using custom types for participants and labels *)
-    from_participant : string
-  ; to_participant : string
-  ; label : string option
-  }
-[@@deriving sexp]
+type t [@@deriving sexp]
 
 (** Stores the mapping between each label and its ID. *)
 module Id_map : sig
@@ -20,6 +14,17 @@ module Id_map : sig
   val actions : t -> from_participant:string -> to_participant:string -> action list
 end
 
+val blank : t
+
+val communication
+  :  from_participant:string
+  -> to_participant:string
+  -> ?label:string
+  -> unit
+  -> t
+
+val label : from_participant:string -> to_participant:string -> t
+val label_of_communication_exn : t -> t
 val to_string : t -> string
 val in_context : Ast.context -> t list
 val find_choice : t -> Ast.choice list -> Ast.choice option
