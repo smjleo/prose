@@ -231,7 +231,9 @@ let translate_ctx_item ~id_map { Ast.ctx_part; ctx_type } =
     | `Int (action, max) -> Int (ActionVar action, max)
     | `Bool action -> Bool (ActionVar action)
   in
-  { locals = List.map (Action.Id_map.local_vars id_map ctx_part) ~f:to_var
+  { locals =
+      Int (StringVar ctx_part, state_space ctx_type + 1)
+      :: List.map (Action.Id_map.local_vars id_map ctx_part) ~f:to_var
   ; participant = ctx_part
   ; commands =
       { action = Action.blank
