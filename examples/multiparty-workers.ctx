@@ -1,0 +1,63 @@
+starter : workerA1 (+) datum(Int) .
+          workerA2 (+) datum(Int) .
+          workerA3 (+) datum(Int) .
+          end
+
+workerA1 : starter & datum(Int) .
+           mu t .
+             workerB1 (+) {
+               0.5 : datum(Int) . workerC1 & result(Int) . t,
+               0.5 : stop . end
+             }
+
+workerB1 : mu t . 
+             workerA1 & {
+               datum(Int) . workerC1 (+) datum(Int) . t,
+               stop . workerC1 (+) stop . end
+             }
+
+workerC1 : mu t .
+             workerB1 & {
+               datum(Int) . workerA1 (+) result . t,
+               stop . end
+             }
+
+
+workerA2 : starter & datum(Int) .
+           mu t .
+             workerB2 (+) {
+               0.5 : datum(Int) . workerC2 & result(Int) . t,
+               0.5 : stop . end
+             }
+
+workerB2 : mu t . 
+             workerA2 & {
+               datum(Int) . workerC2 (+) datum(Int) . t,
+               stop . workerC2 (+) stop . end
+             }
+
+workerC2 : mu t .
+             workerB2 & {
+               datum(Int) . workerA2 (+) result . t,
+               stop . end
+             }
+
+
+workerA3 : starter & datum(Int) .
+           mu t .
+             workerB3 (+) {
+               0.5 : datum(Int) . workerC3 & result(Int) . t,
+               0.5 : stop . end
+             }
+
+workerB3 : mu t . 
+             workerA3 & {
+               datum(Int) . workerC3 (+) datum(Int) . t,
+               stop . workerC3 (+) stop . end
+             }
+
+workerC3 : mu t .
+             workerB3 & {
+               datum(Int) . workerA3 (+) result . t,
+               stop . end
+             } 

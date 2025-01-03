@@ -1,0 +1,45 @@
+mapper : mu t .
+           worker1 (+) datum(Int) .
+           worker2 (+) datum(Int) .
+           worker3 (+) datum(Int) .
+           reducer & {
+             continue(Int) . t,
+             stop . 
+               worker1 (+) stop .
+               worker2 (+) stop .
+               worker3 (+) stop .
+               end
+           }
+
+worker1 : mapper & datum(Int) .
+          mu t .
+            reducer (+) result(Int) .
+            mapper & {
+              datum(Int) . t,
+              stop . end
+            }
+
+worker2 : mapper & datum(Int) .
+          mu t .
+            reducer (+) result(Int) .
+            mapper & {
+              datum(Int) . t,
+              stop . end
+            }
+
+worker3 : mapper & datum(Int) .
+          mu t .
+            reducer (+) result(Int) .
+            mapper & {
+              datum(Int) . t,
+              stop . end
+            }
+
+reducer : mu t .
+            worker1 & result(Int) .
+            worker2 & result(Int) .
+            worker3 & result(Int) .
+            mapper (+) {
+              0.4 : continue(Int) . t,
+              0.6 : stop.end
+            }
