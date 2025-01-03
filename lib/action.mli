@@ -2,7 +2,8 @@ open! Core
 
 type t [@@deriving sexp]
 
-(** Stores the mapping between each label and its ID. *)
+(** Stores the mapping between each label and its ID, as well as who each
+    participant sends messages to. *)
 module Id_map : sig
   type nonrec action = t
   type t
@@ -12,6 +13,13 @@ module Id_map : sig
 
   (** This corresponds to the domid(ID, p, q) function in the paper. *)
   val actions : t -> from_participant:string -> to_participant:string -> action list
+
+  (** All the local variables for a participant module. We don't return
+      a Prism.var_type because this would introduce a dependency cycle
+      (since Prism depends on Action).
+
+      TODO: Lift variable into a separate file? *)
+  val local_vars : t -> string -> [ `Int of action * int | `Bool of action ] list
 end
 
 val blank : t

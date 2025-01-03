@@ -5,6 +5,7 @@ module Ast = Prose.Ast
 module Action = Prose.Action
 module Translate = Prose.Translate
 module Prism = Prose.Prism
+module Printer = Prose.Printer
 
 let parse lexbuf = Parser.context Lexer.read lexbuf
 
@@ -16,6 +17,7 @@ let main filename () =
   print_s [%message (context : Ast.context)];
   let translated = Translate.translate context in
   print_s [%message (translated : Prism.model)];
+  Printer.print translated;
   In_channel.close inx
 ;;
 

@@ -68,9 +68,9 @@ let rec translate_type ~id_map ~participant ~state ~state_size ~var_map ty =
   let state_var =
     (* Local variable within the module to keep track of the current state.
        S_p in the paper. *)
-    IntVar participant
+    StringVar participant
   in
-  let fail_var = BoolVar "fail" in
+  let fail_var = StringVar "fail" in
   match ty with
   | Ast.End -> []
   | Mu (var, ty) ->
@@ -96,7 +96,7 @@ let rec translate_type ~id_map ~participant ~state ~state_size ~var_map ty =
     let initial =
       { action = new_action None
       ; guard =
-          And (Eq (Local state_var, IntConst state), Eq (Global fail_var, BoolConst false))
+          And (Eq (Var state_var, IntConst state), Eq (Var fail_var, BoolConst false))
       ; updates =
           ( 1.0 -. List.sum (module Float) int_choices ~f:(fun (p, _c) -> p)
           , [ IntUpdate (state_var, IntConst (state_size + 1)) ] )
@@ -137,7 +137,7 @@ let rec translate_type ~id_map ~participant ~state ~state_size ~var_map ty =
             + sum_states_until action ~actions ~choices:bald_choices ~id_map
         in
         { action
-        ; guard = Eq (Local state_var, IntConst (state + id))
+        ; guard = Eq (Var state_var, IntConst (state + id))
         ; updates =
             [ ( 1.0
               , [ IntUpdate (state_var, IntConst new_state)
@@ -163,7 +163,7 @@ let rec translate_type ~id_map ~participant ~state ~state_size ~var_map ty =
       { action =
           Action.communication ~from_participant:ext_part ~to_participant:participant ()
       ; guard =
-          And (Eq (Local state_var, IntConst state), Eq (Global fail_var, BoolConst false))
+          And (Eq (Var state_var, IntConst state), Eq (Var fail_var, BoolConst false))
       ; updates = [ 1.0, [ IntUpdate (state_var, IntConst (state + 1)) ] ]
       }
     in
@@ -202,8 +202,7 @@ let rec translate_type ~id_map ~participant ~state ~state_size ~var_map ty =
           { action
           ; guard =
               And
-                ( Eq (Local state_var, IntConst (state + 1))
-                , Eq (Local label_var, IntConst id) )
+                (Eq (Var state_var, IntConst (state + 1)), Eq (Var label_var, IntConst id))
           ; updates = [ 1.0, [ IntUpdate (state_var, IntConst new_state) ] ]
           })
     in
@@ -228,11 +227,16 @@ let rec translate_type ~id_map ~participant ~state ~state_size ~var_map ty =
 
 let translate_ctx_item ~id_map { Ast.ctx_part; ctx_type } =
   let open Prism in
-  { participant = ctx_part
+  let to_var = function
+    | `Int (action, max) -> Int (ActionVar action, max)
+    | `Bool action -> Bool (ActionVar action)
+  in
+  { locals = List.map (Action.Id_map.local_vars id_map ctx_part) ~f:to_var
+  ; participant = ctx_part
   ; commands =
       { action = Action.blank
-      ; guard = Eq (Local (IntVar ctx_part), IntConst (state_space ctx_type + 1))
-      ; updates = [ 1.0, [ BoolUpdate (BoolVar "fail", BoolConst true) ] ]
+      ; guard = Eq (Var (StringVar ctx_part), IntConst (state_space ctx_type + 1))
+      ; updates = [ 1.0, [ BoolUpdate (StringVar "fail", BoolConst true) ] ]
       }
       :: translate_type
            ~id_map
@@ -246,5 +250,7 @@ let translate_ctx_item ~id_map { Ast.ctx_part; ctx_type } =
 
 let translate context =
   let id_map = Action.in_context context |> Action.Id_map.of_list in
-  List.map ~f:(translate_ctx_item ~id_map) context
+  { Prism.globals = [ Prism.Bool (Prism.StringVar "fail") ]
+  ; modules = List.map ~f:(translate_ctx_item ~id_map) context
+  }
 ;;

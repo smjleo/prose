@@ -1,35 +1,38 @@
 open! Core
 
-type model = pmodule list [@@deriving sexp_of]
+type model =
+  { globals : var_type list
+  ; modules : pmodule list
+  }
+[@@deriving sexp_of]
+
+and var_type =
+  | Bool of bool variable
+  | Int of int variable * int (* Maximum value. We always assume [0..n] init 0 *)
 
 and pmodule =
-  { participant : participant
+  { locals : var_type list
+  ; participant : string
   ; commands : command list
   }
-
-and participant = string
 
 and command =
   { action : Action.t
   ; guard : bool expr
-  ; updates : (probability * update list) list
+  ; updates : (float * update list) list
   }
 
 and _ expr =
   | IntConst : int -> int expr
   | BoolConst : bool -> bool expr
-  | Local : 'a variable -> 'a expr
-  | Global : 'a variable -> 'a expr
+  | Var : 'a variable -> 'a expr
   | Eq : 'a expr * 'a expr -> bool expr
-  | Add : int expr * int expr -> int expr
   | And : bool expr * bool expr -> bool expr
+  | Or : bool expr * bool expr -> bool expr
 
 and _ variable =
-  | IntVar : string -> int variable
-  | ActionVar : Action.t -> int variable
-  | BoolVar : string -> bool variable
-
-and probability = float
+  | StringVar : string -> 'a variable
+  | ActionVar : Action.t -> 'a variable
 
 and update =
   | IntUpdate of int variable * int expr
