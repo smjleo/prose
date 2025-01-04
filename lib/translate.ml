@@ -1,5 +1,56 @@
 open! Core
 
+(** R(-) in the paper. Returns set of all participants in the context. *)
+let roles context =
+  let rec in_type = function
+    | Ast.End -> String.Set.empty
+    | Mu (_t, c) -> in_type c
+    | Variable _t -> String.Set.empty
+    | Internal { int_part; int_choices } ->
+      let bald_choices = List.map int_choices ~f:(fun (_p, c) -> c) in
+      Set.union (String.Set.singleton int_part) (in_choices bald_choices)
+    | External { ext_part; ext_choices } ->
+      Set.union (String.Set.singleton ext_part) (in_choices ext_choices)
+  and in_choices choices =
+    List.map choices ~f:(fun { Ast.ch_cont; _ } -> in_type ch_cont)
+    |> String.Set.union_list
+  in
+  let in_context_item { Ast.ctx_part; ctx_type } =
+    Set.union (String.Set.singleton ctx_part) (in_type ctx_type)
+  in
+  List.map context ~f:in_context_item |> String.Set.union_list
+;;
+
+(** CR(-) in the paper. *)
+let closed_roles context =
+  List.map context ~f:(fun { Ast.ctx_part; _ } -> ctx_part) |> String.Set.of_list
+;;
+
+(** OR(-) in the paper. *)
+let open_roles context = Set.diff (roles context) (closed_roles context)
+
+(** Generate the closure module, which ensures that any CR <--> OR communication
+    does not go through. *)
+let closure context =
+  let open Prism in
+  let closure_var = StringVar "closure" in
+  let dummy_update = BoolUpdate (closure_var, BoolConst false) in
+  let dummy_command from_participant to_participant =
+    { action = Action.communication ~from_participant ~to_participant ()
+    ; guard = BoolConst false
+    ; updates = [ 1.0, [ dummy_update ] ]
+    }
+  in
+  let commands =
+    List.cartesian_product
+      (Set.to_list (closed_roles context))
+      (Set.to_list (open_roles context))
+    |> List.map ~f:(fun (c, o) -> [ dummy_command c o; dummy_command o c ])
+    |> List.concat
+  in
+  { locals = [ Bool closure_var ]; participant = "closure"; commands }
+;;
+
 (** SS(-) in the paper. Denotes the "maximum" state (from 0) this type has,
     not including the very last state which denotes the failure state. *)
 let rec state_space = function
@@ -253,6 +304,6 @@ let translate_ctx_item ~id_map { Ast.ctx_part; ctx_type } =
 let translate context =
   let id_map = Action.in_context context |> Action.Id_map.of_list in
   { Prism.globals = [ Prism.Bool (Prism.StringVar "fail") ]
-  ; modules = List.map ~f:(translate_ctx_item ~id_map) context
+  ; modules = closure context :: List.map ~f:(translate_ctx_item ~id_map) context
   }
 ;;

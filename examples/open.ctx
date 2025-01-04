@@ -1,0 +1,2 @@
+alice : bob (+) { 0.33 : a.end, 0.33 : b . carol(+) c . end, 0.34 : c . end }
+bob : alice & { a.end, b.end, c.end }
