@@ -83,4 +83,9 @@ let print_model ppf { globals; modules } =
     fprintf ppf "\n")
 ;;
 
-let print model = print_model stdout model
+let print ?output_file model =
+  let f ppf = print_model ppf model in
+  match output_file with
+  | None -> f stdout
+  | Some output_file -> Out_channel.with_file output_file ~f
+;;

@@ -1,3 +1,3 @@
 open! Core
 
-val print : Prism.model -> unit
+val print : ?output_file:string -> Prism.model -> unit
