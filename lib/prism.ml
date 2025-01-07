@@ -3,6 +3,7 @@ open! Core
 type model =
   { globals : var_type list
   ; modules : pmodule list
+  ; labels : label list
   }
 [@@deriving sexp_of]
 
@@ -37,3 +38,8 @@ and _ variable =
 and update =
   | IntUpdate of int variable * int expr
   | BoolUpdate of bool variable * bool expr
+
+and label =
+  { name : string
+  ; expr : bool expr
+  }

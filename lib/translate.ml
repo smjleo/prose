@@ -301,9 +301,28 @@ let translate_ctx_item ~id_map { Ast.ctx_part; ctx_type } =
   }
 ;;
 
+let conjunction = function
+  | [] -> Prism.BoolConst true
+  | [ c ] -> c
+  | c :: cs -> List.fold_left cs ~init:c ~f:(fun accum c -> Prism.And (accum, c))
+;;
+
+let labels context =
+  let open Prism in
+  let end_label =
+    let clauses =
+      List.map context ~f:(fun { Ast.ctx_part; ctx_type } ->
+        Eq (Var (StringVar ctx_part), IntConst (state_space ctx_type)))
+    in
+    { name = "end"; expr = conjunction clauses }
+  in
+  List.concat [ [ end_label ] ]
+;;
+
 let translate context =
   let id_map = Action.in_context context |> Action.Id_map.of_list in
   { Prism.globals = [ Prism.Bool (Prism.StringVar "fail") ]
   ; modules = closure context :: List.map ~f:(translate_ctx_item ~id_map) context
+  ; labels = labels context
   }
 ;;

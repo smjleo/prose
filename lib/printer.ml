@@ -8,14 +8,38 @@ let print_variable : type a. Out_channel.t -> a variable -> unit =
 ;;
 
 let rec print_expr : type a. Out_channel.t -> a expr -> unit =
-  (* TODO: Get rid of the bracketing in the binary operator cases? *)
   fun ppf -> function
   | IntConst n -> fprintf ppf "%d" n
   | BoolConst b -> fprintf ppf "%B" b
   | Var t -> print_variable ppf t
-  | Eq (e1, e2) -> fprintf ppf "(%a=%a)" print_expr e1 print_expr e2
-  | And (e1, e2) -> fprintf ppf "(%a & %a)" print_expr e1 print_expr e2
-  | Or (e1, e2) -> fprintf ppf "(%a | %a)" print_expr e1 print_expr e2
+  | Eq (e1, e2) ->
+    let fmt =
+      match e1, e2 with
+      | (And _ | Or _ | Eq _), (And _ | Or _ | Eq _) -> fprintf ppf "(%a)=(%a)"
+      | (And _ | Or _ | Eq _), (IntConst _ | BoolConst _ | Var _) -> fprintf ppf "(%a)=%a"
+      | (IntConst _ | BoolConst _ | Var _), (And _ | Or _ | Eq _) -> fprintf ppf "%a=(%a)"
+      | (IntConst _ | BoolConst _ | Var _), (IntConst _ | BoolConst _ | Var _) ->
+        fprintf ppf "%a=%a"
+    in
+    fmt print_expr e1 print_expr e2
+  | And (e1, e2) ->
+    let fmt =
+      match e1, e2 with
+      | And _, And _ -> fprintf ppf "%a & %a"
+      | And _, _ -> fprintf ppf "%a & (%a)"
+      | _, And _ -> fprintf ppf "(%a) & %a"
+      | _ -> fprintf ppf "(%a) & (%a)"
+    in
+    fmt print_expr e1 print_expr e2
+  | Or (e1, e2) ->
+    let fmt =
+      match e1, e2 with
+      | Or _, Or _ -> fprintf ppf "%a | %a"
+      | Or _, _ -> fprintf ppf "%a | (%a)"
+      | _, Or _ -> fprintf ppf "(%a) | %a"
+      | _ -> fprintf ppf "(%a) | (%a)"
+    in
+    fmt print_expr e1 print_expr e2
 ;;
 
 let print_list ppf list ~print ~sep =
@@ -75,12 +99,17 @@ let print_mod ppf { locals; participant; commands } =
   fprintf ppf "endmodule\n"
 ;;
 
-let print_model ppf { globals; modules } =
+let print_label ppf { name; expr } =
+  fprintf ppf "label \"%s\" = %a;\n" name print_expr expr
+;;
+
+let print_model ppf { globals; modules; labels } =
   List.iter globals ~f:(print_var_type ppf ~global:true);
   fprintf ppf "\n";
   List.iter modules ~f:(fun m ->
     print_mod ppf m;
-    fprintf ppf "\n")
+    fprintf ppf "\n");
+  List.iter labels ~f:(print_label ppf)
 ;;
 
 let print ?output_file model =
