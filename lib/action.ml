@@ -43,6 +43,13 @@ let to_string = function
      | Some label -> parts ^ "_" ^ label)
 ;;
 
+let decompose_exn t =
+  match t with
+  | Blank -> error_s [%message "can't decompose a blank action" (t : t)] |> ok_exn
+  | Communication { from_participant; to_participant; label } ->
+    from_participant, to_participant, label
+;;
+
 module Id_map = struct
   type nonrec action = t
 
@@ -122,7 +129,7 @@ module Id_map = struct
   ;;
 end
 
-let in_context_item { Ast.ctx_part; ctx_type } =
+let communications_in_context_item { Ast.ctx_part; ctx_type } =
   let rec recurse direction participant = function
     | Ast.End -> LSet.empty
     | Mu (_var, stype) -> recurse direction participant stype
@@ -162,8 +169,8 @@ let in_context_item { Ast.ctx_part; ctx_type } =
   Set.union (recurse `Sending ctx_part ctx_type) (recurse `Receiving ctx_part ctx_type)
 ;;
 
-let in_context context =
-  List.map ~f:in_context_item context |> LSet.union_list |> Set.to_list
+let communications_in_context context =
+  List.map ~f:communications_in_context_item context |> LSet.union_list |> Set.to_list
 ;;
 
 let find_choice t choices =

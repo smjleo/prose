@@ -34,5 +34,11 @@ val communication
 val label : from_participant:string -> to_participant:string -> t
 val label_of_communication_exn : t -> t
 val to_string : t -> string
-val in_context : Ast.context -> t list
+
+(** If Communication, return (from_participant, to_participant, label) *)
+val decompose_exn : t -> string * string * string option
+
+(* TODO: Some type safety guaranteeing that this will always give a communication
+   would be nice - GADT? (This would also help get rid of the _exns, hopefully) *)
+val communications_in_context : Ast.context -> t list
 val find_choice : t -> Ast.choice list -> Ast.choice option
