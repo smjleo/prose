@@ -29,6 +29,14 @@ rule read =
   | "Int"    { INT }
   | "Str"    { STR }
   | "Bool"   { BOOL }
+  | "(*"     { comment lexbuf }
   | ident    { IDENT (Lexing.lexeme lexbuf) }
   | _        { raise (SyntaxError ("Unexpected char: " ^ Lexing.lexeme lexbuf)) }
   | eof      { EOF }
+
+and comment =
+  parse
+  | "*)"     { read lexbuf }
+  | newline  { new_line lexbuf; comment lexbuf }
+  | eof      { raise (SyntaxError "Unexpected EOF with unterminated comment")}
+  | _        { comment lexbuf }

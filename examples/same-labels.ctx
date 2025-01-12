@@ -1,3 +1,14 @@
+(* Previous iterations of the translation used ID(-) to work out the next state.
+   This causes a problem in the following case.
+
+   Suppose p::q::l1 is assigned ID 2 and p::q::l2 is assigned ID 1, and the state
+   after q (+) l2 to be n. Then, the second q (+) l1 will first do an initial
+   translation to n + 1, then skip by two to n + 3. This will exceed the state
+   space of p.
+
+   This test checks for this case.
+*)
+
 p : q (+) {
       0.5 : l1 . end,
       0.5 : l2 . q (+) l1 . end
@@ -6,5 +17,18 @@ p : q (+) {
 q : p & {
       l1 . end,
       l2 . p & l1 . end
+    }
+
+
+(* Try a different ordering in case the ID ordering changes *)
+
+p1 : q1 (+) {
+      0.5 : l1 . q1 (+) l2 . end,
+      0.5 : l2 . end
+    }
+
+q1 : p1 & {
+      l1 . q1 & l2 . end,
+      l2 . end
     }
 
