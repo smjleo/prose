@@ -103,7 +103,7 @@ let print_label ppf { name; expr } =
   fprintf ppf "label \"%s\" = %a;\n" name print_expr expr
 ;;
 
-let print_model ppf { globals; modules; labels } =
+let print_model' ppf { globals; modules; labels } =
   List.iter globals ~f:(print_var_type ppf ~global:true);
   fprintf ppf "\n";
   List.iter modules ~f:(fun m ->
@@ -112,9 +112,39 @@ let print_model ppf { globals; modules; labels } =
   List.iter labels ~f:(print_label ppf)
 ;;
 
-let print ?output_file model =
-  let f ppf = print_model ppf model in
+let print_with_file ?output_file ~f x =
+  let f ppf = f ppf x in
   match output_file with
   | None -> f stdout
   | Some output_file -> Out_channel.with_file output_file ~f
+;;
+
+let print_model ?output_file model = print_with_file ?output_file ~f:print_model' model
+
+open Psl
+
+let print_bound ppf = function
+  | Exact -> fprintf ppf "=?"
+  | Lt x -> fprintf ppf "<%g" x
+  | Le x -> fprintf ppf "<=%g" x
+  | Gt x -> fprintf ppf ">%g" x
+  | Ge x -> fprintf ppf ">=%g" x
+;;
+
+let rec print_path_prop ppf = function
+  (* TODO: remove unneeded bracketing *)
+  | Label label -> fprintf ppf "\"%s\"" label
+  | And (pp1, pp2) -> fprintf ppf "(%a & %a)" print_path_prop pp1 print_path_prop pp2
+  | Or (pp1, pp2) -> fprintf ppf "(%a | %a)" print_path_prop pp1 print_path_prop pp2
+  | Implies (pp1, pp2) -> fprintf ppf "(%a => %a)" print_path_prop pp1 print_path_prop pp2
+  | G pp -> fprintf ppf "(G %a)" print_path_prop pp
+  | F pp -> fprintf ppf "(F %a)" print_path_prop pp
+;;
+
+let print_property' ppf = function
+  | P (bound, path) -> fprintf ppf "P%a [ %a ]\n" print_bound bound print_path_prop path
+;;
+
+let print_property ?output_file property =
+  print_with_file ?output_file ~f:print_property' property
 ;;

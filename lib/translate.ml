@@ -462,8 +462,9 @@ let labels ~id_map context =
 
 let translate context =
   let id_map = Action.Communication.in_context context |> Action.Id_map.of_list in
-  { globals = [ Bool (StringVar "fail") ]
-  ; modules = closure context :: List.map ~f:(translate_ctx_item ~id_map) context
-  ; labels = labels ~id_map context
-  }
+  ( { globals = [ Bool (StringVar "fail") ]
+    ; modules = closure context :: List.map ~f:(translate_ctx_item ~id_map) context
+    ; labels = labels ~id_map context
+    }
+  , Gen_props.generate id_map )
 ;;
