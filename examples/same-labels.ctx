@@ -20,7 +20,7 @@ q : p & {
     }
 
 
-(* Try a different ordering in case the ID ordering changes *)
+(* Try the symmetric case for if the ID ordering changes *)
 
 p1 : q1 (+) {
       0.5 : l1 . q1 (+) l2 . end,
@@ -28,7 +28,19 @@ p1 : q1 (+) {
     }
 
 q1 : p1 & {
-      l1 . q1 & l2 . end,
+      l1 . p1 & l2 . end,
       l2 . end
     }
 
+
+(* Shuffle the ordering of the two branches *)
+
+q2 : p2 & {
+      l1 . end,
+      l2 . p2 & l1 . end
+    }
+
+p2 : q2 (+) {
+      0.5 : l2 . q2 (+) l1 . end,
+      0.5 : l1 . end
+    }

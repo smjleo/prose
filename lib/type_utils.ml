@@ -9,14 +9,14 @@ let rec state_space = function
       ~init:0
       ~f:(fun acc (_prob, { Ast.ch_cont; _ }) -> acc + state_space ch_cont)
       int_choices
-    + 2
+    + List.length int_choices
+    + 1
   | External { ext_part = _; ext_choices } ->
     List.fold_left
       ~init:0
       ~f:(fun acc { Ast.ch_cont; _ } -> acc + state_space ch_cont)
       ext_choices
-    + List.length ext_choices
-    + 1
+    + 2
 ;;
 
 (** Calculate the big summation in the paper:

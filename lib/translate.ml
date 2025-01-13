@@ -81,6 +81,15 @@ let rec translate_type ~id_map ~participant ~state ~state_size ~var_map ty =
     let label_var =
       ActionVar (Action.label ~from_participant:participant ~to_participant:int_part)
     in
+    let int_choices =
+      (* We sort the internal choice according to their ID, so that the index used to
+         denote the next state is canonical. *)
+      List.sort int_choices ~compare:(fun (_f1, c1) (_f2, c2) ->
+        let id { Ast.ch_label; _ } =
+          new_communication (Some ch_label) |> Action.Id_map.id id_map |> Option.value_exn
+        in
+        Int.compare (id c1) (id c2))
+    in
     let initial =
       { action = Action.communication (new_communication None)
       ; guard =
@@ -88,7 +97,7 @@ let rec translate_type ~id_map ~participant ~state ~state_size ~var_map ty =
       ; updates =
           ( 1.0 -. List.sum (module Float) int_choices ~f:(fun (p, _c) -> p)
           , [ IntUpdate (state_var, IntConst (state_size + 1)) ] )
-          :: List.map int_choices ~f:(fun (prob, { ch_label; _ }) ->
+          :: List.mapi int_choices ~f:(fun i (prob, { ch_label; _ }) ->
             let communication =
               { Action.Communication.from_participant = participant
               ; to_participant = int_part
@@ -97,7 +106,7 @@ let rec translate_type ~id_map ~participant ~state ~state_size ~var_map ty =
             in
             let id = Action.Id_map.id id_map communication |> Option.value_exn in
             ( prob
-            , [ IntUpdate (state_var, IntConst (state + id))
+            , [ IntUpdate (state_var, IntConst (state + i + 1))
               ; IntUpdate (label_var, IntConst id)
               ] ))
       }
@@ -111,25 +120,23 @@ let rec translate_type ~id_map ~participant ~state ~state_size ~var_map ty =
       List.map int_choices ~f:(fun (_p, c) -> c)
     in
     let choices =
-      List.map bald_choices ~f:(fun { ch_label; ch_cont; _ } ->
+      List.mapi bald_choices ~f:(fun i { ch_label; ch_cont; _ } ->
         let communication = new_communication (Some ch_label) in
-        let id = Action.Id_map.id id_map communication |> Option.value_exn in
         let new_state =
           match ch_cont with
           | End -> state_size
           | Variable t -> Map.find_exn var_map t
           | Mu _ | Internal _ | External _ ->
-            state
-            + Type_utils.next_state
-                ~direction:`Internal
-                ~state
-                ~communication
-                ~communications
-                ~choices:bald_choices
-                ~id_map
+            Type_utils.next_state
+              ~direction:`Internal
+              ~state
+              ~communication
+              ~communications
+              ~choices:bald_choices
+              ~id_map
         in
         { action = Action.communication communication
-        ; guard = Eq (Var state_var, IntConst (state + id))
+        ; guard = Eq (Var state_var, IntConst (state + i + 1))
         ; updates =
             [ ( 1.0
               , [ IntUpdate (state_var, IntConst new_state)
