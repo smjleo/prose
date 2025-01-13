@@ -4,6 +4,7 @@ open! Core
     not including the very last state which denotes the failure state. *)
 val state_space : Ast.session_type -> int
 
+(** Calculate what the next state should be after a communication. *)
 val next_state
   :  direction:[ `Internal | `External ]
   -> state:int
