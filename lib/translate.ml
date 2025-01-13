@@ -51,80 +51,6 @@ let closure context =
   { locals = [ Bool closure_var ]; participant = "closure"; commands }
 ;;
 
-(** SS(-) in the paper. Denotes the "maximum" state (from 0) this type has,
-    not including the very last state which denotes the failure state. *)
-let rec state_space = function
-  | Ast.End -> 0
-  | Mu (_var, t) -> state_space t
-  | Variable _ -> 0
-  | Internal { int_part = _; int_choices } ->
-    List.fold_left
-      ~init:0
-      ~f:(fun acc (_prob, { Ast.ch_cont; _ }) -> acc + state_space ch_cont)
-      int_choices
-    + 2
-  | External { ext_part = _; ext_choices } ->
-    List.fold_left
-      ~init:0
-      ~f:(fun acc { Ast.ch_cont; _ } -> acc + state_space ch_cont)
-      ext_choices
-    + List.length ext_choices
-    + 1
-;;
-
-(** Calculate the big summation in the paper:
-      \sum_{i | ID(p::q::l_i) < ID(action)} SS(T_i)
-    where communication is p::q::l_j for some j
-          communications contains all p::q::l_i
-      and choices contains l_i and T_i for all p::q choices *)
-let sum_states_until communication ~communications ~choices ~id_map =
-  (* TODO: This currently contains a lot of redundant list traversals - probably fine
-     since we don't expect a large list, but it'd be nice if it can be made more
-     efficient. *)
-  let id =
-    match Action.Id_map.id id_map communication with
-    | None ->
-      error_s
-        [%message
-          "can't find communication in ID map" (communication : Action.Communication.t)]
-      |> ok_exn
-    | Some id -> id
-  in
-  List.filter communications ~f:(fun communication ->
-    let id' =
-      match Action.Id_map.id id_map communication with
-      | None ->
-        error_s
-          [%message
-            "can't find communication within provided communications in ID map"
-              (communication : Action.Communication.t)
-              (communications : Action.Communication.t list)]
-        |> ok_exn
-      | Some id' -> id'
-    in
-    id' < id)
-  |> List.sum
-       (module Int)
-       ~f:(fun c ->
-         match Action.Communication.find_choice c choices with
-         | None ->
-           error_s
-             [%message
-               "can't find choice with communication"
-                 (c : Action.Communication.t)
-                 (choices : Ast.choice list)]
-           |> ok_exn
-         | Some { ch_cont; _ } -> state_space ch_cont)
-;;
-
-let next_state ~direction ~state ~communication ~communications ~choices ~id_map =
-  let delta = sum_states_until communication ~communications ~choices ~id_map in
-  (* TODO: dedup calculations with translation function *)
-  match direction with
-  | `Internal -> state + 1 + List.length choices + delta
-  | `External -> state + 2 + delta
-;;
-
 (** The (| - |) function in the paper, which takes a session type and
     produces a list of commands for the PRISM module. *)
 let rec translate_type ~id_map ~participant ~state ~state_size ~var_map ty =
@@ -194,7 +120,7 @@ let rec translate_type ~id_map ~participant ~state ~state_size ~var_map ty =
           | Variable t -> Map.find_exn var_map t
           | Mu _ | Internal _ | External _ ->
             state
-            + next_state
+            + Type_utils.next_state
                 ~direction:`Internal
                 ~state
                 ~communication
@@ -216,7 +142,7 @@ let rec translate_type ~id_map ~participant ~state ~state_size ~var_map ty =
       List.concat_map bald_choices ~f:(fun { ch_cont; ch_label; ch_sort = _ } ->
         let communication = new_communication (Some ch_label) in
         let new_state =
-          next_state
+          Type_utils.next_state
             ~direction:`Internal
             ~state
             ~communication
@@ -262,7 +188,7 @@ let rec translate_type ~id_map ~participant ~state ~state_size ~var_map ty =
             | End -> state_size
             | Variable t -> Map.find_exn var_map t
             | Mu _ | Internal _ | External _ ->
-              next_state
+              Type_utils.next_state
                 ~direction:`External
                 ~state
                 ~communication
@@ -288,7 +214,7 @@ let rec translate_type ~id_map ~participant ~state ~state_size ~var_map ty =
           }
         in
         let new_state =
-          next_state
+          Type_utils.next_state
             ~direction:`External
             ~state
             ~communication
@@ -307,19 +233,20 @@ let translate_ctx_item ~id_map { Ast.ctx_part; ctx_type } =
     | `Bool action -> Bool (ActionVar action)
   in
   { locals =
-      Int (StringVar ctx_part, state_space ctx_type + 1)
+      Int (StringVar ctx_part, Type_utils.state_space ctx_type + 1)
       :: List.map (Action.Id_map.local_vars id_map ctx_part) ~f:to_var
   ; participant = ctx_part
   ; commands =
       { action = Action.blank
-      ; guard = Eq (Var (StringVar ctx_part), IntConst (state_space ctx_type + 1))
+      ; guard =
+          Eq (Var (StringVar ctx_part), IntConst (Type_utils.state_space ctx_type + 1))
       ; updates = [ 1.0, [ BoolUpdate (StringVar "fail", BoolConst true) ] ]
       }
       :: translate_type
            ~id_map
            ~participant:ctx_part
            ~state:0
-           ~state_size:(state_space ctx_type)
+           ~state_size:(Type_utils.state_space ctx_type)
            ~var_map:String.Map.empty
            ctx_type
   }
@@ -377,7 +304,13 @@ let enabled_label_states ~id_map ~direction ~communication context =
           { Action.Communication.from_participant; to_participant; label = Some ch_label }
         in
         let new_state =
-          next_state ~direction ~state ~communication ~communications ~choices ~id_map
+          Type_utils.next_state
+            ~direction
+            ~state
+            ~communication
+            ~communications
+            ~choices
+            ~id_map
         in
         enabled_label_states' ~state:new_state ch_cont)
       |> Int.Set.union_list
@@ -427,7 +360,7 @@ let labels ~id_map context =
   let end_label =
     let clauses =
       List.map context ~f:(fun { Ast.ctx_part; ctx_type } ->
-        Eq (Var (StringVar ctx_part), IntConst (state_space ctx_type)))
+        Eq (Var (StringVar ctx_part), IntConst (Type_utils.state_space ctx_type)))
     in
     { name = "end"; expr = conjunction clauses }
   in
