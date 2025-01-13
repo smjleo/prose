@@ -36,7 +36,7 @@ let closure context =
   let closure_var = StringVar "closure" in
   let dummy_update = BoolUpdate (closure_var, BoolConst false) in
   let dummy_command from_participant to_participant =
-    { action = Action.communication ~from_participant ~to_participant ()
+    { action = Action.communication { from_participant; to_participant; label = None }
     ; guard = BoolConst false
     ; updates = [ 1.0, [ dummy_update ] ]
     }
@@ -74,46 +74,51 @@ let rec state_space = function
 
 (** Calculate the big summation in the paper:
       \sum_{i | ID(p::q::l_i) < ID(action)} SS(T_i)
-    where action is p::q::l_j for some j
-          actions contains all p::q::l_i
+    where communication is p::q::l_j for some j
+          communications contains all p::q::l_i
       and choices contains l_i and T_i for all p::q choices *)
-let sum_states_until action ~actions ~choices ~id_map =
+let sum_states_until communication ~communications ~choices ~id_map =
   (* TODO: This currently contains a lot of redundant list traversals - probably fine
      since we don't expect a large list, but it'd be nice if it can be made more
      efficient. *)
   let id =
-    match Action.Id_map.id id_map ~action with
+    match Action.Id_map.id id_map communication with
     | None ->
-      error_s [%message "can't find action in ID map" (action : Action.t)] |> ok_exn
+      error_s
+        [%message
+          "can't find communication in ID map" (communication : Action.Communication.t)]
+      |> ok_exn
     | Some id -> id
   in
-  List.filter actions ~f:(fun action ->
+  List.filter communications ~f:(fun communication ->
     let id' =
-      match Action.Id_map.id id_map ~action with
+      match Action.Id_map.id id_map communication with
       | None ->
         error_s
           [%message
-            "can't find action within provided actions in ID map"
-              (action : Action.t)
-              (actions : Action.t list)]
+            "can't find communication within provided communications in ID map"
+              (communication : Action.Communication.t)
+              (communications : Action.Communication.t list)]
         |> ok_exn
       | Some id' -> id'
     in
     id' < id)
   |> List.sum
        (module Int)
-       ~f:(fun a ->
-         match Action.find_choice a choices with
+       ~f:(fun c ->
+         match Action.Communication.find_choice c choices with
          | None ->
            error_s
              [%message
-               "can't find choice with action" (a : Action.t) (choices : Ast.choice list)]
+               "can't find choice with communication"
+                 (c : Action.Communication.t)
+                 (choices : Ast.choice list)]
            |> ok_exn
          | Some { ch_cont; _ } -> state_space ch_cont)
 ;;
 
-let next_state ~direction ~state ~action ~actions ~choices ~id_map =
-  let delta = sum_states_until action ~actions ~choices ~id_map in
+let next_state ~direction ~state ~communication ~communications ~choices ~id_map =
+  let delta = sum_states_until communication ~communications ~choices ~id_map in
   (* TODO: dedup calculations with translation function *)
   match direction with
   | `Internal -> state + 1 + List.length choices + delta
@@ -141,40 +146,39 @@ let rec translate_type ~id_map ~participant ~state ~state_size ~var_map ty =
       ty
   | Variable _var -> []
   | Internal { int_part; int_choices } ->
-    let new_action label =
-      Action.communication
-        ~from_participant:participant
-        ~to_participant:int_part
-        ?label
-        ()
+    let new_communication label =
+      { Action.Communication.from_participant = participant
+      ; to_participant = int_part
+      ; label
+      }
     in
     let label_var =
       ActionVar (Action.label ~from_participant:participant ~to_participant:int_part)
     in
     let initial =
-      { action = new_action None
+      { action = Action.communication (new_communication None)
       ; guard =
           And (Eq (Var state_var, IntConst state), Eq (Var fail_var, BoolConst false))
       ; updates =
           ( 1.0 -. List.sum (module Float) int_choices ~f:(fun (p, _c) -> p)
           , [ IntUpdate (state_var, IntConst (state_size + 1)) ] )
           :: List.map int_choices ~f:(fun (prob, { ch_label; _ }) ->
-            let action =
-              Action.communication
-                ~from_participant:participant
-                ~to_participant:int_part
-                ~label:ch_label
-                ()
+            let communication =
+              { Action.Communication.from_participant = participant
+              ; to_participant = int_part
+              ; label = Some ch_label
+              }
             in
-            let id = Action.Id_map.id id_map ~action |> Option.value_exn in
+            let id = Action.Id_map.id id_map communication |> Option.value_exn in
             ( prob
             , [ IntUpdate (state_var, IntConst (state + id))
               ; IntUpdate (label_var, IntConst id)
               ] ))
       }
     in
-    let actions =
-      List.map int_choices ~f:(fun (_p, { ch_label; _ }) -> new_action (Some ch_label))
+    let communications =
+      List.map int_choices ~f:(fun (_p, { ch_label; _ }) ->
+        new_communication (Some ch_label))
     in
     let bald_choices =
       (* Choices without probabilities *)
@@ -182,8 +186,8 @@ let rec translate_type ~id_map ~participant ~state ~state_size ~var_map ty =
     in
     let choices =
       List.map bald_choices ~f:(fun { ch_label; ch_cont; _ } ->
-        let action = new_action (Some ch_label) in
-        let id = Action.Id_map.id id_map ~action |> Option.value_exn in
+        let communication = new_communication (Some ch_label) in
+        let id = Action.Id_map.id id_map communication |> Option.value_exn in
         let new_state =
           match ch_cont with
           | End -> state_size
@@ -193,12 +197,12 @@ let rec translate_type ~id_map ~participant ~state ~state_size ~var_map ty =
             + next_state
                 ~direction:`Internal
                 ~state
-                ~action
-                ~actions
+                ~communication
+                ~communications
                 ~choices:bald_choices
                 ~id_map
         in
-        { action
+        { action = Action.communication communication
         ; guard = Eq (Var state_var, IntConst (state + id))
         ; updates =
             [ ( 1.0
@@ -210,13 +214,13 @@ let rec translate_type ~id_map ~participant ~state ~state_size ~var_map ty =
     in
     let continuations =
       List.concat_map bald_choices ~f:(fun { ch_cont; ch_label; ch_sort = _ } ->
-        let action = new_action (Some ch_label) in
+        let communication = new_communication (Some ch_label) in
         let new_state =
           next_state
             ~direction:`Internal
             ~state
-            ~action
-            ~actions
+            ~communication
+            ~communications
             ~choices:bald_choices
             ~id_map
         in
@@ -226,25 +230,29 @@ let rec translate_type ~id_map ~participant ~state ~state_size ~var_map ty =
   | External { ext_part; ext_choices } ->
     let initial =
       { action =
-          Action.communication ~from_participant:ext_part ~to_participant:participant ()
+          Action.communication
+            { from_participant = ext_part; to_participant = participant; label = None }
       ; guard =
           And (Eq (Var state_var, IntConst state), Eq (Var fail_var, BoolConst false))
       ; updates = [ 1.0, [ IntUpdate (state_var, IntConst (state + 1)) ] ]
       }
     in
-    let actions =
-      Action.Id_map.actions id_map ~from_participant:ext_part ~to_participant:participant
+    let communications =
+      Action.Id_map.communications
+        id_map
+        ~from_participant:ext_part
+        ~to_participant:participant
     in
-    let present_actions =
-      (* Only actions of the form p::q::l_i where l_i is present in ext_choices *)
-      List.filter actions ~f:(fun action ->
-        Action.find_choice action ext_choices |> Option.is_some)
+    let present_communications =
+      (* Only communications of the form p::q::l_i where l_i is present in ext_choices *)
+      List.filter communications ~f:(fun communication ->
+        Action.Communication.find_choice communication ext_choices |> Option.is_some)
     in
     let choices =
-      List.map actions ~f:(fun action ->
-        match Action.find_choice action ext_choices with
+      List.map communications ~f:(fun communication ->
+        match Action.Communication.find_choice communication ext_choices with
         | None ->
-          { action
+          { action = Action.communication communication
           ; guard = BoolConst false
           ; updates = [ 1.0, [ IntUpdate (state_var, IntConst (state + 1)) ] ]
           }
@@ -257,14 +265,14 @@ let rec translate_type ~id_map ~participant ~state ~state_size ~var_map ty =
               next_state
                 ~direction:`External
                 ~state
-                ~action
-                ~actions:present_actions
+                ~communication
+                ~communications:present_communications
                 ~choices:ext_choices
                 ~id_map
           in
-          let id = Action.Id_map.id id_map ~action |> Option.value_exn in
-          let label_var = ActionVar (Action.label_of_communication_exn action) in
-          { action
+          let id = Action.Id_map.id id_map communication |> Option.value_exn in
+          let label_var = ActionVar (Action.label_of_communication communication) in
+          { action = Action.communication communication
           ; guard =
               And
                 (Eq (Var state_var, IntConst (state + 1)), Eq (Var label_var, IntConst id))
@@ -273,19 +281,18 @@ let rec translate_type ~id_map ~participant ~state ~state_size ~var_map ty =
     in
     let continuations =
       List.concat_map ext_choices ~f:(fun { ch_cont; ch_label; ch_sort = _ } ->
-        let action =
-          Action.communication
-            ~from_participant:ext_part
-            ~to_participant:participant
-            ~label:ch_label
-            ()
+        let communication =
+          { Action.Communication.from_participant = ext_part
+          ; to_participant = participant
+          ; label = Some ch_label
+          }
         in
         let new_state =
           next_state
             ~direction:`External
             ~state
-            ~action
-            ~actions:present_actions
+            ~communication
+            ~communications:present_communications
             ~choices:ext_choices
             ~id_map
         in
@@ -341,12 +348,15 @@ let choices_contain_label choices label =
 ;;
 
 (** EBL/EOL(p, q, l, ctx) from the paper. *)
-let enabled_label_states ~id_map ~direction ~action context =
-  let from_participant, to_participant, label = Action.decompose_exn action in
+let enabled_label_states ~id_map ~direction ~communication context =
+  let { Action.Communication.from_participant; to_participant; label } = communication in
   let label =
     match label with
     | None ->
-      error_s [%message "got an action with empty label" (action : Action.t)] |> ok_exn
+      error_s
+        [%message
+          "got a communication with empty label" (communication : Action.Communication.t)]
+      |> ok_exn
     | Some label -> label
   in
   (* EBL/EOL(q, type, l, n) from the paper. Participants and [label] remain the
@@ -358,15 +368,17 @@ let enabled_label_states ~id_map ~direction ~action context =
   in
   let rec enabled_label_states' ~state ty =
     let communication_rest ~from_participant ~to_participant ~direction choices =
-      let actions =
+      let communications =
         List.map choices ~f:(fun { Ast.ch_label; _ } ->
-          Action.communication ~from_participant ~to_participant ~label:ch_label ())
+          { Action.Communication.from_participant; to_participant; label = Some ch_label })
       in
       List.map choices ~f:(fun { ch_cont; ch_label; ch_sort = _ } ->
-        let action =
-          Action.communication ~from_participant ~to_participant ~label:ch_label ()
+        let communication =
+          { Action.Communication.from_participant; to_participant; label = Some ch_label }
         in
-        let new_state = next_state ~direction ~state ~action ~actions ~choices ~id_map in
+        let new_state =
+          next_state ~direction ~state ~communication ~communications ~choices ~id_map
+        in
         enabled_label_states' ~state:new_state ch_cont)
       |> Int.Set.union_list
     in
@@ -420,14 +432,16 @@ let labels ~id_map context =
     { name = "end"; expr = conjunction clauses }
   in
   let cando_action_labels =
-    let actions = Action.communications_in_context context in
-    List.concat_map actions ~f:(fun action ->
-      let from_participant, to_participant, _ = Action.decompose_exn action in
+    let communications = Action.Communication.in_context context in
+    List.concat_map communications ~f:(fun communication ->
+      let { Action.Communication.from_participant; to_participant; _ } = communication in
       let eol =
-        enabled_label_states ~id_map ~direction:`Output ~action context |> Set.to_list
+        enabled_label_states ~id_map ~direction:`Output ~communication context
+        |> Set.to_list
       in
       let ebl =
-        enabled_label_states ~id_map ~direction:`Branching ~action context |> Set.to_list
+        enabled_label_states ~id_map ~direction:`Branching ~communication context
+        |> Set.to_list
       in
       let output_clauses =
         List.map eol ~f:(fun n -> Eq (Var (StringVar from_participant), IntConst n))
@@ -435,7 +449,9 @@ let labels ~id_map context =
       let branching_clauses =
         List.map ebl ~f:(fun n -> Eq (Var (StringVar to_participant), IntConst n))
       in
-      let output_name = "cando_" ^ Action.to_string action in
+      let output_name =
+        "cando_" ^ Action.to_string (Action.communication communication)
+      in
       let branching_name = output_name ^ "_branch" in
       [ { name = output_name; expr = disjunction output_clauses }
       ; { name = branching_name; expr = disjunction branching_clauses }
@@ -445,7 +461,7 @@ let labels ~id_map context =
 ;;
 
 let translate context =
-  let id_map = Action.communications_in_context context |> Action.Id_map.of_list in
+  let id_map = Action.Communication.in_context context |> Action.Id_map.of_list in
   { globals = [ Bool (StringVar "fail") ]
   ; modules = closure context :: List.map ~f:(translate_ctx_item ~id_map) context
   ; labels = labels ~id_map context
