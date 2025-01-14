@@ -19,22 +19,17 @@ let type_from_context_exn context ~participant =
     | true -> Some ctx_type)
 ;;
 
+(* TODO: come up with a better name - this is not descriptive of the fact that
+   [label] is an [option], and that it returns true when [label] = [None]. *)
 let choices_contain_label choices label =
-  List.exists choices ~f:(fun { Ast.ch_label; _ } -> String.equal ch_label label)
+  match label with
+  | None -> true
+  | Some label ->
+    List.exists choices ~f:(fun { Ast.ch_label; _ } -> String.equal ch_label label)
 ;;
 
 (** EBL/EOL(p, q, l, ctx) from the paper. *)
-let enabled_label_states ~id_map ~direction ~communication context =
-  let { Action.Communication.from_participant; to_participant; label } = communication in
-  let label =
-    match label with
-    | None ->
-      error_s
-        [%message
-          "got a communication with empty label" (communication : Action.Communication.t)]
-      |> ok_exn
-    | Some label -> label
-  in
+let enabled_states ~id_map ~direction ~from_participant ~to_participant ~label context =
   (* EBL/EOL(q, type, l, n) from the paper. Participants and [label] remain the
      same during recursion, so we omit from the arguments. *)
   let participant =
@@ -42,7 +37,7 @@ let enabled_label_states ~id_map ~direction ~communication context =
     | `Branching -> to_participant
     | `Output -> from_participant
   in
-  let rec enabled_label_states' ~state ty =
+  let rec enabled_states' ~state ty =
     let communication_rest ~from_participant ~to_participant ~direction choices =
       let communications =
         List.map choices ~f:(fun { Ast.ch_label; _ } ->
@@ -61,12 +56,12 @@ let enabled_label_states ~id_map ~direction ~communication context =
             ~choices
             ~id_map
         in
-        enabled_label_states' ~state:new_state ch_cont)
+        enabled_states' ~state:new_state ch_cont)
       |> Int.Set.union_list
     in
     match ty with
     | Ast.End -> Int.Set.empty
-    | Mu (_var, t) -> enabled_label_states' ~state t
+    | Mu (_var, t) -> enabled_states' ~state t
     | Variable _var -> Int.Set.empty
     | Internal { int_part; int_choices } ->
       let bald_choices = List.map int_choices ~f:(fun (_p, c) -> c) in
@@ -102,7 +97,7 @@ let enabled_label_states ~id_map ~direction ~communication context =
        | _, false -> rest
        | `Branching, true -> Set.union rest (Int.Set.singleton state))
   in
-  enabled_label_states' (type_from_context_exn context ~participant) ~state:0
+  enabled_states' (type_from_context_exn context ~participant) ~state:0
 ;;
 
 let generate ~id_map context =
@@ -113,31 +108,89 @@ let generate ~id_map context =
     in
     { name = "end"; expr = conjunction clauses }
   in
-  let cando_action_labels =
-    let communications = Action.Communication.in_context context in
+  let communications = Action.Communication.in_context context in
+  let cando_action =
     List.concat_map communications ~f:(fun communication ->
-      let { Action.Communication.from_participant; to_participant; _ } = communication in
+      let { Action.Communication.from_participant; to_participant; label } =
+        communication
+      in
+      let label =
+        (* Even though unpacking this is unnecessary because [enabled_states] accepts
+           a [string option] for label, we add a check here to make sure that
+           the label field is actually filled in for the communication, since we
+           expect this to always be the case. *)
+        match label with
+        | None ->
+          error_s
+            [%message
+              "received empty label field for communication"
+                (communication : Action.Communication.t)]
+          |> ok_exn
+        | Some label -> label
+      in
       let eol =
-        enabled_label_states ~id_map ~direction:`Output ~communication context
+        enabled_states
+          ~id_map
+          ~direction:`Output
+          ~from_participant
+          ~to_participant
+          ~label:(Some label)
+          context
         |> Set.to_list
       in
       let ebl =
-        enabled_label_states ~id_map ~direction:`Branching ~communication context
+        enabled_states
+          ~id_map
+          ~direction:`Branching
+          ~from_participant
+          ~to_participant
+          ~label:(Some label)
+          context
         |> Set.to_list
       in
-      let output_clauses =
+      let output_labelled_clauses =
         List.map eol ~f:(fun n -> Eq (Var (StringVar from_participant), IntConst n))
       in
-      let branching_clauses =
+      let branching_labelled_clauses =
         List.map ebl ~f:(fun n -> Eq (Var (StringVar to_participant), IntConst n))
       in
-      let output_name =
+      let output_labelled_name =
         "cando_" ^ Action.to_string (Action.communication communication)
       in
-      let branching_name = output_name ^ "_branch" in
-      [ { name = output_name; expr = disjunction output_clauses }
-      ; { name = branching_name; expr = disjunction branching_clauses }
+      let branching_labelled_name = output_labelled_name ^ "_branch" in
+      [ { name = output_labelled_name; expr = disjunction output_labelled_clauses }
+      ; { name = branching_labelled_name; expr = disjunction branching_labelled_clauses }
       ])
   in
-  List.concat [ [ end_label ]; cando_action_labels ]
+  let cando_any =
+    (* TODO: dedup with above *)
+    let unlabelled_communications =
+      List.map communications ~f:(fun { from_participant; to_participant; label = _ } ->
+        { Action.Communication.from_participant; to_participant; label = None })
+      |> List.sort ~compare:Action.Communication.compare
+      |> List.remove_consecutive_duplicates ~equal:Action.Communication.equal
+    in
+    List.map unlabelled_communications ~f:(fun communication ->
+      let { Action.Communication.from_participant; to_participant; label = _ } =
+        communication
+      in
+      let eb =
+        enabled_states
+          ~id_map
+          ~direction:`Branching
+          ~from_participant
+          ~to_participant
+          ~label:None
+          context
+        |> Set.to_list
+      in
+      let branching_clauses =
+        List.map eb ~f:(fun n -> Eq (Var (StringVar to_participant), IntConst n))
+      in
+      let branching_name =
+        "cando_" ^ Action.to_string (Action.communication communication) ^ "_branch"
+      in
+      { name = branching_name; expr = disjunction branching_clauses })
+  in
+  List.concat [ [ end_label ]; cando_action; cando_any ]
 ;;
