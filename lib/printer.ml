@@ -99,8 +99,16 @@ let print_mod ppf { locals; participant; commands } =
   fprintf ppf "endmodule\n"
 ;;
 
+let print_label_name ppf = function
+  | End -> fprintf ppf "end"
+  | Deadlock -> fprintf ppf "deadlock"
+  | Can_do c -> fprintf ppf "cando_%s" (Action.to_string (Action.communication c))
+  | Can_do_branch c ->
+    fprintf ppf "cando_%s_branch" (Action.to_string (Action.communication c))
+;;
+
 let print_label ppf { name; expr } =
-  fprintf ppf "label \"%s\" = %a;\n" name print_expr expr
+  fprintf ppf "label \"%a\" = %a;\n" print_label_name name print_expr expr
 ;;
 
 let print_model' ppf { globals; modules; labels } =
@@ -124,7 +132,7 @@ let print_model ?output_file model = print_with_file ?output_file ~f:print_model
 open Psl
 
 let print_bound ppf = function
-  | Exact -> fprintf ppf "=?"
+  | Exact -> fprintf ppf "min=?"
   | Lt x -> fprintf ppf "<%g" x
   | Le x -> fprintf ppf "<=%g" x
   | Gt x -> fprintf ppf ">%g" x
@@ -133,7 +141,9 @@ let print_bound ppf = function
 
 let rec print_path_prop ppf = function
   (* TODO: remove unneeded bracketing *)
-  | Label label -> fprintf ppf "\"%s\"" label
+  | Label label -> fprintf ppf "\"%a\"" print_label_name label
+  | Variable var -> fprintf ppf "%s" var
+  | Const b -> fprintf ppf "%B" b
   | And (pp1, pp2) -> fprintf ppf "(%a & %a)" print_path_prop pp1 print_path_prop pp2
   | Or (pp1, pp2) -> fprintf ppf "(%a | %a)" print_path_prop pp1 print_path_prop pp2
   | Implies (pp1, pp2) -> fprintf ppf "(%a => %a)" print_path_prop pp1 print_path_prop pp2

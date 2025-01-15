@@ -265,5 +265,5 @@ let translate context =
     ; modules = closure context :: List.map ~f:(translate_ctx_item ~id_map) context
     ; labels = Gen_labels.generate ~id_map context
     }
-  , Gen_props.generate id_map )
+  , Gen_props.generate context )
 ;;

@@ -106,7 +106,7 @@ let generate ~id_map context =
       List.map context ~f:(fun { Ast.ctx_part; ctx_type } ->
         Eq (Var (StringVar ctx_part), IntConst (Type_utils.state_space ctx_type)))
     in
-    { name = "end"; expr = conjunction clauses }
+    { name = End; expr = conjunction clauses }
   in
   let communications = Action.Communication.in_context context in
   let cando_action =
@@ -148,18 +148,14 @@ let generate ~id_map context =
           context
         |> Set.to_list
       in
-      let output_labelled_clauses =
+      let output_clauses =
         List.map eol ~f:(fun n -> Eq (Var (StringVar from_participant), IntConst n))
       in
-      let branching_labelled_clauses =
+      let branching_clauses =
         List.map ebl ~f:(fun n -> Eq (Var (StringVar to_participant), IntConst n))
       in
-      let output_labelled_name =
-        "cando_" ^ Action.to_string (Action.communication communication)
-      in
-      let branching_labelled_name = output_labelled_name ^ "_branch" in
-      [ { name = output_labelled_name; expr = disjunction output_labelled_clauses }
-      ; { name = branching_labelled_name; expr = disjunction branching_labelled_clauses }
+      [ { name = Can_do communication; expr = disjunction output_clauses }
+      ; { name = Can_do_branch communication; expr = disjunction branching_clauses }
       ])
   in
   let cando_any =
@@ -187,10 +183,7 @@ let generate ~id_map context =
       let branching_clauses =
         List.map eb ~f:(fun n -> Eq (Var (StringVar to_participant), IntConst n))
       in
-      let branching_name =
-        "cando_" ^ Action.to_string (Action.communication communication) ^ "_branch"
-      in
-      { name = branching_name; expr = disjunction branching_clauses })
+      { name = Can_do_branch communication; expr = disjunction branching_clauses })
   in
   List.concat [ [ end_label ]; cando_action; cando_any ]
 ;;

@@ -8,7 +8,9 @@ and bound =
   | Ge of float
 
 and path_property =
-  | Label of string (* TODO: Should use a label type *)
+  | Label of Prism.label_name
+  | Variable of string
+  | Const of bool
   | And of path_property * path_property
   | Or of path_property * path_property
   | Implies of path_property * path_property

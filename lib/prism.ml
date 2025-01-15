@@ -40,6 +40,12 @@ and update =
   | BoolUpdate of bool variable * bool expr
 
 and label =
-  { name : string
+  { name : label_name
   ; expr : bool expr
   }
+
+and label_name =
+  | End
+  | Deadlock
+  | Can_do of Action.Communication.t
+  | Can_do_branch of Action.Communication.t
