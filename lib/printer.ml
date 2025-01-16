@@ -151,10 +151,13 @@ let rec print_path_prop ppf = function
   | F pp -> fprintf ppf "(F %a)" print_path_prop pp
 ;;
 
-let print_property' ppf = function
-  | P (bound, path) -> fprintf ppf "P%a [ %a ]\n" print_bound bound print_path_prop path
+let print_properties' ppf properties =
+  let print_property = function
+    | P (bound, path) -> fprintf ppf "P%a [ %a ]\n" print_bound bound print_path_prop path
+  in
+  List.iter properties ~f:print_property
 ;;
 
-let print_property ?output_file property =
-  print_with_file ?output_file ~f:print_property' property
+let print_properties ?output_file properties =
+  print_with_file ?output_file ~f:print_properties' properties
 ;;

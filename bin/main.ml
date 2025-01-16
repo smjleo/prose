@@ -20,8 +20,7 @@ let main ctx_file ?model_output_file ?prop_output_file ~print_ast () =
   let translated, properties = Translate.translate context in
   dbg_print_s [%message (translated : Prism.model)];
   Printer.print_model ?output_file:model_output_file translated;
-  List.iter properties ~f:(fun p ->
-    Printer.print_property ?output_file:prop_output_file p);
+  Printer.print_properties ?output_file:prop_output_file properties;
   In_channel.close inx
 ;;
 
