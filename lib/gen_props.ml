@@ -21,4 +21,4 @@ let safety context =
   P (Exact, G (conjunction clauses))
 ;;
 
-let generate context = List.concat [ [ deadlock ]; [ safety context ] ]
+let generate context = [ deadlock; safety context ]
