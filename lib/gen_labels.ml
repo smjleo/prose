@@ -12,8 +12,8 @@ let disjunction = function
   | c :: cs -> List.fold_left cs ~init:c ~f:(fun accum c -> Or (accum, c))
 ;;
 
-let type_from_context_exn context ~participant =
-  List.find_map_exn context ~f:(fun { Ast.ctx_part; ctx_type } ->
+let type_from_context context ~participant =
+  List.find_map context ~f:(fun { Ast.ctx_part; ctx_type } ->
     match String.equal ctx_part participant with
     | false -> None
     | true -> Some ctx_type)
@@ -97,7 +97,9 @@ let enabled_states ~id_map ~direction ~from_participant ~to_participant ~label c
        | _, false -> rest
        | `Branching, true -> Set.union rest (Int.Set.singleton state))
   in
-  enabled_states' (type_from_context_exn context ~participant) ~state:0
+  match type_from_context context ~participant with
+  | None -> Int.Set.empty
+  | Some ty -> enabled_states' ty ~state:0
 ;;
 
 let generate ~id_map context =
