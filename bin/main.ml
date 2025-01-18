@@ -10,7 +10,7 @@ module Psl = Prose.Psl
 
 let parse lexbuf = Parser.context Lexer.read lexbuf
 
-let main ctx_file ?model_output_file ?prop_output_file ~print_ast () =
+let output ctx_file ?model_output_file ?prop_output_file ~print_ast () =
   let dbg_print_s sexp = if print_ast then print_s sexp in
   let inx = In_channel.create ctx_file in
   let lexbuf = Lexing.from_channel inx in
@@ -24,14 +24,40 @@ let main ctx_file ?model_output_file ?prop_output_file ~print_ast () =
   In_channel.close inx
 ;;
 
-let command =
-  (* TODO: These set of args is meant for this version of Prose, which only
-     translates into PRISM without running property verification. Once this
-     is implemented, these should be adjusted accordingly (for example, only
-     save PRISM file with a flag, etc.) *)
+let verify ctx_file ~print_ast () =
+  let model_output_file = Filename_unix.temp_file "model" ".prism" in
+  let prop_output_file = Filename_unix.temp_file "properties" ".props" in
+  output ctx_file ~model_output_file ~prop_output_file ~print_ast ();
+  let prism =
+    Core_unix.create_process ~prog:"prism" ~args:[ model_output_file; prop_output_file ]
+  in
+  let stdout = Core_unix.in_channel_of_descr prism.stdout in
+  let output = In_channel.input_all stdout in
+  (* TODO: Maybe parse PRISM output to make it more readable? *)
+  print_endline output;
+  Core_unix.remove model_output_file;
+  Core_unix.remove prop_output_file
+;;
+
+let ctx_file_flag =
+  let open Command.Param in
+  anon ("ctx_file" %: string)
+;;
+
+let print_ast_flag =
+  let open Command.Param in
+  flag
+    "-print-ast"
+    no_arg
+    ~doc:" Print internal AST representation for debugging purposes"
+;;
+
+let output_command =
   Command.basic
-    ~summary:"Compile given session type context into PRISM"
-    (let%map_open.Command ctx_file = anon ("ctx_file" %: string)
+    ~summary:
+      "Compile given session type context into a PRISM model and properties, and output \
+       them."
+    (let%map_open.Command ctx_file = ctx_file_flag
      and model_output_file =
        flag
          "-o"
@@ -42,13 +68,25 @@ let command =
          "-p"
          (optional string)
          ~doc:"string Write PRISM property output to filename (default: print to stdout)"
-     and print_ast =
-       flag
-         "-print-ast"
-         no_arg
-         ~doc:" Print internal AST representation for debugging purposes"
-     in
-     main ctx_file ?model_output_file ?prop_output_file ~print_ast)
+     and print_ast = print_ast_flag in
+     output ctx_file ?model_output_file ?prop_output_file ~print_ast)
+;;
+
+let verify_command =
+  Command.basic
+    ~summary:
+      "Verify probabilistic properties of the given session type context using PRISM."
+    (let%map_open.Command ctx_file = ctx_file_flag
+     and print_ast = print_ast_flag in
+     verify ctx_file ~print_ast)
+;;
+
+let command =
+  Command.group
+    ~summary:
+      "Commands to either verify the probilistic session type or output PRISM files for \
+       inspection."
+    [ "output", output_command; "verify", verify_command ]
 ;;
 
 let () = Command_unix.run command

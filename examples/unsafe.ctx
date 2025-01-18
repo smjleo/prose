@@ -1,0 +1,14 @@
+alice : bob (+) {
+          0.5 : l1 . end,
+          0.3 : l2 .
+                bob (+) {
+                  0.9 : l3 . end,
+                  0.1 : l4 . end
+                },
+          0.1 : l5 . end
+        }
+
+bob : alice & {
+        l1 . end,
+        l2 . alice & l3 . end
+      }
