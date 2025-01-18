@@ -18,7 +18,7 @@ let safety context =
         ( And (Label (Prism.Can_do communication), Label (Prism.Can_do_branch unlabelled))
         , Label (Prism.Can_do_branch communication) ))
   in
-  P (Exact, G (conjunction clauses))
+  P (Ge 1.0, G (conjunction clauses))
 ;;
 
 let generate context = [ deadlock; safety context ]

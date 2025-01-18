@@ -24,6 +24,35 @@ let output ctx_file ?model_output_file ?prop_output_file ~print_ast () =
   In_channel.close inx
 ;;
 
+type checked_output =
+  { deadlock_freedom : string
+  ; safety : string
+  }
+
+let parse_prism_output lines =
+  let results =
+    List.fold_left lines ~init:[] ~f:(fun accum line ->
+      match String.is_prefix line ~prefix:"Result: " with
+      | false -> accum
+      | true -> line :: accum)
+    |> List.rev
+  in
+  match results with
+  | [ deadlock_freedom; safety ] -> { deadlock_freedom; safety }
+  | _ ->
+    error_s
+      [%message
+        "PRISM output contains an unexpected number of results" (results : string list)]
+    |> ok_exn
+;;
+
+let print_output { deadlock_freedom; safety } =
+  print_endline "Probabilistic deadlock freedom";
+  print_endline deadlock_freedom;
+  print_endline "\nType safety";
+  print_endline safety
+;;
+
 let verify ctx_file ~print_ast () =
   let model_output_file = Filename_unix.temp_file "model" ".prism" in
   let prop_output_file = Filename_unix.temp_file "properties" ".props" in
@@ -32,9 +61,9 @@ let verify ctx_file ~print_ast () =
     Core_unix.create_process ~prog:"prism" ~args:[ model_output_file; prop_output_file ]
   in
   let stdout = Core_unix.in_channel_of_descr prism.stdout in
-  let output = In_channel.input_all stdout in
-  (* TODO: Maybe parse PRISM output to make it more readable? *)
-  print_endline output;
+  let lines = In_channel.input_lines stdout in
+  let output = parse_prism_output lines in
+  print_output output;
   Core_unix.remove model_output_file;
   Core_unix.remove prop_output_file
 ;;
