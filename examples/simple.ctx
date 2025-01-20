@@ -1,2 +1,4 @@
 alice : bob (+) { 0.33 : a.end, 0.67 : b(Int).end }
 bob : alice & { a.end, b(Int).end }
+
+

@@ -16,5 +16,10 @@ To see the translated PRISM model and property file, run `dune exec prose -- out
 
 For examples of session types, see [examples/](examples/).
 
+### Testing
+`dune test test/run-examples.t` (alternatively, just `dune test`)
+
+This runs Prose on every file in the [examples/](examples/) directory, and compares both the PRISM output and the property verification output against the expected output. If they don't match, a `diff` listing of the changes are shown. If the new changes are correct, the diff can be applied automatically via `dune promote`.
+
 ## Contributing
 TODO

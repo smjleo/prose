@@ -1,2 +1,2 @@
-(test
- (name test_spmpst))
+(cram
+   (deps %{bin:prose} (glob_files ../examples/*.ctx)))

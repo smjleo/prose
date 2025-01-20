@@ -9,3 +9,4 @@ a : commander & {
     }
 
 b : a & msg . end
+

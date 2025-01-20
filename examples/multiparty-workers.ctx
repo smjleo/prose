@@ -60,4 +60,5 @@ workerC3 : mu t .
              workerB3 & {
                datum(Int) . workerA3 (+) result . t,
                stop . end
-             } 
+             }
+
