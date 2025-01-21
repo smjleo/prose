@@ -263,16 +263,87 @@ For each context file in this directory, run [prose output] to check the model a
   label "cando_workerC1_workerA1_branch" = workerA1=5;
   label "cando_workerC2_workerA2_branch" = workerA2=5;
   label "cando_workerC3_workerA3_branch" = workerA3=5;
-  Pmin=? [ (G ("deadlock" => "end")) ]
   P>=1 [ (G ((("cando_starter_workerA1_datum" & "cando_starter_workerA1_branch") => "cando_starter_workerA1_datum_branch") & ((("cando_starter_workerA2_datum" & "cando_starter_workerA2_branch") => "cando_starter_workerA2_datum_branch") & ((("cando_starter_workerA3_datum" & "cando_starter_workerA3_branch") => "cando_starter_workerA3_datum_branch") & ((("cando_workerA1_workerB1_datum" & "cando_workerA1_workerB1_branch") => "cando_workerA1_workerB1_datum_branch") & ((("cando_workerA1_workerB1_stop" & "cando_workerA1_workerB1_branch") => "cando_workerA1_workerB1_stop_branch") & ((("cando_workerA2_workerB2_datum" & "cando_workerA2_workerB2_branch") => "cando_workerA2_workerB2_datum_branch") & ((("cando_workerA2_workerB2_stop" & "cando_workerA2_workerB2_branch") => "cando_workerA2_workerB2_stop_branch") & ((("cando_workerA3_workerB3_datum" & "cando_workerA3_workerB3_branch") => "cando_workerA3_workerB3_datum_branch") & ((("cando_workerA3_workerB3_stop" & "cando_workerA3_workerB3_branch") => "cando_workerA3_workerB3_stop_branch") & ((("cando_workerB1_workerC1_datum" & "cando_workerB1_workerC1_branch") => "cando_workerB1_workerC1_datum_branch") & ((("cando_workerB1_workerC1_stop" & "cando_workerB1_workerC1_branch") => "cando_workerB1_workerC1_stop_branch") & ((("cando_workerB2_workerC2_datum" & "cando_workerB2_workerC2_branch") => "cando_workerB2_workerC2_datum_branch") & ((("cando_workerB2_workerC2_stop" & "cando_workerB2_workerC2_branch") => "cando_workerB2_workerC2_stop_branch") & ((("cando_workerB3_workerC3_datum" & "cando_workerB3_workerC3_branch") => "cando_workerB3_workerC3_datum_branch") & ((("cando_workerB3_workerC3_stop" & "cando_workerB3_workerC3_branch") => "cando_workerB3_workerC3_stop_branch") & ((("cando_workerC1_workerA1_result" & "cando_workerC1_workerA1_branch") => "cando_workerC1_workerA1_result_branch") & ((("cando_workerC2_workerA2_result" & "cando_workerC2_workerA2_branch") => "cando_workerC2_workerA2_result_branch") & (("cando_workerC3_workerA3_result" & "cando_workerC3_workerA3_branch") => "cando_workerC3_workerA3_result_branch"))))))))))))))))))) ]
+  Pmin=? [ (G ("deadlock" => "end")) ]
+  Pmin=? [ (F "deadlock") ]
   
    ======= Property checking =======
+  
+  Type safety
+  Result: true
   
   Probabilistic deadlock freedom
   Result: 1.0 (exact floating point)
   
+  Probabilistic termination
+  Result: 1.0 (exact floating point)
+  
+  
+  
+  
+   ======= TEST ../examples/non-terminating.ctx =======
+  
+  a : b (+) {
+        0.5 : l1 . end,
+        0.5 : l2 . mu t . b (+) l2 . t
+      }
+  
+  b : mu t .
+      a & {
+        l1 . end,
+        l2 . t
+      }
+      
+   ======= PRISM output ========
+  
+  global fail : bool init false;
+  
+  module closure
+    closure : bool init false;
+  
+  endmodule
+  
+  module a
+    a : [0..6] init 0;
+    a_b_label : [0..2] init 0;
+  
+    [] a=6 -> 1:(fail'=true);
+    [a_b] (a=0) & (fail=false) -> 0:(a'=6) + 0.5:(a'=1)&(a_b_label'=1) + 0.5:(a'=2)&(a_b_label'=2);
+    [a_b_l2] a=1 -> 1:(a'=3)&(a_b_label'=0);
+    [a_b_l1] a=2 -> 1:(a'=5)&(a_b_label'=0);
+    [a_b] (a=3) & (fail=false) -> 0:(a'=6) + 1:(a'=4)&(a_b_label'=1);
+    [a_b_l2] a=4 -> 1:(a'=3)&(a_b_label'=0);
+  endmodule
+  
+  module b
+    b : [0..3] init 0;
+  
+    [] b=3 -> 1:(fail'=true);
+    [a_b] (b=0) & (fail=false) -> 1:(b'=1);
+    [a_b_l2] (b=1) & (a_b_label=1) -> 1:(b'=0);
+    [a_b_l1] (b=1) & (a_b_label=2) -> 1:(b'=2);
+  endmodule
+  
+  label "end" = (a=5) & (b=2);
+  label "cando_a_b_l1" = a=0;
+  label "cando_a_b_l1_branch" = b=0;
+  label "cando_a_b_l2" = (a=0) | (a=3);
+  label "cando_a_b_l2_branch" = b=0;
+  label "cando_a_b_branch" = b=0;
+  P>=1 [ (G ((("cando_a_b_l1" & "cando_a_b_branch") => "cando_a_b_l1_branch") & (("cando_a_b_l2" & "cando_a_b_branch") => "cando_a_b_l2_branch"))) ]
+  Pmin=? [ (G ("deadlock" => "end")) ]
+  Pmin=? [ (F "deadlock") ]
+  
+   ======= Property checking =======
+  
   Type safety
   Result: true
+  
+  Probabilistic deadlock freedom
+  Result: 1.0 (exact floating point)
+  
+  Probabilistic termination
+  Result: 0.5 (exact floating point)
   
   
   
@@ -331,16 +402,20 @@ For each context file in this directory, run [prose output] to check the model a
   label "cando_alice_carol_c_branch" = false;
   label "cando_alice_bob_branch" = bob=0;
   label "cando_alice_carol_branch" = false;
-  Pmin=? [ (G ("deadlock" => "end")) ]
   P>=1 [ (G ((("cando_alice_bob_a" & "cando_alice_bob_branch") => "cando_alice_bob_a_branch") & ((("cando_alice_bob_b" & "cando_alice_bob_branch") => "cando_alice_bob_b_branch") & ((("cando_alice_bob_c" & "cando_alice_bob_branch") => "cando_alice_bob_c_branch") & (("cando_alice_carol_c" & "cando_alice_carol_branch") => "cando_alice_carol_c_branch"))))) ]
+  Pmin=? [ (G ("deadlock" => "end")) ]
+  Pmin=? [ (F "deadlock") ]
   
    ======= Property checking =======
+  
+  Type safety
+  Result: true
   
   Probabilistic deadlock freedom
   Result: 0.6699999999999999 (exact floating point)
   
-  Type safety
-  Result: true
+  Probabilistic termination
+  Result: 1.0 (exact floating point)
   
   
   
@@ -414,16 +489,20 @@ For each context file in this directory, run [prose output] to check the model a
   label "cando_a_b_branch" = b=0;
   label "cando_b_a_branch" = a=4;
   label "cando_commander_a_branch" = a=0;
-  Pmin=? [ (G ("deadlock" => "end")) ]
   P>=1 [ (G ((("cando_a_b_msg" & "cando_a_b_branch") => "cando_a_b_msg_branch") & ((("cando_b_a_msg" & "cando_b_a_branch") => "cando_b_a_msg_branch") & ((("cando_commander_a_deadlock" & "cando_commander_a_branch") => "cando_commander_a_deadlock_branch") & (("cando_commander_a_nodeadlock" & "cando_commander_a_branch") => "cando_commander_a_nodeadlock_branch"))))) ]
+  Pmin=? [ (G ("deadlock" => "end")) ]
+  Pmin=? [ (F "deadlock") ]
   
    ======= Property checking =======
+  
+  Type safety
+  Result: true
   
   Probabilistic deadlock freedom
   Result: 0.30000000000000004 (exact floating point)
   
-  Type safety
-  Result: true
+  Probabilistic termination
+  Result: 1.0 (exact floating point)
   
   
   
@@ -599,16 +678,20 @@ For each context file in this directory, run [prose output] to check the model a
   label "cando_worker1_reducer_branch" = reducer=0;
   label "cando_worker2_reducer_branch" = reducer=2;
   label "cando_worker3_reducer_branch" = reducer=4;
-  Pmin=? [ (G ("deadlock" => "end")) ]
   P>=1 [ (G ((("cando_mapper_worker1_datum" & "cando_mapper_worker1_branch") => "cando_mapper_worker1_datum_branch") & ((("cando_mapper_worker1_stop" & "cando_mapper_worker1_branch") => "cando_mapper_worker1_stop_branch") & ((("cando_mapper_worker2_datum" & "cando_mapper_worker2_branch") => "cando_mapper_worker2_datum_branch") & ((("cando_mapper_worker2_stop" & "cando_mapper_worker2_branch") => "cando_mapper_worker2_stop_branch") & ((("cando_mapper_worker3_datum" & "cando_mapper_worker3_branch") => "cando_mapper_worker3_datum_branch") & ((("cando_mapper_worker3_stop" & "cando_mapper_worker3_branch") => "cando_mapper_worker3_stop_branch") & ((("cando_reducer_mapper_continue" & "cando_reducer_mapper_branch") => "cando_reducer_mapper_continue_branch") & ((("cando_reducer_mapper_stop" & "cando_reducer_mapper_branch") => "cando_reducer_mapper_stop_branch") & ((("cando_worker1_reducer_result" & "cando_worker1_reducer_branch") => "cando_worker1_reducer_result_branch") & ((("cando_worker2_reducer_result" & "cando_worker2_reducer_branch") => "cando_worker2_reducer_result_branch") & (("cando_worker3_reducer_result" & "cando_worker3_reducer_branch") => "cando_worker3_reducer_result_branch")))))))))))) ]
+  Pmin=? [ (G ("deadlock" => "end")) ]
+  Pmin=? [ (F "deadlock") ]
   
    ======= Property checking =======
+  
+  Type safety
+  Result: true
   
   Probabilistic deadlock freedom
   Result: 1.0 (exact floating point)
   
-  Type safety
-  Result: true
+  Probabilistic termination
+  Result: 1.0 (exact floating point)
   
   
   
@@ -714,16 +797,20 @@ For each context file in this directory, run [prose output] to check the model a
   label "cando_alice_shop_branch" = (shop=0) | (shop=4);
   label "cando_bob_alice_branch" = alice=7;
   label "cando_shop_alice_branch" = alice=2;
-  Pmin=? [ (G ("deadlock" => "end")) ]
   P>=1 [ (G ((("cando_alice_bob_cancel" & "cando_alice_bob_branch") => "cando_alice_bob_cancel_branch") & ((("cando_alice_bob_split" & "cando_alice_bob_branch") => "cando_alice_bob_split_branch") & ((("cando_alice_shop_buy" & "cando_alice_shop_branch") => "cando_alice_shop_buy_branch") & ((("cando_alice_shop_no" & "cando_alice_shop_branch") => "cando_alice_shop_no_branch") & ((("cando_alice_shop_query" & "cando_alice_shop_branch") => "cando_alice_shop_query_branch") & ((("cando_bob_alice_no" & "cando_bob_alice_branch") => "cando_bob_alice_no_branch") & ((("cando_bob_alice_yes" & "cando_bob_alice_branch") => "cando_bob_alice_yes_branch") & (("cando_shop_alice_price" & "cando_shop_alice_branch") => "cando_shop_alice_price_branch"))))))))) ]
+  Pmin=? [ (G ("deadlock" => "end")) ]
+  Pmin=? [ (F "deadlock") ]
   
    ======= Property checking =======
+  
+  Type safety
+  Result: true
   
   Probabilistic deadlock freedom
   Result: 1.0 (exact floating point)
   
-  Type safety
-  Result: true
+  Probabilistic termination
+  Result: 1.0 (exact floating point)
   
   
   
@@ -875,16 +962,20 @@ For each context file in this directory, run [prose output] to check the model a
   label "cando_p_q_branch" = (q=0) | (q=2);
   label "cando_p1_q1_branch" = (q1=0) | (q1=2);
   label "cando_p2_q2_branch" = (q2=0) | (q2=2);
-  Pmin=? [ (G ("deadlock" => "end")) ]
   P>=1 [ (G ((("cando_p_q_l1" & "cando_p_q_branch") => "cando_p_q_l1_branch") & ((("cando_p_q_l2" & "cando_p_q_branch") => "cando_p_q_l2_branch") & ((("cando_p1_q1_l1" & "cando_p1_q1_branch") => "cando_p1_q1_l1_branch") & ((("cando_p1_q1_l2" & "cando_p1_q1_branch") => "cando_p1_q1_l2_branch") & ((("cando_p2_q2_l1" & "cando_p2_q2_branch") => "cando_p2_q2_l1_branch") & (("cando_p2_q2_l2" & "cando_p2_q2_branch") => "cando_p2_q2_l2_branch"))))))) ]
+  Pmin=? [ (G ("deadlock" => "end")) ]
+  Pmin=? [ (F "deadlock") ]
   
    ======= Property checking =======
+  
+  Type safety
+  Result: true
   
   Probabilistic deadlock freedom
   Result: 1.0 (exact floating point)
   
-  Type safety
-  Result: true
+  Probabilistic termination
+  Result: 1.0 (exact floating point)
   
   
   
@@ -930,16 +1021,20 @@ For each context file in this directory, run [prose output] to check the model a
   label "cando_alice_bob_b" = alice=0;
   label "cando_alice_bob_b_branch" = bob=0;
   label "cando_alice_bob_branch" = bob=0;
-  Pmin=? [ (G ("deadlock" => "end")) ]
   P>=1 [ (G ((("cando_alice_bob_a" & "cando_alice_bob_branch") => "cando_alice_bob_a_branch") & (("cando_alice_bob_b" & "cando_alice_bob_branch") => "cando_alice_bob_b_branch"))) ]
+  Pmin=? [ (G ("deadlock" => "end")) ]
+  Pmin=? [ (F "deadlock") ]
   
    ======= Property checking =======
+  
+  Type safety
+  Result: true
   
   Probabilistic deadlock freedom
   Result: 1.0 (exact floating point)
   
-  Type safety
-  Result: true
+  Probabilistic termination
+  Result: 1.0 (exact floating point)
   
   
   
@@ -1015,16 +1110,20 @@ For each context file in this directory, run [prose output] to check the model a
   label "cando_alice_bob_l5" = alice=0;
   label "cando_alice_bob_l5_branch" = false;
   label "cando_alice_bob_branch" = (bob=0) | (bob=2);
-  Pmin=? [ (G ("deadlock" => "end")) ]
   P>=1 [ (G ((("cando_alice_bob_l1" & "cando_alice_bob_branch") => "cando_alice_bob_l1_branch") & ((("cando_alice_bob_l2" & "cando_alice_bob_branch") => "cando_alice_bob_l2_branch") & ((("cando_alice_bob_l3" & "cando_alice_bob_branch") => "cando_alice_bob_l3_branch") & ((("cando_alice_bob_l4" & "cando_alice_bob_branch") => "cando_alice_bob_l4_branch") & (("cando_alice_bob_l5" & "cando_alice_bob_branch") => "cando_alice_bob_l5_branch")))))) ]
+  Pmin=? [ (G ("deadlock" => "end")) ]
+  Pmin=? [ (F "deadlock") ]
   
    ======= Property checking =======
+  
+  Type safety
+  Result: false
   
   Probabilistic deadlock freedom
   Result: 0.87 (exact floating point)
   
-  Type safety
-  Result: false
+  Probabilistic termination
+  Result: 0.9 (exact floating point)
   
   
 

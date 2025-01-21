@@ -8,6 +8,7 @@ let rec conjunction = function
 ;;
 
 let deadlock = P (Exact, G (Implies (Label Prism.Deadlock, Label Prism.End)))
+let termination = P (Exact, F (Label Prism.Deadlock))
 
 let safety context =
   let communications = Action.Communication.in_context context in
@@ -21,4 +22,4 @@ let safety context =
   P (Ge 1.0, G (conjunction clauses))
 ;;
 
-let generate context = [ deadlock; safety context ]
+let generate context = [ safety context; deadlock; termination ]
