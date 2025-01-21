@@ -40,9 +40,13 @@ let parse_prism_output lines =
   match results with
   | [ deadlock_freedom; safety ] -> { deadlock_freedom; safety }
   | _ ->
+    let full_output = String.concat ~sep:"\n" lines in
     error_s
       [%message
-        "PRISM output contains an unexpected number of results" (results : string list)]
+        "PRISM output contains an unexpected number of results, likely PRISM returned an \
+         error"
+          full_output
+          (results : string list)]
     |> ok_exn
 ;;
 
@@ -61,7 +65,11 @@ let verify ctx_file ~print_ast () =
     Core_unix.create_process ~prog:"prism" ~args:[ model_output_file; prop_output_file ]
   in
   let stdout = Core_unix.in_channel_of_descr prism.stdout in
+  let stderr = Core_unix.in_channel_of_descr prism.stderr in
   let lines = In_channel.input_lines stdout in
+  let stderr_output = In_channel.input_all stderr in
+  if String.length stderr_output <> 0
+  then error_s [%message "PRISM returned error when verifying" stderr_output] |> ok_exn;
   let output = parse_prism_output lines in
   print_output output;
   Core_unix.remove model_output_file;
