@@ -8,7 +8,14 @@ module Prism = Prose.Prism
 module Printer = Prose.Printer
 module Psl = Prose.Psl
 
-let parse lexbuf = Parser.context Lexer.read lexbuf
+let parse lexbuf =
+  try Parser.context Lexer.read lexbuf with
+  | Parser.Error ->
+    let pos = lexbuf.lex_curr_p in
+    let line = pos.pos_lnum in
+    let column = pos.pos_cnum - pos.pos_bol in
+    error_s [%message "Syntax error" (line : int) (column : int)] |> ok_exn
+;;
 
 let output ctx_file ?model_output_file ?prop_output_file ~print_ast () =
   let dbg_print_s sexp = if print_ast then print_s sexp in
