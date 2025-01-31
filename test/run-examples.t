@@ -3,6 +3,468 @@ For each context file in this directory, run [prose output] to check the model a
   $ for i in ../examples/*.ctx; do echo "\n\n ======= TEST $i =======\n"; cat "$i"; echo "\n ======= PRISM output ========\n"; prose output "$i"; echo "\n ======= Property checking =======\n"; prose verify "$i"; echo "\n"; done
   
   
+   ======= TEST ../examples/dice.ctx =======
+  
+  (* Knuth & Yao's Dice Program. Refer to https://www.prismmodelchecker.org/casestudies/dice.php
+  
+     We represent each vertex i with two processes (pi, qi), which allows us to simulate internal
+     choice sending to different participants.
+  *)
+  
+  p0 : q0 (+) {
+          0.5 : l1 . end,
+          0.5 : l2 . end
+       }
+  
+  q0 : p0 & {
+          l1 . mu t .
+               p1 (+) go . q3 & redo . t,
+          l2 . mu t .
+               p2 (+) go . q6 & redo . t
+       }
+  
+  p1 : mu t .
+       q0 & go .
+       q1 (+) {
+          0.5 : l3 . t,
+          0.5 : l4 . t
+       }
+  
+  q1 : mu t.
+       p1 & {
+          l3 . p3 (+) go . t,
+          l4 . p4 (+) go . t
+       }
+  
+  p2 : mu t.
+       q0 & go .
+       q2 (+) {
+          0.5 : l5 . t,
+          0.5 : l6 . t
+       }
+  
+  q2 : mu t .
+       p2 & {
+          l5 . p5 (+) go . t,
+          l6 . p6 (+) go . t
+       }
+  
+  p3 : mu t .
+       q1 & go .
+       q3 (+) {
+          0.5 : l1 . t,
+          0.5 : d1 . end
+       }
+  
+  q3 : mu t .
+       p3 & {
+          l1 . q0 (+) redo . t,
+          d1 . dice1 (+) done . end
+       }
+  
+  p4 : q1 & go .
+       q4 (+) {
+          0.5 : d2 . end,
+          0.5 : d3 . end
+       }
+  
+  q4 : p4 & {
+          d2 . dice2 (+) done . end,
+          d3 . dice3 (+) done . end
+       }
+  
+  p5 : q2 & go .
+       q5 (+) {
+          0.5 : d4 . end,
+          0.5 : d5 . end
+       }
+  
+  q5 : p5 & {
+          d4 . dice4 (+) done . end,
+          d5 . dice5 (+) done . end
+       }
+  
+  p6 : mu t .
+       q2 & go .
+       q6 (+) {
+          0.5 : d6 . end,
+          0.5 : l2 . end
+       }
+  
+  q6 : mu t .
+       p6 & {
+          d6 . dice6 (+) done . end,
+          l2 . q0 (+) redo . t
+       }
+  
+  (* Each of these should be of 1/6 probability *)
+  
+  dice1 : q3 & done . mu t . dummy (+) repeat . t
+  dice2 : q4 & done . end
+  dice3 : q4 & done . end
+  dice4 : q5 & done . end
+  dice5 : q5 & done . end
+  dice6 : q6 & done . end
+  
+  dummy : mu t . dice1 & repeat . t
+   ======= PRISM output ========
+  
+  global fail : bool init false;
+  
+  module closure
+    closure : bool init false;
+  
+  endmodule
+  
+  module p0
+    p0 : [0..4] init 0;
+    p0_q0_label : [0..2] init 0;
+  
+    [] p0=4 -> 1:(fail'=true);
+    [p0_q0] (p0=0) & (fail=false) -> 0:(p0'=4) + 0.5:(p0'=1)&(p0_q0_label'=1) + 0.5:(p0'=2)&(p0_q0_label'=2);
+    [p0_q0_l2] p0=1 -> 1:(p0'=3)&(p0_q0_label'=0);
+    [p0_q0_l1] p0=2 -> 1:(p0'=3)&(p0_q0_label'=0);
+  endmodule
+  
+  module q0
+    q0 : [0..11] init 0;
+    q0_p1_label : [0..1] init 0;
+    q0_p2_label : [0..1] init 0;
+  
+    [] q0=11 -> 1:(fail'=true);
+    [p0_q0] (q0=0) & (fail=false) -> 1:(q0'=1);
+    [p0_q0_l2] (q0=1) & (p0_q0_label=1) -> 1:(q0'=2);
+    [p0_q0_l1] (q0=1) & (p0_q0_label=2) -> 1:(q0'=6);
+    [q0_p1] (q0=6) & (fail=false) -> 0:(q0'=11) + 1:(q0'=7)&(q0_p1_label'=1);
+    [q0_p1_go] q0=7 -> 1:(q0'=8)&(q0_p1_label'=0);
+    [q3_q0] (q0=8) & (fail=false) -> 1:(q0'=9);
+    [q3_q0_redo] (q0=9) & (q3_q0_label=1) -> 1:(q0'=6);
+    [q0_p2] (q0=2) & (fail=false) -> 0:(q0'=11) + 1:(q0'=3)&(q0_p2_label'=1);
+    [q0_p2_go] q0=3 -> 1:(q0'=4)&(q0_p2_label'=0);
+    [q6_q0] (q0=4) & (fail=false) -> 1:(q0'=5);
+    [q6_q0_redo] (q0=5) & (q6_q0_label=1) -> 1:(q0'=2);
+  endmodule
+  
+  module p1
+    p1 : [0..6] init 0;
+    p1_q1_label : [0..2] init 0;
+  
+    [] p1=6 -> 1:(fail'=true);
+    [q0_p1] (p1=0) & (fail=false) -> 1:(p1'=1);
+    [q0_p1_go] (p1=1) & (q0_p1_label=1) -> 1:(p1'=2);
+    [p1_q1] (p1=2) & (fail=false) -> 0:(p1'=6) + 0.5:(p1'=3)&(p1_q1_label'=1) + 0.5:(p1'=4)&(p1_q1_label'=2);
+    [p1_q1_l4] p1=3 -> 1:(p1'=0)&(p1_q1_label'=0);
+    [p1_q1_l3] p1=4 -> 1:(p1'=0)&(p1_q1_label'=0);
+  endmodule
+  
+  module q1
+    q1 : [0..7] init 0;
+    q1_p3_label : [0..1] init 0;
+    q1_p4_label : [0..1] init 0;
+  
+    [] q1=7 -> 1:(fail'=true);
+    [p1_q1] (q1=0) & (fail=false) -> 1:(q1'=1);
+    [p1_q1_l4] (q1=1) & (p1_q1_label=1) -> 1:(q1'=2);
+    [p1_q1_l3] (q1=1) & (p1_q1_label=2) -> 1:(q1'=4);
+    [q1_p3] (q1=4) & (fail=false) -> 0:(q1'=7) + 1:(q1'=5)&(q1_p3_label'=1);
+    [q1_p3_go] q1=5 -> 1:(q1'=0)&(q1_p3_label'=0);
+    [q1_p4] (q1=2) & (fail=false) -> 0:(q1'=7) + 1:(q1'=3)&(q1_p4_label'=1);
+    [q1_p4_go] q1=3 -> 1:(q1'=0)&(q1_p4_label'=0);
+  endmodule
+  
+  module p2
+    p2 : [0..6] init 0;
+    p2_q2_label : [0..2] init 0;
+  
+    [] p2=6 -> 1:(fail'=true);
+    [q0_p2] (p2=0) & (fail=false) -> 1:(p2'=1);
+    [q0_p2_go] (p2=1) & (q0_p2_label=1) -> 1:(p2'=2);
+    [p2_q2] (p2=2) & (fail=false) -> 0:(p2'=6) + 0.5:(p2'=3)&(p2_q2_label'=1) + 0.5:(p2'=4)&(p2_q2_label'=2);
+    [p2_q2_l6] p2=3 -> 1:(p2'=0)&(p2_q2_label'=0);
+    [p2_q2_l5] p2=4 -> 1:(p2'=0)&(p2_q2_label'=0);
+  endmodule
+  
+  module q2
+    q2 : [0..7] init 0;
+    q2_p5_label : [0..1] init 0;
+    q2_p6_label : [0..1] init 0;
+  
+    [] q2=7 -> 1:(fail'=true);
+    [p2_q2] (q2=0) & (fail=false) -> 1:(q2'=1);
+    [p2_q2_l6] (q2=1) & (p2_q2_label=1) -> 1:(q2'=2);
+    [p2_q2_l5] (q2=1) & (p2_q2_label=2) -> 1:(q2'=4);
+    [q2_p5] (q2=4) & (fail=false) -> 0:(q2'=7) + 1:(q2'=5)&(q2_p5_label'=1);
+    [q2_p5_go] q2=5 -> 1:(q2'=0)&(q2_p5_label'=0);
+    [q2_p6] (q2=2) & (fail=false) -> 0:(q2'=7) + 1:(q2'=3)&(q2_p6_label'=1);
+    [q2_p6_go] q2=3 -> 1:(q2'=0)&(q2_p6_label'=0);
+  endmodule
+  
+  module p3
+    p3 : [0..6] init 0;
+    p3_q3_label : [0..2] init 0;
+  
+    [] p3=6 -> 1:(fail'=true);
+    [q1_p3] (p3=0) & (fail=false) -> 1:(p3'=1);
+    [q1_p3_go] (p3=1) & (q1_p3_label=1) -> 1:(p3'=2);
+    [p3_q3] (p3=2) & (fail=false) -> 0:(p3'=6) + 0.5:(p3'=3)&(p3_q3_label'=1) + 0.5:(p3'=4)&(p3_q3_label'=2);
+    [p3_q3_l1] p3=3 -> 1:(p3'=0)&(p3_q3_label'=0);
+    [p3_q3_d1] p3=4 -> 1:(p3'=5)&(p3_q3_label'=0);
+  endmodule
+  
+  module q3
+    q3 : [0..7] init 0;
+    q3_dice1_label : [0..1] init 0;
+    q3_q0_label : [0..1] init 0;
+  
+    [] q3=7 -> 1:(fail'=true);
+    [p3_q3] (q3=0) & (fail=false) -> 1:(q3'=1);
+    [p3_q3_l1] (q3=1) & (p3_q3_label=1) -> 1:(q3'=2);
+    [p3_q3_d1] (q3=1) & (p3_q3_label=2) -> 1:(q3'=4);
+    [q3_q0] (q3=2) & (fail=false) -> 0:(q3'=7) + 1:(q3'=3)&(q3_q0_label'=1);
+    [q3_q0_redo] q3=3 -> 1:(q3'=0)&(q3_q0_label'=0);
+    [q3_dice1] (q3=4) & (fail=false) -> 0:(q3'=7) + 1:(q3'=5)&(q3_dice1_label'=1);
+    [q3_dice1_done] q3=5 -> 1:(q3'=6)&(q3_dice1_label'=0);
+  endmodule
+  
+  module p4
+    p4 : [0..6] init 0;
+    p4_q4_label : [0..2] init 0;
+  
+    [] p4=6 -> 1:(fail'=true);
+    [q1_p4] (p4=0) & (fail=false) -> 1:(p4'=1);
+    [q1_p4_go] (p4=1) & (q1_p4_label=1) -> 1:(p4'=2);
+    [p4_q4] (p4=2) & (fail=false) -> 0:(p4'=6) + 0.5:(p4'=3)&(p4_q4_label'=1) + 0.5:(p4'=4)&(p4_q4_label'=2);
+    [p4_q4_d3] p4=3 -> 1:(p4'=5)&(p4_q4_label'=0);
+    [p4_q4_d2] p4=4 -> 1:(p4'=5)&(p4_q4_label'=0);
+  endmodule
+  
+  module q4
+    q4 : [0..7] init 0;
+    q4_dice2_label : [0..1] init 0;
+    q4_dice3_label : [0..1] init 0;
+  
+    [] q4=7 -> 1:(fail'=true);
+    [p4_q4] (q4=0) & (fail=false) -> 1:(q4'=1);
+    [p4_q4_d3] (q4=1) & (p4_q4_label=1) -> 1:(q4'=2);
+    [p4_q4_d2] (q4=1) & (p4_q4_label=2) -> 1:(q4'=4);
+    [q4_dice2] (q4=4) & (fail=false) -> 0:(q4'=7) + 1:(q4'=5)&(q4_dice2_label'=1);
+    [q4_dice2_done] q4=5 -> 1:(q4'=6)&(q4_dice2_label'=0);
+    [q4_dice3] (q4=2) & (fail=false) -> 0:(q4'=7) + 1:(q4'=3)&(q4_dice3_label'=1);
+    [q4_dice3_done] q4=3 -> 1:(q4'=6)&(q4_dice3_label'=0);
+  endmodule
+  
+  module p5
+    p5 : [0..6] init 0;
+    p5_q5_label : [0..2] init 0;
+  
+    [] p5=6 -> 1:(fail'=true);
+    [q2_p5] (p5=0) & (fail=false) -> 1:(p5'=1);
+    [q2_p5_go] (p5=1) & (q2_p5_label=1) -> 1:(p5'=2);
+    [p5_q5] (p5=2) & (fail=false) -> 0:(p5'=6) + 0.5:(p5'=3)&(p5_q5_label'=1) + 0.5:(p5'=4)&(p5_q5_label'=2);
+    [p5_q5_d5] p5=3 -> 1:(p5'=5)&(p5_q5_label'=0);
+    [p5_q5_d4] p5=4 -> 1:(p5'=5)&(p5_q5_label'=0);
+  endmodule
+  
+  module q5
+    q5 : [0..7] init 0;
+    q5_dice4_label : [0..1] init 0;
+    q5_dice5_label : [0..1] init 0;
+  
+    [] q5=7 -> 1:(fail'=true);
+    [p5_q5] (q5=0) & (fail=false) -> 1:(q5'=1);
+    [p5_q5_d5] (q5=1) & (p5_q5_label=1) -> 1:(q5'=2);
+    [p5_q5_d4] (q5=1) & (p5_q5_label=2) -> 1:(q5'=4);
+    [q5_dice4] (q5=4) & (fail=false) -> 0:(q5'=7) + 1:(q5'=5)&(q5_dice4_label'=1);
+    [q5_dice4_done] q5=5 -> 1:(q5'=6)&(q5_dice4_label'=0);
+    [q5_dice5] (q5=2) & (fail=false) -> 0:(q5'=7) + 1:(q5'=3)&(q5_dice5_label'=1);
+    [q5_dice5_done] q5=3 -> 1:(q5'=6)&(q5_dice5_label'=0);
+  endmodule
+  
+  module p6
+    p6 : [0..6] init 0;
+    p6_q6_label : [0..2] init 0;
+  
+    [] p6=6 -> 1:(fail'=true);
+    [q2_p6] (p6=0) & (fail=false) -> 1:(p6'=1);
+    [q2_p6_go] (p6=1) & (q2_p6_label=1) -> 1:(p6'=2);
+    [p6_q6] (p6=2) & (fail=false) -> 0:(p6'=6) + 0.5:(p6'=3)&(p6_q6_label'=1) + 0.5:(p6'=4)&(p6_q6_label'=2);
+    [p6_q6_l2] p6=3 -> 1:(p6'=5)&(p6_q6_label'=0);
+    [p6_q6_d6] p6=4 -> 1:(p6'=5)&(p6_q6_label'=0);
+  endmodule
+  
+  module q6
+    q6 : [0..7] init 0;
+    q6_dice6_label : [0..1] init 0;
+    q6_q0_label : [0..1] init 0;
+  
+    [] q6=7 -> 1:(fail'=true);
+    [p6_q6] (q6=0) & (fail=false) -> 1:(q6'=1);
+    [p6_q6_l2] (q6=1) & (p6_q6_label=1) -> 1:(q6'=2);
+    [p6_q6_d6] (q6=1) & (p6_q6_label=2) -> 1:(q6'=4);
+    [q6_dice6] (q6=4) & (fail=false) -> 0:(q6'=7) + 1:(q6'=5)&(q6_dice6_label'=1);
+    [q6_dice6_done] q6=5 -> 1:(q6'=6)&(q6_dice6_label'=0);
+    [q6_q0] (q6=2) & (fail=false) -> 0:(q6'=7) + 1:(q6'=3)&(q6_q0_label'=1);
+    [q6_q0_redo] q6=3 -> 1:(q6'=0)&(q6_q0_label'=0);
+  endmodule
+  
+  module dice1
+    dice1 : [0..5] init 0;
+    dice1_dummy_label : [0..1] init 0;
+  
+    [] dice1=5 -> 1:(fail'=true);
+    [q3_dice1] (dice1=0) & (fail=false) -> 1:(dice1'=1);
+    [q3_dice1_done] (dice1=1) & (q3_dice1_label=1) -> 1:(dice1'=2);
+    [dice1_dummy] (dice1=2) & (fail=false) -> 0:(dice1'=5) + 1:(dice1'=3)&(dice1_dummy_label'=1);
+    [dice1_dummy_repeat] dice1=3 -> 1:(dice1'=2)&(dice1_dummy_label'=0);
+  endmodule
+  
+  module dice2
+    dice2 : [0..3] init 0;
+  
+    [] dice2=3 -> 1:(fail'=true);
+    [q4_dice2] (dice2=0) & (fail=false) -> 1:(dice2'=1);
+    [q4_dice2_done] (dice2=1) & (q4_dice2_label=1) -> 1:(dice2'=2);
+  endmodule
+  
+  module dice3
+    dice3 : [0..3] init 0;
+  
+    [] dice3=3 -> 1:(fail'=true);
+    [q4_dice3] (dice3=0) & (fail=false) -> 1:(dice3'=1);
+    [q4_dice3_done] (dice3=1) & (q4_dice3_label=1) -> 1:(dice3'=2);
+  endmodule
+  
+  module dice4
+    dice4 : [0..3] init 0;
+  
+    [] dice4=3 -> 1:(fail'=true);
+    [q5_dice4] (dice4=0) & (fail=false) -> 1:(dice4'=1);
+    [q5_dice4_done] (dice4=1) & (q5_dice4_label=1) -> 1:(dice4'=2);
+  endmodule
+  
+  module dice5
+    dice5 : [0..3] init 0;
+  
+    [] dice5=3 -> 1:(fail'=true);
+    [q5_dice5] (dice5=0) & (fail=false) -> 1:(dice5'=1);
+    [q5_dice5_done] (dice5=1) & (q5_dice5_label=1) -> 1:(dice5'=2);
+  endmodule
+  
+  module dice6
+    dice6 : [0..3] init 0;
+  
+    [] dice6=3 -> 1:(fail'=true);
+    [q6_dice6] (dice6=0) & (fail=false) -> 1:(dice6'=1);
+    [q6_dice6_done] (dice6=1) & (q6_dice6_label=1) -> 1:(dice6'=2);
+  endmodule
+  
+  module dummy
+    dummy : [0..3] init 0;
+  
+    [] dummy=3 -> 1:(fail'=true);
+    [dice1_dummy] (dummy=0) & (fail=false) -> 1:(dummy'=1);
+    [dice1_dummy_repeat] (dummy=1) & (dice1_dummy_label=1) -> 1:(dummy'=0);
+  endmodule
+  
+  label "end" = (p0=3) & (q0=10) & (p1=5) & (q1=6) & (p2=5) & (q2=6) & (p3=5) & (q3=6) & (p4=5) & (q4=6) & (p5=5) & (q5=6) & (p6=5) & (q6=6) & (dice1=4) & (dice2=2) & (dice3=2) & (dice4=2) & (dice5=2) & (dice6=2) & (dummy=2);
+  label "cando_dice1_dummy_repeat" = dice1=2;
+  label "cando_dice1_dummy_repeat_branch" = dummy=0;
+  label "cando_p0_q0_l1" = p0=0;
+  label "cando_p0_q0_l1_branch" = q0=0;
+  label "cando_p0_q0_l2" = p0=0;
+  label "cando_p0_q0_l2_branch" = q0=0;
+  label "cando_p1_q1_l3" = p1=2;
+  label "cando_p1_q1_l3_branch" = q1=0;
+  label "cando_p1_q1_l4" = p1=2;
+  label "cando_p1_q1_l4_branch" = q1=0;
+  label "cando_p2_q2_l5" = p2=2;
+  label "cando_p2_q2_l5_branch" = q2=0;
+  label "cando_p2_q2_l6" = p2=2;
+  label "cando_p2_q2_l6_branch" = q2=0;
+  label "cando_p3_q3_d1" = p3=2;
+  label "cando_p3_q3_d1_branch" = q3=0;
+  label "cando_p3_q3_l1" = p3=2;
+  label "cando_p3_q3_l1_branch" = q3=0;
+  label "cando_p4_q4_d2" = p4=2;
+  label "cando_p4_q4_d2_branch" = q4=0;
+  label "cando_p4_q4_d3" = p4=2;
+  label "cando_p4_q4_d3_branch" = q4=0;
+  label "cando_p5_q5_d4" = p5=2;
+  label "cando_p5_q5_d4_branch" = q5=0;
+  label "cando_p5_q5_d5" = p5=2;
+  label "cando_p5_q5_d5_branch" = q5=0;
+  label "cando_p6_q6_d6" = p6=2;
+  label "cando_p6_q6_d6_branch" = q6=0;
+  label "cando_p6_q6_l2" = p6=2;
+  label "cando_p6_q6_l2_branch" = q6=0;
+  label "cando_q0_p1_go" = q0=6;
+  label "cando_q0_p1_go_branch" = p1=0;
+  label "cando_q0_p2_go" = q0=2;
+  label "cando_q0_p2_go_branch" = p2=0;
+  label "cando_q1_p3_go" = q1=4;
+  label "cando_q1_p3_go_branch" = p3=0;
+  label "cando_q1_p4_go" = q1=2;
+  label "cando_q1_p4_go_branch" = p4=0;
+  label "cando_q2_p5_go" = q2=4;
+  label "cando_q2_p5_go_branch" = p5=0;
+  label "cando_q2_p6_go" = q2=2;
+  label "cando_q2_p6_go_branch" = p6=0;
+  label "cando_q3_dice1_done" = q3=4;
+  label "cando_q3_dice1_done_branch" = dice1=0;
+  label "cando_q3_q0_redo" = q3=2;
+  label "cando_q3_q0_redo_branch" = q0=8;
+  label "cando_q4_dice2_done" = q4=4;
+  label "cando_q4_dice2_done_branch" = dice2=0;
+  label "cando_q4_dice3_done" = q4=2;
+  label "cando_q4_dice3_done_branch" = dice3=0;
+  label "cando_q5_dice4_done" = q5=4;
+  label "cando_q5_dice4_done_branch" = dice4=0;
+  label "cando_q5_dice5_done" = q5=2;
+  label "cando_q5_dice5_done_branch" = dice5=0;
+  label "cando_q6_dice6_done" = q6=4;
+  label "cando_q6_dice6_done_branch" = dice6=0;
+  label "cando_q6_q0_redo" = q6=2;
+  label "cando_q6_q0_redo_branch" = q0=4;
+  label "cando_dice1_dummy_branch" = dummy=0;
+  label "cando_p0_q0_branch" = q0=0;
+  label "cando_p1_q1_branch" = q1=0;
+  label "cando_p2_q2_branch" = q2=0;
+  label "cando_p3_q3_branch" = q3=0;
+  label "cando_p4_q4_branch" = q4=0;
+  label "cando_p5_q5_branch" = q5=0;
+  label "cando_p6_q6_branch" = q6=0;
+  label "cando_q0_p1_branch" = p1=0;
+  label "cando_q0_p2_branch" = p2=0;
+  label "cando_q1_p3_branch" = p3=0;
+  label "cando_q1_p4_branch" = p4=0;
+  label "cando_q2_p5_branch" = p5=0;
+  label "cando_q2_p6_branch" = p6=0;
+  label "cando_q3_dice1_branch" = dice1=0;
+  label "cando_q3_q0_branch" = q0=8;
+  label "cando_q4_dice2_branch" = dice2=0;
+  label "cando_q4_dice3_branch" = dice3=0;
+  label "cando_q5_dice4_branch" = dice4=0;
+  label "cando_q5_dice5_branch" = dice5=0;
+  label "cando_q6_dice6_branch" = dice6=0;
+  label "cando_q6_q0_branch" = q0=4;
+  P>=1 [ (G ((("cando_dice1_dummy_repeat" & "cando_dice1_dummy_branch") => "cando_dice1_dummy_repeat_branch") & ((("cando_p0_q0_l1" & "cando_p0_q0_branch") => "cando_p0_q0_l1_branch") & ((("cando_p0_q0_l2" & "cando_p0_q0_branch") => "cando_p0_q0_l2_branch") & ((("cando_p1_q1_l3" & "cando_p1_q1_branch") => "cando_p1_q1_l3_branch") & ((("cando_p1_q1_l4" & "cando_p1_q1_branch") => "cando_p1_q1_l4_branch") & ((("cando_p2_q2_l5" & "cando_p2_q2_branch") => "cando_p2_q2_l5_branch") & ((("cando_p2_q2_l6" & "cando_p2_q2_branch") => "cando_p2_q2_l6_branch") & ((("cando_p3_q3_d1" & "cando_p3_q3_branch") => "cando_p3_q3_d1_branch") & ((("cando_p3_q3_l1" & "cando_p3_q3_branch") => "cando_p3_q3_l1_branch") & ((("cando_p4_q4_d2" & "cando_p4_q4_branch") => "cando_p4_q4_d2_branch") & ((("cando_p4_q4_d3" & "cando_p4_q4_branch") => "cando_p4_q4_d3_branch") & ((("cando_p5_q5_d4" & "cando_p5_q5_branch") => "cando_p5_q5_d4_branch") & ((("cando_p5_q5_d5" & "cando_p5_q5_branch") => "cando_p5_q5_d5_branch") & ((("cando_p6_q6_d6" & "cando_p6_q6_branch") => "cando_p6_q6_d6_branch") & ((("cando_p6_q6_l2" & "cando_p6_q6_branch") => "cando_p6_q6_l2_branch") & ((("cando_q0_p1_go" & "cando_q0_p1_branch") => "cando_q0_p1_go_branch") & ((("cando_q0_p2_go" & "cando_q0_p2_branch") => "cando_q0_p2_go_branch") & ((("cando_q1_p3_go" & "cando_q1_p3_branch") => "cando_q1_p3_go_branch") & ((("cando_q1_p4_go" & "cando_q1_p4_branch") => "cando_q1_p4_go_branch") & ((("cando_q2_p5_go" & "cando_q2_p5_branch") => "cando_q2_p5_go_branch") & ((("cando_q2_p6_go" & "cando_q2_p6_branch") => "cando_q2_p6_go_branch") & ((("cando_q3_dice1_done" & "cando_q3_dice1_branch") => "cando_q3_dice1_done_branch") & ((("cando_q3_q0_redo" & "cando_q3_q0_branch") => "cando_q3_q0_redo_branch") & ((("cando_q4_dice2_done" & "cando_q4_dice2_branch") => "cando_q4_dice2_done_branch") & ((("cando_q4_dice3_done" & "cando_q4_dice3_branch") => "cando_q4_dice3_done_branch") & ((("cando_q5_dice4_done" & "cando_q5_dice4_branch") => "cando_q5_dice4_done_branch") & ((("cando_q5_dice5_done" & "cando_q5_dice5_branch") => "cando_q5_dice5_done_branch") & ((("cando_q6_dice6_done" & "cando_q6_dice6_branch") => "cando_q6_dice6_done_branch") & (("cando_q6_q0_redo" & "cando_q6_q0_branch") => "cando_q6_q0_redo_branch")))))))))))))))))))))))))))))) ]
+  Pmin=? [ (G ("deadlock" => "end")) ]
+  Pmin=? [ (F "deadlock") ]
+  
+   ======= Property checking =======
+  
+  Type safety
+  Result: true
+  
+  Probabilistic deadlock freedom
+  Result: 0.16666698455810547 (+/- 1.1920963061161968E-6 estimated; rel err 7.1525641942636435E-6)
+  
+  Probabilistic termination
+  Result: 0.8333330154418945 (+/- 5.960467888147447E-6 estimated; rel err 7.1525641942636435E-6)
+  
+  
+  
+  
    ======= TEST ../examples/multiparty-workers.ctx =======
   
   starter : workerA1 (+) datum(Int) .

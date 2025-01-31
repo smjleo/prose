@@ -1,0 +1,102 @@
+(* Knuth & Yao's Dice Program. Refer to https://www.prismmodelchecker.org/casestudies/dice.php
+
+   We represent each vertex i with two processes (pi, qi), which allows us to simulate internal
+   choice sending to different participants.
+*)
+
+p0 : q0 (+) {
+        0.5 : l1 . end,
+        0.5 : l2 . end
+     }
+
+q0 : p0 & {
+        l1 . mu t .
+             p1 (+) go . q3 & redo . t,
+        l2 . mu t .
+             p2 (+) go . q6 & redo . t
+     }
+
+p1 : mu t .
+     q0 & go .
+     q1 (+) {
+        0.5 : l3 . t,
+        0.5 : l4 . t
+     }
+
+q1 : mu t.
+     p1 & {
+        l3 . p3 (+) go . t,
+        l4 . p4 (+) go . t
+     }
+
+p2 : mu t.
+     q0 & go .
+     q2 (+) {
+        0.5 : l5 . t,
+        0.5 : l6 . t
+     }
+
+q2 : mu t .
+     p2 & {
+        l5 . p5 (+) go . t,
+        l6 . p6 (+) go . t
+     }
+
+p3 : mu t .
+     q1 & go .
+     q3 (+) {
+        0.5 : l1 . t,
+        0.5 : d1 . end
+     }
+
+q3 : mu t .
+     p3 & {
+        l1 . q0 (+) redo . t,
+        d1 . dice1 (+) done . end
+     }
+
+p4 : q1 & go .
+     q4 (+) {
+        0.5 : d2 . end,
+        0.5 : d3 . end
+     }
+
+q4 : p4 & {
+        d2 . dice2 (+) done . end,
+        d3 . dice3 (+) done . end
+     }
+
+p5 : q2 & go .
+     q5 (+) {
+        0.5 : d4 . end,
+        0.5 : d5 . end
+     }
+
+q5 : p5 & {
+        d4 . dice4 (+) done . end,
+        d5 . dice5 (+) done . end
+     }
+
+p6 : mu t .
+     q2 & go .
+     q6 (+) {
+        0.5 : d6 . end,
+        0.5 : l2 . end
+     }
+
+q6 : mu t .
+     p6 & {
+        d6 . dice6 (+) done . end,
+        l2 . q0 (+) redo . t
+     }
+
+(* Each of these should be of 1/6 probability *)
+
+dice1 : q3 & done . mu t . dummy (+) repeat . t
+dice2 : q4 & done . end
+dice3 : q4 & done . end
+dice4 : q5 & done . end
+dice5 : q5 & done . end
+dice6 : q6 & done . end
+
+dummy : mu t . dice1 & repeat . t
