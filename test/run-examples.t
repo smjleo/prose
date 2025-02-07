@@ -465,6 +465,277 @@ For each context file in this directory, run [prose output] to check the model a
   
   
   
+   ======= TEST ../examples/monty-hall-change.ctx =======
+  
+  (* Monty Hall problem. In this variant, the contestant always switches doors
+     to either 2 or 3, depending on whichever door the host opens.
+  
+     The probability of deadlock freedom corresponds with the probability of
+     picking the door with the car.
+  
+     Compare with [monty-hall-stay.ctx]. *)
+  
+  car : host (+) {
+          0.333333 : l1 . end,
+          0.333333 : l2 . end,
+          0.333333 : l3 . end
+        }
+  
+  host : car & {
+           l1 . player (+) {
+             0.5 : l2 . player & l1 . end,
+             0.5 : l3 . player & l1 . end
+           },
+           l2 . player (+) l3 . player & l2 . end,
+           l3 . player (+) l2 . player & l3 . end
+        }
+  
+  player : host & {
+             l2 . host (+) l3 . end,
+             l3 . host (+) l2 . end
+           }
+  
+   ======= PRISM output ========
+  
+  global fail : bool init false;
+  
+  module closure
+    closure : bool init false;
+  
+  endmodule
+  
+  module car
+    car : [0..5] init 0;
+    car_host_label : [0..3] init 0;
+  
+    [] car=5 -> 1:(fail'=true);
+    [car_host] (car=0) & (fail=false) -> 1e-06:(car'=5) + 0.333333:(car'=1)&(car_host_label'=1) + 0.333333:(car'=2)&(car_host_label'=2) + 0.333333:(car'=3)&(car_host_label'=3);
+    [car_host_l3] car=1 -> 1:(car'=4)&(car_host_label'=0);
+    [car_host_l2] car=2 -> 1:(car'=4)&(car_host_label'=0);
+    [car_host_l1] car=3 -> 1:(car'=4)&(car_host_label'=0);
+  endmodule
+  
+  module host
+    host : [0..18] init 0;
+    host_player_label : [0..2] init 0;
+  
+    [] host=18 -> 1:(fail'=true);
+    [car_host] (host=0) & (fail=false) -> 1:(host'=1);
+    [car_host_l3] (host=1) & (car_host_label=1) -> 1:(host'=2);
+    [car_host_l2] (host=1) & (car_host_label=2) -> 1:(host'=6);
+    [car_host_l1] (host=1) & (car_host_label=3) -> 1:(host'=10);
+    [host_player] (host=10) & (fail=false) -> 0:(host'=18) + 0.5:(host'=11)&(host_player_label'=1) + 0.5:(host'=12)&(host_player_label'=2);
+    [host_player_l3] host=11 -> 1:(host'=13)&(host_player_label'=0);
+    [host_player_l2] host=12 -> 1:(host'=15)&(host_player_label'=0);
+    [player_host] (host=13) & (fail=false) -> 1:(host'=14);
+    [player_host_l3] false -> 1:(host'=14);
+    [player_host_l2] false -> 1:(host'=14);
+    [player_host_l1] (host=14) & (player_host_label=3) -> 1:(host'=17);
+    [player_host] (host=15) & (fail=false) -> 1:(host'=16);
+    [player_host_l3] false -> 1:(host'=16);
+    [player_host_l2] false -> 1:(host'=16);
+    [player_host_l1] (host=16) & (player_host_label=3) -> 1:(host'=17);
+    [host_player] (host=6) & (fail=false) -> 0:(host'=18) + 1:(host'=7)&(host_player_label'=1);
+    [host_player_l3] host=7 -> 1:(host'=8)&(host_player_label'=0);
+    [player_host] (host=8) & (fail=false) -> 1:(host'=9);
+    [player_host_l3] false -> 1:(host'=9);
+    [player_host_l2] (host=9) & (player_host_label=2) -> 1:(host'=17);
+    [player_host_l1] false -> 1:(host'=9);
+    [host_player] (host=2) & (fail=false) -> 0:(host'=18) + 1:(host'=3)&(host_player_label'=2);
+    [host_player_l2] host=3 -> 1:(host'=4)&(host_player_label'=0);
+    [player_host] (host=4) & (fail=false) -> 1:(host'=5);
+    [player_host_l3] (host=5) & (player_host_label=1) -> 1:(host'=17);
+    [player_host_l2] false -> 1:(host'=5);
+    [player_host_l1] false -> 1:(host'=5);
+  endmodule
+  
+  module player
+    player : [0..7] init 0;
+    player_host_label : [0..3] init 0;
+  
+    [] player=7 -> 1:(fail'=true);
+    [host_player] (player=0) & (fail=false) -> 1:(player'=1);
+    [host_player_l3] (player=1) & (host_player_label=1) -> 1:(player'=2);
+    [host_player_l2] (player=1) & (host_player_label=2) -> 1:(player'=4);
+    [player_host] (player=4) & (fail=false) -> 0:(player'=7) + 1:(player'=5)&(player_host_label'=1);
+    [player_host_l3] player=5 -> 1:(player'=6)&(player_host_label'=0);
+    [player_host] (player=2) & (fail=false) -> 0:(player'=7) + 1:(player'=3)&(player_host_label'=2);
+    [player_host_l2] player=3 -> 1:(player'=6)&(player_host_label'=0);
+  endmodule
+  
+  label "end" = (car=4) & (host=17) & (player=6);
+  label "cando_car_host_l1" = car=0;
+  label "cando_car_host_l1_branch" = host=0;
+  label "cando_car_host_l2" = car=0;
+  label "cando_car_host_l2_branch" = host=0;
+  label "cando_car_host_l3" = car=0;
+  label "cando_car_host_l3_branch" = host=0;
+  label "cando_host_player_l2" = (host=2) | (host=10);
+  label "cando_host_player_l2_branch" = player=0;
+  label "cando_host_player_l3" = (host=6) | (host=10);
+  label "cando_host_player_l3_branch" = player=0;
+  label "cando_player_host_l1" = false;
+  label "cando_player_host_l1_branch" = (host=13) | (host=15);
+  label "cando_player_host_l2" = player=2;
+  label "cando_player_host_l2_branch" = host=8;
+  label "cando_player_host_l3" = player=4;
+  label "cando_player_host_l3_branch" = host=4;
+  label "cando_car_host_branch" = host=0;
+  label "cando_host_player_branch" = player=0;
+  label "cando_player_host_branch" = (host=4) | (host=8) | (host=13) | (host=15);
+  P>=1 [ (G ((("cando_car_host_l1" & "cando_car_host_branch") => "cando_car_host_l1_branch") & ((("cando_car_host_l2" & "cando_car_host_branch") => "cando_car_host_l2_branch") & ((("cando_car_host_l3" & "cando_car_host_branch") => "cando_car_host_l3_branch") & ((("cando_host_player_l2" & "cando_host_player_branch") => "cando_host_player_l2_branch") & ((("cando_host_player_l3" & "cando_host_player_branch") => "cando_host_player_l3_branch") & ((("cando_player_host_l1" & "cando_player_host_branch") => "cando_player_host_l1_branch") & ((("cando_player_host_l2" & "cando_player_host_branch") => "cando_player_host_l2_branch") & (("cando_player_host_l3" & "cando_player_host_branch") => "cando_player_host_l3_branch"))))))))) ]
+  Pmin=? [ (G ("deadlock" => "end")) ]
+  Pmin=? [ (F "deadlock") ]
+  
+   ======= Property checking =======
+  
+  Type safety
+  Result: false
+  
+  Probabilistic deadlock freedom
+  Result: 0.666667 (exact floating point)
+  
+  Probabilistic termination
+  Result: 0.999999 (exact floating point)
+  
+  
+  
+  
+   ======= TEST ../examples/monty-hall-stay.ctx =======
+  
+  (* Monty Hall problem. In this variant, the contestant always picks Door 1.
+     The probability of deadlock freedom corresponds with the probability of
+     picking the door with the car.
+  
+     Compare with [monty-hall-change.ctx]. *)
+  
+  car : host (+) {
+          0.333333 : l1 . end,
+          0.333333 : l2 . end,
+          0.333333 : l3 . end
+        }
+  
+  host : car & {
+           l1 . player (+) {
+             0.5 : l2 . player & l1 . end,
+             0.5 : l3 . player & l1 . end
+           },
+           l2 . player (+) l3 . player & l2 . end,
+           l3 . player (+) l2 . player & l3 . end
+        }
+  
+  player : host & {
+             l2 . host (+) l1 . end,
+             l3 . host (+) l1 . end
+           }
+  
+  
+   ======= PRISM output ========
+  
+  global fail : bool init false;
+  
+  module closure
+    closure : bool init false;
+  
+  endmodule
+  
+  module car
+    car : [0..5] init 0;
+    car_host_label : [0..3] init 0;
+  
+    [] car=5 -> 1:(fail'=true);
+    [car_host] (car=0) & (fail=false) -> 1e-06:(car'=5) + 0.333333:(car'=1)&(car_host_label'=1) + 0.333333:(car'=2)&(car_host_label'=2) + 0.333333:(car'=3)&(car_host_label'=3);
+    [car_host_l3] car=1 -> 1:(car'=4)&(car_host_label'=0);
+    [car_host_l2] car=2 -> 1:(car'=4)&(car_host_label'=0);
+    [car_host_l1] car=3 -> 1:(car'=4)&(car_host_label'=0);
+  endmodule
+  
+  module host
+    host : [0..18] init 0;
+    host_player_label : [0..2] init 0;
+  
+    [] host=18 -> 1:(fail'=true);
+    [car_host] (host=0) & (fail=false) -> 1:(host'=1);
+    [car_host_l3] (host=1) & (car_host_label=1) -> 1:(host'=2);
+    [car_host_l2] (host=1) & (car_host_label=2) -> 1:(host'=6);
+    [car_host_l1] (host=1) & (car_host_label=3) -> 1:(host'=10);
+    [host_player] (host=10) & (fail=false) -> 0:(host'=18) + 0.5:(host'=11)&(host_player_label'=1) + 0.5:(host'=12)&(host_player_label'=2);
+    [host_player_l3] host=11 -> 1:(host'=13)&(host_player_label'=0);
+    [host_player_l2] host=12 -> 1:(host'=15)&(host_player_label'=0);
+    [player_host] (host=13) & (fail=false) -> 1:(host'=14);
+    [player_host_l3] false -> 1:(host'=14);
+    [player_host_l2] false -> 1:(host'=14);
+    [player_host_l1] (host=14) & (player_host_label=3) -> 1:(host'=17);
+    [player_host] (host=15) & (fail=false) -> 1:(host'=16);
+    [player_host_l3] false -> 1:(host'=16);
+    [player_host_l2] false -> 1:(host'=16);
+    [player_host_l1] (host=16) & (player_host_label=3) -> 1:(host'=17);
+    [host_player] (host=6) & (fail=false) -> 0:(host'=18) + 1:(host'=7)&(host_player_label'=1);
+    [host_player_l3] host=7 -> 1:(host'=8)&(host_player_label'=0);
+    [player_host] (host=8) & (fail=false) -> 1:(host'=9);
+    [player_host_l3] false -> 1:(host'=9);
+    [player_host_l2] (host=9) & (player_host_label=2) -> 1:(host'=17);
+    [player_host_l1] false -> 1:(host'=9);
+    [host_player] (host=2) & (fail=false) -> 0:(host'=18) + 1:(host'=3)&(host_player_label'=2);
+    [host_player_l2] host=3 -> 1:(host'=4)&(host_player_label'=0);
+    [player_host] (host=4) & (fail=false) -> 1:(host'=5);
+    [player_host_l3] (host=5) & (player_host_label=1) -> 1:(host'=17);
+    [player_host_l2] false -> 1:(host'=5);
+    [player_host_l1] false -> 1:(host'=5);
+  endmodule
+  
+  module player
+    player : [0..7] init 0;
+    player_host_label : [0..3] init 0;
+  
+    [] player=7 -> 1:(fail'=true);
+    [host_player] (player=0) & (fail=false) -> 1:(player'=1);
+    [host_player_l3] (player=1) & (host_player_label=1) -> 1:(player'=2);
+    [host_player_l2] (player=1) & (host_player_label=2) -> 1:(player'=4);
+    [player_host] (player=4) & (fail=false) -> 0:(player'=7) + 1:(player'=5)&(player_host_label'=3);
+    [player_host_l1] player=5 -> 1:(player'=6)&(player_host_label'=0);
+    [player_host] (player=2) & (fail=false) -> 0:(player'=7) + 1:(player'=3)&(player_host_label'=3);
+    [player_host_l1] player=3 -> 1:(player'=6)&(player_host_label'=0);
+  endmodule
+  
+  label "end" = (car=4) & (host=17) & (player=6);
+  label "cando_car_host_l1" = car=0;
+  label "cando_car_host_l1_branch" = host=0;
+  label "cando_car_host_l2" = car=0;
+  label "cando_car_host_l2_branch" = host=0;
+  label "cando_car_host_l3" = car=0;
+  label "cando_car_host_l3_branch" = host=0;
+  label "cando_host_player_l2" = (host=2) | (host=10);
+  label "cando_host_player_l2_branch" = player=0;
+  label "cando_host_player_l3" = (host=6) | (host=10);
+  label "cando_host_player_l3_branch" = player=0;
+  label "cando_player_host_l1" = (player=2) | (player=4);
+  label "cando_player_host_l1_branch" = (host=13) | (host=15);
+  label "cando_player_host_l2" = false;
+  label "cando_player_host_l2_branch" = host=8;
+  label "cando_player_host_l3" = false;
+  label "cando_player_host_l3_branch" = host=4;
+  label "cando_car_host_branch" = host=0;
+  label "cando_host_player_branch" = player=0;
+  label "cando_player_host_branch" = (host=4) | (host=8) | (host=13) | (host=15);
+  P>=1 [ (G ((("cando_car_host_l1" & "cando_car_host_branch") => "cando_car_host_l1_branch") & ((("cando_car_host_l2" & "cando_car_host_branch") => "cando_car_host_l2_branch") & ((("cando_car_host_l3" & "cando_car_host_branch") => "cando_car_host_l3_branch") & ((("cando_host_player_l2" & "cando_host_player_branch") => "cando_host_player_l2_branch") & ((("cando_host_player_l3" & "cando_host_player_branch") => "cando_host_player_l3_branch") & ((("cando_player_host_l1" & "cando_player_host_branch") => "cando_player_host_l1_branch") & ((("cando_player_host_l2" & "cando_player_host_branch") => "cando_player_host_l2_branch") & (("cando_player_host_l3" & "cando_player_host_branch") => "cando_player_host_l3_branch"))))))))) ]
+  Pmin=? [ (G ("deadlock" => "end")) ]
+  Pmin=? [ (F "deadlock") ]
+  
+   ======= Property checking =======
+  
+  Type safety
+  Result: false
+  
+  Probabilistic deadlock freedom
+  Result: 0.333334 (exact floating point)
+  
+  Probabilistic termination
+  Result: 0.999999 (exact floating point)
+  
+  
+  
+  
    ======= TEST ../examples/multiparty-workers.ctx =======
   
   starter : workerA1 (+) datum(Int) .

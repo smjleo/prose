@@ -1,0 +1,26 @@
+(* Monty Hall problem. In this variant, the contestant always picks Door 1.
+   The probability of deadlock freedom corresponds with the probability of
+   picking the door with the car.
+
+   Compare with [monty-hall-change.ctx]. *)
+
+car : host (+) {
+        0.333333 : l1 . end,
+        0.333333 : l2 . end,
+        0.333333 : l3 . end
+      }
+
+host : car & {
+         l1 . player (+) {
+           0.5 : l2 . player & l1 . end,
+           0.5 : l3 . player & l1 . end
+         },
+         l2 . player (+) l3 . player & l2 . end,
+         l3 . player (+) l2 . player & l3 . end
+      }
+
+player : host & {
+           l2 . host (+) l1 . end,
+           l3 . host (+) l1 . end
+         }
+
