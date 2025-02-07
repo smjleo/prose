@@ -146,16 +146,18 @@ let rec print_path_prop ppf = function
   | Const b -> fprintf ppf "%B" b
   | And (pp1, pp2) -> fprintf ppf "(%a & %a)" print_path_prop pp1 print_path_prop pp2
   | Or (pp1, pp2) -> fprintf ppf "(%a | %a)" print_path_prop pp1 print_path_prop pp2
+  | Not pp -> fprintf ppf "(!%a)" print_path_prop pp
   | Implies (pp1, pp2) -> fprintf ppf "(%a => %a)" print_path_prop pp1 print_path_prop pp2
   | G pp -> fprintf ppf "(G %a)" print_path_prop pp
   | F pp -> fprintf ppf "(F %a)" print_path_prop pp
 ;;
 
 let print_properties' ppf properties =
-  let print_property = function
-    | P (bound, path) -> fprintf ppf "P%a [ %a ]\n" print_bound bound print_path_prop path
+  let rec print_property ppf = function
+    | P (bound, path) -> fprintf ppf "P%a [ %a ]" print_bound bound print_path_prop path
+    | Divide (p1, p2) -> fprintf ppf "(%a / %a)" print_property p1 print_property p2
   in
-  List.iter properties ~f:print_property
+  List.iter properties ~f:(fun p -> fprintf ppf "%a\n" print_property p)
 ;;
 
 let print_properties ?output_file properties =

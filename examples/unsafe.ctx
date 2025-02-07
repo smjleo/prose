@@ -1,5 +1,5 @@
 alice : bob (+) {
-          0.5 : l1 . end,
+          0.6 : l1 . end,
           0.3 : l2 .
                 bob (+) {
                   0.9 : l3 . end,

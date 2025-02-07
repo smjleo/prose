@@ -7,7 +7,12 @@ let rec conjunction = function
   | c :: cs -> And (c, conjunction cs)
 ;;
 
-let deadlock = P (Exact, G (Implies (Label Prism.Deadlock, Label Prism.End)))
+let deadlock_freedom = P (Exact, G (Implies (Label Prism.Deadlock, Label Prism.End)))
+
+let normalised_deadlock_freedom =
+  Divide (deadlock_freedom, P (Exact, G (Not (Variable "fail"))))
+;;
+
 let termination = P (Exact, F (Label Prism.Deadlock))
 
 let safety context =
@@ -22,4 +27,6 @@ let safety context =
   P (Ge 1.0, G (conjunction clauses))
 ;;
 
-let generate context = [ safety context; deadlock; termination ]
+let generate context =
+  [ safety context; deadlock_freedom; normalised_deadlock_freedom; termination ]
+;;

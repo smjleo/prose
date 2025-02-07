@@ -33,7 +33,8 @@ let output ctx_file ?model_output_file ?prop_output_file ~print_ast () =
 
 type checked_output =
   { safety : string
-  ; deadlock_freedom : string
+  ; pdf : string
+  ; normalised_pdf : string
   ; termination : string
   }
 
@@ -46,7 +47,8 @@ let parse_prism_output lines =
     |> List.rev
   in
   match results with
-  | [ safety; deadlock_freedom; termination ] -> { safety; deadlock_freedom; termination }
+  | [ safety; pdf; normalised_pdf; termination ] ->
+    { safety; pdf; normalised_pdf; termination }
   | _ ->
     let full_output = String.concat ~sep:"\n" lines in
     error_s
@@ -58,11 +60,13 @@ let parse_prism_output lines =
     |> ok_exn
 ;;
 
-let print_output { deadlock_freedom; safety; termination } =
+let print_output { pdf; normalised_pdf; safety; termination } =
   print_endline "Type safety";
   print_endline safety;
   print_endline "\nProbabilistic deadlock freedom";
-  print_endline deadlock_freedom;
+  print_endline pdf;
+  print_endline "\nNormalised probabilistic deadlock freedom";
+  print_endline normalised_pdf;
   print_endline "\nProbabilistic termination";
   print_endline termination
 ;;
