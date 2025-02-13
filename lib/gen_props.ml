@@ -7,13 +7,14 @@ let rec conjunction = function
   | c :: cs -> And (c, conjunction cs)
 ;;
 
-let deadlock_freedom = P (Exact, G (Implies (Label Prism.Deadlock, Label Prism.End)))
+let noreduction = Or (Label Prism.Deadlock, Variable "fail")
+let deadlock_freedom = P (Exact, G (Implies (noreduction, Label Prism.End)))
 
 let normalised_deadlock_freedom =
   Divide (deadlock_freedom, P (Exact, G (Not (Variable "fail"))))
 ;;
 
-let termination = P (Exact, F (Label Prism.Deadlock))
+let termination = P (Exact, F noreduction)
 
 let safety context =
   let communications = Action.Communication.in_context context in

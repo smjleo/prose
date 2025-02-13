@@ -1,0 +1,25 @@
+(* Running example from the paper *)
+
+s : b & {
+      connect . c (+) {
+                 0.1 : login . a & authorise . end,
+                 0.3 : cancel . e (+) terminate . end
+               },
+      networkerror . mu t . b & retry . t
+    }
+
+c : s & {
+      login . a (+) pass . end,
+      cancel . a (+) quit . end
+    }
+
+a : c & {
+      pass . a (+) authorise . end,
+      quit . end
+    }
+
+b : s (+) {
+      0.6 : connect . end,
+      0.4 : networkerror . mu t . s (+) retry . t
+    }
+
