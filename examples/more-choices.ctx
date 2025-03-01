@@ -1,0 +1,6 @@
+p : q (+) l1 . end
+
+q : mu t . p & {
+             l1 . end,
+             l2 . t
+           }

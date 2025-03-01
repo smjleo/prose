@@ -904,6 +904,69 @@ For each context file in this directory, run [prose output] to check the model a
   
   
   
+   ======= TEST ../examples/more-choices.ctx =======
+  
+  p : q (+) l1 . end
+  
+  q : mu t . p & {
+               l1 . end,
+               l2 . t
+             }
+   ======= PRISM output ========
+  
+  global fail : bool init false;
+  
+  module closure
+    closure : bool init false;
+  
+  endmodule
+  
+  module p
+    p : [0..3] init 0;
+    p_q_label : [0..2] init 0;
+  
+    [] p=3 -> 1:(fail'=true);
+    [p_q] (p=0) & (fail=false) -> 0:(p'=3) + 1:(p'=1)&(p_q_label'=2);
+    [p_q_l1] p=1 -> 1:(p'=2)&(p_q_label'=0);
+  endmodule
+  
+  module q
+    q : [0..3] init 0;
+  
+    [] q=3 -> 1:(fail'=true);
+    [p_q] (q=0) & (fail=false) -> 1:(q'=1);
+    [p_q_l2] (q=1) & (p_q_label=1) -> 1:(q'=0);
+    [p_q_l1] (q=1) & (p_q_label=2) -> 1:(q'=2);
+  endmodule
+  
+  label "end" = (p=2) & (q=2);
+  label "cando_p_q_l1" = p=0;
+  label "cando_p_q_l1_branch" = q=0;
+  label "cando_p_q_l2" = false;
+  label "cando_p_q_l2_branch" = q=0;
+  label "cando_p_q_branch" = q=0;
+  P>=1 [ (G ((("cando_p_q_l1" & "cando_p_q_branch") => "cando_p_q_l1_branch") & (("cando_p_q_l2" & "cando_p_q_branch") => "cando_p_q_l2_branch"))) ]
+  Pmin=? [ (G (("deadlock" | fail) => "end")) ]
+  (Pmin=? [ (G (("deadlock" | fail) => "end")) ] / Pmin=? [ (G (!fail)) ])
+  Pmin=? [ (F ("deadlock" | fail)) ]
+  
+   ======= Property checking =======
+  
+  Type safety
+  Result: true
+  
+  Probabilistic deadlock freedom
+  Result: 1.0 (exact floating point)
+  
+  Normalised probabilistic deadlock freedom
+  Result: 1.0
+  
+  Probabilistic termination
+  Result: 1.0 (exact floating point)
+  
+  
+  
+  
    ======= TEST ../examples/multiparty-workers.ctx =======
   
   starter : workerA1 (+) datum(Int) .
