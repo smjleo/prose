@@ -2134,20 +2134,36 @@ For each context file in this directory, run [prose output] to check the model a
   (* What happens if we send to a recipient who does not ever expect to receive? *)
   
   alice : bob (+) {
-  	  0.4 : l1 . end,
-  	  0.6 : l2 . end
+  	        0.4 : l1 . end,
+  	        0.6 : l2 . end
           }
   
   bob : charlie & {
-  	  l1 . end,
-  	  l2 . end
+  	      l1 . end,
+  	      l2 . end
         }
   
   charlie : bob (+) {
-  	    0.5 : l1 . end,
-  	    0.5 : l2 . end
+  	          0.5 : l1 . end,
+  	          0.5 : l2 . end
             }
   
+  (* What about the other way? *)
+  
+  a : b & {
+        l1 . end,
+        l2 . end
+      }
+  
+  b : c (+) {
+        0.7 : l1 . end,
+        0.3 : l2 . end
+      }
+  
+  c : b & {
+        l1 . end,
+        l2 . end
+      }
    ======= PRISM output ========
   
   global fail : bool init false;
@@ -2155,6 +2171,8 @@ For each context file in this directory, run [prose output] to check the model a
   module closure
     closure : bool init false;
   
+    [a_b] false -> 1:(closure'=false);
+    [b_a] false -> 1:(closure'=false);
     [alice_bob] false -> 1:(closure'=false);
     [bob_alice] false -> 1:(closure'=false);
   endmodule
@@ -2188,18 +2206,57 @@ For each context file in this directory, run [prose output] to check the model a
     [charlie_bob_l1] charlie=2 -> 1:(charlie'=3)&(charlie_bob_label'=0);
   endmodule
   
-  label "end" = (alice=3) & (bob=2) & (charlie=3);
+  module a
+    a : [0..3] init 0;
+  
+    [] a=3 -> 1:(fail'=true);
+    [b_a] (a=0) & (fail=false) -> 1:(a'=1);
+    [b_a_l2] (a=1) & (b_a_label=1) -> 1:(a'=2);
+    [b_a_l1] (a=1) & (b_a_label=2) -> 1:(a'=2);
+  endmodule
+  
+  module b
+    b : [0..4] init 0;
+    b_a_label : [0..2] init 0;
+    b_c_label : [0..2] init 0;
+  
+    [] b=4 -> 1:(fail'=true);
+    [b_c] (b=0) & (fail=false) -> 0:(b'=4) + 0.3:(b'=1)&(b_c_label'=1) + 0.7:(b'=2)&(b_c_label'=2);
+    [b_c_l2] b=1 -> 1:(b'=3)&(b_c_label'=0);
+    [b_c_l1] b=2 -> 1:(b'=3)&(b_c_label'=0);
+  endmodule
+  
+  module c
+    c : [0..3] init 0;
+  
+    [] c=3 -> 1:(fail'=true);
+    [b_c] (c=0) & (fail=false) -> 1:(c'=1);
+    [b_c_l2] (c=1) & (b_c_label=1) -> 1:(c'=2);
+    [b_c_l1] (c=1) & (b_c_label=2) -> 1:(c'=2);
+  endmodule
+  
+  label "end" = (alice=3) & (bob=2) & (charlie=3) & (a=2) & (b=3) & (c=2);
   label "cando_alice_bob_l1" = alice=0;
   label "cando_alice_bob_l1_branch" = false;
   label "cando_alice_bob_l2" = alice=0;
   label "cando_alice_bob_l2_branch" = false;
+  label "cando_b_a_l1" = false;
+  label "cando_b_a_l1_branch" = a=0;
+  label "cando_b_a_l2" = false;
+  label "cando_b_a_l2_branch" = a=0;
+  label "cando_b_c_l1" = b=0;
+  label "cando_b_c_l1_branch" = c=0;
+  label "cando_b_c_l2" = b=0;
+  label "cando_b_c_l2_branch" = c=0;
   label "cando_charlie_bob_l1" = charlie=0;
   label "cando_charlie_bob_l1_branch" = bob=0;
   label "cando_charlie_bob_l2" = charlie=0;
   label "cando_charlie_bob_l2_branch" = bob=0;
   label "cando_alice_bob_branch" = false;
+  label "cando_b_a_branch" = a=0;
+  label "cando_b_c_branch" = c=0;
   label "cando_charlie_bob_branch" = bob=0;
-  P>=1 [ (G ((("cando_alice_bob_l1" & "cando_alice_bob_branch") => "cando_alice_bob_l1_branch") & ((("cando_alice_bob_l2" & "cando_alice_bob_branch") => "cando_alice_bob_l2_branch") & ((("cando_charlie_bob_l1" & "cando_charlie_bob_branch") => "cando_charlie_bob_l1_branch") & (("cando_charlie_bob_l2" & "cando_charlie_bob_branch") => "cando_charlie_bob_l2_branch"))))) ]
+  P>=1 [ (G ((("cando_alice_bob_l1" & "cando_alice_bob_branch") => "cando_alice_bob_l1_branch") & ((("cando_alice_bob_l2" & "cando_alice_bob_branch") => "cando_alice_bob_l2_branch") & ((("cando_b_a_l1" & "cando_b_a_branch") => "cando_b_a_l1_branch") & ((("cando_b_a_l2" & "cando_b_a_branch") => "cando_b_a_l2_branch") & ((("cando_b_c_l1" & "cando_b_c_branch") => "cando_b_c_l1_branch") & ((("cando_b_c_l2" & "cando_b_c_branch") => "cando_b_c_l2_branch") & ((("cando_charlie_bob_l1" & "cando_charlie_bob_branch") => "cando_charlie_bob_l1_branch") & (("cando_charlie_bob_l2" & "cando_charlie_bob_branch") => "cando_charlie_bob_l2_branch"))))))))) ]
   Pmin=? [ (G (("deadlock" | fail) => "end")) ]
   (Pmin=? [ (G (("deadlock" | fail) => "end")) ] / Pmin=? [ (G (!fail)) ])
   Pmin=? [ (F ("deadlock" | fail)) ]
