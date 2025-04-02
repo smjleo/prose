@@ -71,3 +71,24 @@ let next_state ~direction ~state ~communication ~communications ~choices ~id_map
   | `Internal -> state + 1 + List.length choices + delta
   | `External -> state + 2 + delta
 ;;
+
+let communicates_exn ~context ~from_participant ~to_participant =
+  let ty =
+    List.find_map_exn context ~f:(fun { Ast.ctx_part; ctx_type } ->
+      match String.equal from_participant ctx_part with
+      | true -> Some ctx_type
+      | false -> None)
+  in
+  let rec communicates' = function
+    | Ast.End -> false
+    | Mu (_var, ty) -> communicates' ty
+    | Variable _var -> false
+    | Internal { int_part; int_choices } ->
+      String.equal int_part to_participant
+      || List.exists int_choices ~f:(fun (_p, { ch_cont; _ }) -> communicates' ch_cont)
+    | External { ext_part; ext_choices } ->
+      String.equal ext_part to_participant
+      || List.exists ext_choices ~f:(fun { ch_cont; _ } -> communicates' ch_cont)
+  in
+  communicates' ty
+;;

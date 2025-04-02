@@ -41,14 +41,27 @@ let closure context =
     ; updates = [ 1.0, [ dummy_update ] ]
     }
   in
-  let commands =
-    List.cartesian_product
-      (Set.to_list (closed_roles context))
-      (Set.to_list (open_roles context))
-    |> List.map ~f:(fun (c, o) -> [ dummy_command c o; dummy_command o c ])
+  let closed_roles = Set.to_list (closed_roles context) in
+  let open_roles = Set.to_list (open_roles context) in
+  let disallow participant_pairs =
+    List.map participant_pairs ~f:(fun (p1, p2) ->
+      [ dummy_command p1 p2; dummy_command p2 p1 ])
     |> List.concat
   in
-  { locals = [ Bool closure_var ]; participant = "closure"; commands }
+  let closed_open = List.cartesian_product closed_roles open_roles |> disallow in
+  (* Where both participants are closed, but only one tries to synchronise *)
+  let sync_alone =
+    List.cartesian_product closed_roles closed_roles
+    |> List.filter ~f:(fun (c1, c2) ->
+      Type_utils.communicates_exn ~context ~from_participant:c1 ~to_participant:c2
+      && not
+           (Type_utils.communicates_exn ~context ~from_participant:c2 ~to_participant:c1))
+    |> disallow
+  in
+  { locals = [ Bool closure_var ]
+  ; participant = "closure"
+  ; commands = List.concat [ closed_open; sync_alone ]
+  }
 ;;
 
 (** The (| - |) function in the paper, which takes a session type and

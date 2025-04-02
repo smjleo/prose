@@ -1,0 +1,16 @@
+(* What happens if we send to a recipient who does not ever expect to receive? *)
+
+alice : bob (+) {
+	  0.4 : l1 . end,
+	  0.6 : l2 . end
+        }
+
+bob : charlie & {
+	  l1 . end,
+	  l2 . end
+      }
+
+charlie : bob (+) {
+	    0.5 : l1 . end,
+	    0.5 : l2 . end
+          }

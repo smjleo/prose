@@ -46,6 +46,8 @@ For each context file in this directory, run [prose output] to check the model a
     [e_c] false -> 1:(closure'=false);
     [s_e] false -> 1:(closure'=false);
     [e_s] false -> 1:(closure'=false);
+    [s_a] false -> 1:(closure'=false);
+    [a_s] false -> 1:(closure'=false);
   endmodule
   
   module s
@@ -2120,6 +2122,98 @@ For each context file in this directory, run [prose output] to check the model a
   
   Normalised probabilistic deadlock freedom
   Result: 0.37500000000000006
+  
+  Probabilistic termination
+  Result: 1.0 (exact floating point)
+  
+  
+  
+  
+   ======= TEST ../examples/sync_alone.ctx =======
+  
+  (* What happens if we send to a recipient who does not ever expect to receive? *)
+  
+  alice : bob (+) {
+  	  0.4 : l1 . end,
+  	  0.6 : l2 . end
+          }
+  
+  bob : charlie & {
+  	  l1 . end,
+  	  l2 . end
+        }
+  
+  charlie : bob (+) {
+  	    0.5 : l1 . end,
+  	    0.5 : l2 . end
+            }
+  
+   ======= PRISM output ========
+  
+  global fail : bool init false;
+  
+  module closure
+    closure : bool init false;
+  
+    [alice_bob] false -> 1:(closure'=false);
+    [bob_alice] false -> 1:(closure'=false);
+  endmodule
+  
+  module alice
+    alice : [0..4] init 0;
+    alice_bob_label : [0..2] init 0;
+  
+    [] alice=4 -> 1:(fail'=true);
+    [alice_bob] (alice=0) & (fail=false) -> 0:(alice'=4) + 0.6:(alice'=1)&(alice_bob_label'=1) + 0.4:(alice'=2)&(alice_bob_label'=2);
+    [alice_bob_l2] alice=1 -> 1:(alice'=3)&(alice_bob_label'=0);
+    [alice_bob_l1] alice=2 -> 1:(alice'=3)&(alice_bob_label'=0);
+  endmodule
+  
+  module bob
+    bob : [0..3] init 0;
+  
+    [] bob=3 -> 1:(fail'=true);
+    [charlie_bob] (bob=0) & (fail=false) -> 1:(bob'=1);
+    [charlie_bob_l2] (bob=1) & (charlie_bob_label=1) -> 1:(bob'=2);
+    [charlie_bob_l1] (bob=1) & (charlie_bob_label=2) -> 1:(bob'=2);
+  endmodule
+  
+  module charlie
+    charlie : [0..4] init 0;
+    charlie_bob_label : [0..2] init 0;
+  
+    [] charlie=4 -> 1:(fail'=true);
+    [charlie_bob] (charlie=0) & (fail=false) -> 0:(charlie'=4) + 0.5:(charlie'=1)&(charlie_bob_label'=1) + 0.5:(charlie'=2)&(charlie_bob_label'=2);
+    [charlie_bob_l2] charlie=1 -> 1:(charlie'=3)&(charlie_bob_label'=0);
+    [charlie_bob_l1] charlie=2 -> 1:(charlie'=3)&(charlie_bob_label'=0);
+  endmodule
+  
+  label "end" = (alice=3) & (bob=2) & (charlie=3);
+  label "cando_alice_bob_l1" = alice=0;
+  label "cando_alice_bob_l1_branch" = false;
+  label "cando_alice_bob_l2" = alice=0;
+  label "cando_alice_bob_l2_branch" = false;
+  label "cando_charlie_bob_l1" = charlie=0;
+  label "cando_charlie_bob_l1_branch" = bob=0;
+  label "cando_charlie_bob_l2" = charlie=0;
+  label "cando_charlie_bob_l2_branch" = bob=0;
+  label "cando_alice_bob_branch" = false;
+  label "cando_charlie_bob_branch" = bob=0;
+  P>=1 [ (G ((("cando_alice_bob_l1" & "cando_alice_bob_branch") => "cando_alice_bob_l1_branch") & ((("cando_alice_bob_l2" & "cando_alice_bob_branch") => "cando_alice_bob_l2_branch") & ((("cando_charlie_bob_l1" & "cando_charlie_bob_branch") => "cando_charlie_bob_l1_branch") & (("cando_charlie_bob_l2" & "cando_charlie_bob_branch") => "cando_charlie_bob_l2_branch"))))) ]
+  Pmin=? [ (G (("deadlock" | fail) => "end")) ]
+  (Pmin=? [ (G (("deadlock" | fail) => "end")) ] / Pmin=? [ (G (!fail)) ])
+  Pmin=? [ (F ("deadlock" | fail)) ]
+  
+   ======= Property checking =======
+  
+  Type safety
+  Result: true
+  
+  Probabilistic deadlock freedom
+  Result: 0.0 (exact floating point)
+  
+  Normalised probabilistic deadlock freedom
+  Result: 0.0
   
   Probabilistic termination
   Result: 1.0 (exact floating point)

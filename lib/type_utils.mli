@@ -13,3 +13,12 @@ val next_state
   -> choices:Ast.choice list
   -> id_map:Action.Id_map.t
   -> int
+
+(** Does from_participant try to communicate with to_participant?
+    Note p : q & ... and p : q (+) both count as p trying to communicate
+    with q (i.e. the direction does not matter) *)
+val communicates_exn
+  :  context:Ast.context
+  -> from_participant:string
+  -> to_participant:string
+  -> bool
