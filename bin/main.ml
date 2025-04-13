@@ -17,15 +17,26 @@ let parse lexbuf =
     error_s [%message "Syntax error" (line : int) (column : int)] |> ok_exn
 ;;
 
-let output ctx_file ?model_output_file ?prop_output_file ~print_ast () =
+let output
+      ctx_file
+      ?model_output_file
+      ?prop_output_file
+      ~print_ast
+      ~print_translation_time
+      ()
+  =
   let dbg_print_s sexp = if print_ast then print_s sexp in
+  let t0 = Time_float.now () in
   let inx = In_channel.create ctx_file in
   let lexbuf = Lexing.from_channel inx in
   lexbuf.lex_curr_p <- { lexbuf.lex_curr_p with pos_fname = ctx_file };
   let context = parse lexbuf in
   dbg_print_s [%message (context : Ast.context)];
   let translated, properties = Translate.translate context in
+  let t1 = Time_float.now () in
+  let translation_time = Time_float.diff t1 t0 in
   dbg_print_s [%message (translated : Prism.model)];
+  if print_translation_time then print_s [%message (translation_time : Time_float.Span.t)];
   Printer.print_model ?output_file:model_output_file translated;
   Printer.print_properties ?output_file:prop_output_file properties;
   In_channel.close inx
@@ -71,10 +82,16 @@ let print_output { pdf; normalised_pdf; safety; termination } =
   print_endline termination
 ;;
 
-let verify ctx_file ~print_ast () =
+let verify ctx_file ~print_ast ~print_raw_prism ~print_translation_time () =
   let model_output_file = Filename_unix.temp_file "model" ".prism" in
   let prop_output_file = Filename_unix.temp_file "properties" ".props" in
-  output ctx_file ~model_output_file ~prop_output_file ~print_ast ();
+  output
+    ctx_file
+    ~model_output_file
+    ~prop_output_file
+    ~print_ast
+    ~print_translation_time
+    ();
   let prism =
     Core_unix.create_process ~prog:"prism" ~args:[ model_output_file; prop_output_file ]
   in
@@ -84,6 +101,7 @@ let verify ctx_file ~print_ast () =
   let stderr_output = In_channel.input_all stderr in
   if String.length stderr_output <> 0
   then error_s [%message "PRISM returned error when verifying" stderr_output] |> ok_exn;
+  if print_raw_prism then print_s [%message "Raw PRISM output" (lines : string list)];
   let output = parse_prism_output lines in
   print_output output;
   Core_unix.remove model_output_file;
@@ -103,6 +121,19 @@ let print_ast_flag =
     ~doc:" Print internal AST representation for debugging purposes"
 ;;
 
+let print_raw_prism_flag =
+  let open Command.Param in
+  flag "-raw-prism" no_arg ~doc:"Print raw PRISM CLI output for debugging purposes"
+;;
+
+let print_translation_time_flag =
+  let open Command.Param in
+  flag
+    "-translation-time"
+    no_arg
+    ~doc:"Print time taken for translation of context into PRISM"
+;;
+
 let output_command =
   Command.basic
     ~summary:
@@ -119,8 +150,14 @@ let output_command =
          "-p"
          (optional string)
          ~doc:"string Write PRISM property output to filename (default: print to stdout)"
-     and print_ast = print_ast_flag in
-     output ctx_file ?model_output_file ?prop_output_file ~print_ast)
+     and print_ast = print_ast_flag
+     and print_translation_time = print_translation_time_flag in
+     output
+       ctx_file
+       ?model_output_file
+       ?prop_output_file
+       ~print_ast
+       ~print_translation_time)
 ;;
 
 let verify_command =
@@ -128,8 +165,10 @@ let verify_command =
     ~summary:
       "Verify probabilistic properties of the given session type context using PRISM."
     (let%map_open.Command ctx_file = ctx_file_flag
-     and print_ast = print_ast_flag in
-     verify ctx_file ~print_ast)
+     and print_ast = print_ast_flag
+     and print_raw_prism = print_raw_prism_flag
+     and print_translation_time = print_translation_time_flag in
+     verify ctx_file ~print_ast ~print_raw_prism ~print_translation_time)
 ;;
 
 let command =

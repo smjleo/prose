@@ -2278,6 +2278,115 @@ For each context file in this directory, run [prose output] to check the model a
   
   
   
+   ======= TEST ../examples/unsafe-2.ctx =======
+  
+  (* Two pairs being unsafe in parallel *)
+  
+  a : b (+) {
+        0.4 : l1 . end,
+        0.6 : l2 . end
+      }
+  
+  b : a & {
+        l2 . end,
+        l3 . end
+      }
+  
+  c : d (+) {
+        0.3 : l1 . end,
+        0.7 : l2 . end
+      }
+  
+  d : c & {
+        l2 . end,
+        l3 . end
+      }
+   ======= PRISM output ========
+  
+  global fail : bool init false;
+  
+  module closure
+    closure : bool init false;
+  
+  endmodule
+  
+  module a
+    a : [0..4] init 0;
+    a_b_label : [0..3] init 0;
+  
+    [] a=4 -> 1:(fail'=true);
+    [a_b] (a=0) & (fail=false) -> 0:(a'=4) + 0.6:(a'=1)&(a_b_label'=2) + 0.4:(a'=2)&(a_b_label'=3);
+    [a_b_l2] a=1 -> 1:(a'=3)&(a_b_label'=0);
+    [a_b_l1] a=2 -> 1:(a'=3)&(a_b_label'=0);
+  endmodule
+  
+  module b
+    b : [0..3] init 0;
+  
+    [] b=3 -> 1:(fail'=true);
+    [a_b] (b=0) & (fail=false) -> 1:(b'=1);
+    [a_b_l3] (b=1) & (a_b_label=1) -> 1:(b'=2);
+    [a_b_l2] (b=1) & (a_b_label=2) -> 1:(b'=2);
+    [a_b_l1] false -> 1:(b'=1);
+  endmodule
+  
+  module c
+    c : [0..4] init 0;
+    c_d_label : [0..3] init 0;
+  
+    [] c=4 -> 1:(fail'=true);
+    [c_d] (c=0) & (fail=false) -> 0:(c'=4) + 0.7:(c'=1)&(c_d_label'=2) + 0.3:(c'=2)&(c_d_label'=3);
+    [c_d_l2] c=1 -> 1:(c'=3)&(c_d_label'=0);
+    [c_d_l1] c=2 -> 1:(c'=3)&(c_d_label'=0);
+  endmodule
+  
+  module d
+    d : [0..3] init 0;
+  
+    [] d=3 -> 1:(fail'=true);
+    [c_d] (d=0) & (fail=false) -> 1:(d'=1);
+    [c_d_l3] (d=1) & (c_d_label=1) -> 1:(d'=2);
+    [c_d_l2] (d=1) & (c_d_label=2) -> 1:(d'=2);
+    [c_d_l1] false -> 1:(d'=1);
+  endmodule
+  
+  label "end" = (a=3) & (b=2) & (c=3) & (d=2);
+  label "cando_a_b_l1" = a=0;
+  label "cando_a_b_l1_branch" = false;
+  label "cando_a_b_l2" = a=0;
+  label "cando_a_b_l2_branch" = b=0;
+  label "cando_a_b_l3" = false;
+  label "cando_a_b_l3_branch" = b=0;
+  label "cando_c_d_l1" = c=0;
+  label "cando_c_d_l1_branch" = false;
+  label "cando_c_d_l2" = c=0;
+  label "cando_c_d_l2_branch" = d=0;
+  label "cando_c_d_l3" = false;
+  label "cando_c_d_l3_branch" = d=0;
+  label "cando_a_b_branch" = b=0;
+  label "cando_c_d_branch" = d=0;
+  P>=1 [ (G ((("cando_a_b_l1" & "cando_a_b_branch") => "cando_a_b_l1_branch") & ((("cando_a_b_l2" & "cando_a_b_branch") => "cando_a_b_l2_branch") & ((("cando_a_b_l3" & "cando_a_b_branch") => "cando_a_b_l3_branch") & ((("cando_c_d_l1" & "cando_c_d_branch") => "cando_c_d_l1_branch") & ((("cando_c_d_l2" & "cando_c_d_branch") => "cando_c_d_l2_branch") & (("cando_c_d_l3" & "cando_c_d_branch") => "cando_c_d_l3_branch"))))))) ]
+  Pmin=? [ (G (("deadlock" | fail) => "end")) ]
+  (Pmin=? [ (G (("deadlock" | fail) => "end")) ] / Pmin=? [ (G (!fail)) ])
+  Pmin=? [ (F ("deadlock" | fail)) ]
+  
+   ======= Property checking =======
+  
+  Type safety
+  Result: false
+  
+  Probabilistic deadlock freedom
+  Result: 0.41999999999999993 (exact floating point)
+  
+  Normalised probabilistic deadlock freedom
+  Result: 0.41999999999999993
+  
+  Probabilistic termination
+  Result: 1.0 (exact floating point)
+  
+  
+  
+  
    ======= TEST ../examples/unsafe.ctx =======
   
   alice : bob (+) {

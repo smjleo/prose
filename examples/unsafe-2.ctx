@@ -1,0 +1,21 @@
+(* Two pairs being unsafe in parallel *)
+
+a : b (+) {
+      0.4 : l1 . end,
+      0.6 : l2 . end
+    }
+
+b : a & {
+      l2 . end,
+      l3 . end
+    }
+
+c : d (+) {
+      0.3 : l1 . end,
+      0.7 : l2 . end
+    }
+
+d : c & {
+      l2 . end,
+      l3 . end
+    }
