@@ -1489,6 +1489,41 @@ For each context file in this directory, run [prose output] to check the model a
   
   
   
+   ======= TEST ../examples/prob-over-one.ctx =======
+  
+  a : b (+) { 0.4 : l1 . end, 0.7 : l2 . end }
+  
+  b : a & { l1 . end, l2 . end } 
+   ======= PRISM output ========
+  
+  Uncaught exception:
+    
+    ("probabilities sum to more than one" (sum_probabilities 1.1))
+  
+  Raised at Base__Error.raise in file "src/error.ml" (inlined), line 9, characters 21-37
+  Called from Base__Or_error.ok_exn in file "src/or_error.ml", line 124, characters 17-32
+  Called from Base__List0.iter in file "src/list0.ml", line 66, characters 4-7
+  Called from Dune__exe__Main.output in file "bin/main.ml", line 36, characters 2-31
+  Called from Command.For_unix.run.(fun) in file "command/src/command.ml", line 3388, characters 8-270
+  Called from Base__Exn.handle_uncaught_aux in file "src/exn.ml", line 126, characters 6-10
+  
+   ======= Property checking =======
+  
+  Uncaught exception:
+    
+    ("probabilities sum to more than one" (sum_probabilities 1.1))
+  
+  Raised at Base__Error.raise in file "src/error.ml" (inlined), line 9, characters 21-37
+  Called from Base__Or_error.ok_exn in file "src/or_error.ml", line 124, characters 17-32
+  Called from Base__List0.iter in file "src/list0.ml", line 66, characters 4-7
+  Called from Dune__exe__Main.output in file "bin/main.ml", line 36, characters 2-31
+  Called from Dune__exe__Main.verify in file "bin/main.ml", line 90, characters 2-116
+  Called from Command.For_unix.run.(fun) in file "command/src/command.ml", line 3388, characters 8-270
+  Called from Base__Exn.handle_uncaught_aux in file "src/exn.ml", line 126, characters 6-10
+  
+  
+  
+  
    ======= TEST ../examples/rec-map-reduce.ctx =======
   
   mapper : mu t .
@@ -2274,6 +2309,43 @@ For each context file in this directory, run [prose output] to check the model a
   
   Probabilistic termination
   Result: 1.0 (exact floating point)
+  
+  
+  
+  
+   ======= TEST ../examples/unbound-variable.ctx =======
+  
+  a : mu t . b (+) { 0.5 : l1 . t1, 0.5 : l2 . end }
+  
+  b : mu t . a & { l1 . end, l2 . end }
+   ======= PRISM output ========
+  
+  Uncaught exception:
+    
+    ("unbound variable" t1)
+  
+  Raised at Base__Error.raise in file "src/error.ml" (inlined), line 9, characters 21-37
+  Called from Base__Or_error.ok_exn in file "src/or_error.ml", line 124, characters 17-32
+  Called from Base__List0.iter in file "src/list0.ml", line 66, characters 4-7
+  Called from Base__List0.iter in file "src/list0.ml", line 66, characters 4-7
+  Called from Dune__exe__Main.output in file "bin/main.ml", line 36, characters 2-31
+  Called from Command.For_unix.run.(fun) in file "command/src/command.ml", line 3388, characters 8-270
+  Called from Base__Exn.handle_uncaught_aux in file "src/exn.ml", line 126, characters 6-10
+  
+   ======= Property checking =======
+  
+  Uncaught exception:
+    
+    ("unbound variable" t1)
+  
+  Raised at Base__Error.raise in file "src/error.ml" (inlined), line 9, characters 21-37
+  Called from Base__Or_error.ok_exn in file "src/or_error.ml", line 124, characters 17-32
+  Called from Base__List0.iter in file "src/list0.ml", line 66, characters 4-7
+  Called from Base__List0.iter in file "src/list0.ml", line 66, characters 4-7
+  Called from Dune__exe__Main.output in file "bin/main.ml", line 36, characters 2-31
+  Called from Dune__exe__Main.verify in file "bin/main.ml", line 90, characters 2-116
+  Called from Command.For_unix.run.(fun) in file "command/src/command.ml", line 3388, characters 8-270
+  Called from Base__Exn.handle_uncaught_aux in file "src/exn.ml", line 126, characters 6-10
   
   
   

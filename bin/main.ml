@@ -7,6 +7,7 @@ module Translate = Prose.Translate
 module Prism = Prose.Prism
 module Printer = Prose.Printer
 module Psl = Prose.Psl
+module Well_formed = Prose.Well_formed
 
 let parse lexbuf =
   try Parser.context Lexer.read lexbuf with
@@ -32,6 +33,7 @@ let output
   lexbuf.lex_curr_p <- { lexbuf.lex_curr_p with pos_fname = ctx_file };
   let context = parse lexbuf in
   dbg_print_s [%message (context : Ast.context)];
+  Well_formed.check_exn context;
   let translated, properties = Translate.translate context in
   let t1 = Time_float.now () in
   let translation_time = Time_float.diff t1 t0 in
