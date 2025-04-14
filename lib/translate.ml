@@ -111,12 +111,7 @@ let rec translate_type ~id_map ~participant ~state ~state_size ~var_map ty =
           ( 1.0 -. List.sum (module Float) int_choices ~f:(fun (p, _c) -> p)
           , [ IntUpdate (state_var, IntConst (state_size + 1)) ] )
           :: List.mapi int_choices ~f:(fun i (prob, { ch_label; _ }) ->
-            let communication =
-              { Action.Communication.from_participant = participant
-              ; to_participant = int_part
-              ; label = Some ch_label
-              }
-            in
+            let communication = new_communication (Some ch_label) in
             let id = Action.Id_map.id id_map communication |> Option.value_exn in
             ( prob
             , [ IntUpdate (state_var, IntConst (state + i + 1))
@@ -135,6 +130,7 @@ let rec translate_type ~id_map ~participant ~state ~state_size ~var_map ty =
     let choices =
       List.mapi bald_choices ~f:(fun i { ch_label; ch_cont; _ } ->
         let communication = new_communication (Some ch_label) in
+        let id = Action.Id_map.id id_map communication |> Option.value_exn in
         let new_state =
           match ch_cont with
           | End -> state_size
@@ -149,7 +145,10 @@ let rec translate_type ~id_map ~participant ~state ~state_size ~var_map ty =
               ~id_map
         in
         { action = Action.communication communication
-        ; guard = Eq (Var state_var, IntConst (state + i + 1))
+        ; guard =
+            And
+              ( Eq (Var state_var, IntConst (state + i + 1))
+              , Eq (Var label_var, IntConst id) )
         ; updates =
             [ ( 1.0
               , [ IntUpdate (state_var, IntConst new_state)
