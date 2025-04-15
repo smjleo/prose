@@ -2,20 +2,7 @@ open! Core
 
 (** Output the PRISM model and property translations of the given context.
     The results are printed to stdout by default, but can be output to a file
-    if [model_output_file] or [prop_output_file] are set.
-
-    This function returns a list of english annotations of each property,
-    in the order they appear in [prop_output_file] (or stdout). *)
-val output_and_return_annotations
-  :  ctx_file:string
-  -> print_ast:bool
-  -> print_translation_time:bool
-  -> ?model_output_file:string
-  -> ?prop_output_file:string
-  -> unit
-  -> string list
-
-(** Same as [output_and_return_annotations], but annotations are not returned.*)
+    if [model_output_file] or [prop_output_file] are set. *)
 val output
   :  ctx_file:string
   -> print_ast:bool

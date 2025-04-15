@@ -1,6 +1,6 @@
 open! Core
 
-module Annotation = struct
+module Annotation : sig
   type t =
     | Type_safety
     | Probabilistic_deadlock_freedom
@@ -8,21 +8,8 @@ module Annotation = struct
     | Probabilisic_termination
   [@@deriving equal, sexp_of]
 
-  let all =
-    [ Type_safety
-    ; Probabilistic_deadlock_freedom
-    ; Normalised_probabilistic_deadlock_freedom
-    ; Probabilisic_termination
-    ]
-  ;;
-
-  let to_string = function
-    | Type_safety -> "Type safety"
-    | Probabilistic_deadlock_freedom -> "Probabilistic deadlock freedom"
-    | Normalised_probabilistic_deadlock_freedom ->
-      "Normalised probabilistic deadlock freedom"
-    | Probabilisic_termination -> "Probabilistic termination"
-  ;;
+  val all : t list
+  val to_string : t -> string
 end
 
 type annotated_property = Annotation.t * property

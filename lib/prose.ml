@@ -26,6 +26,7 @@ let output_and_return_annotations
       ~print_translation_time
       ?model_output_file
       ?prop_output_file
+      ?only_annotation
       ()
   =
   let dbg_print_s sexp = if print_ast then print_s sexp in
@@ -37,6 +38,12 @@ let output_and_return_annotations
   if print_translation_time then print_s [%message (translation_time : Time_float.Span.t)];
   dbg_print_s [%message (translated : Prism.model)];
   Printer.print_model ?output_file:model_output_file translated;
+  let properties =
+    match only_annotation with
+    | None -> properties
+    | Some only_annotation ->
+      List.filter properties ~f:(fun (a, _p) -> Psl.Annotation.equal a only_annotation)
+  in
   Printer.print_properties ?output_file:prop_output_file properties;
   let annotations = List.map properties ~f:(fun (a, _p) -> a) in
   annotations
@@ -86,11 +93,11 @@ let print_output annotations lines =
   in
   List.iteri annotated_output ~f:(fun i (a, o) ->
     if i > 0 then print_endline "";
-    print_endline a;
+    print_endline (Psl.Annotation.to_string a);
     print_endline o)
 ;;
 
-let with_prism_files ~ctx_file ~print_ast ~print_translation_time ~f =
+let with_prism_files ~ctx_file ~print_ast ~print_translation_time ~f ?only_annotation () =
   let model_output_file = Filename_unix.temp_file "model" ".prism" in
   let prop_output_file = Filename_unix.temp_file "properties" ".props" in
   let annotations =
@@ -100,6 +107,7 @@ let with_prism_files ~ctx_file ~print_ast ~print_translation_time ~f =
       ~prop_output_file
       ~print_ast
       ~print_translation_time
+      ?only_annotation
       ()
   in
   let res = f ~model_output_file ~prop_output_file ~annotations in
@@ -131,6 +139,7 @@ let verify ~ctx_file ~print_ast ~print_raw_prism ~print_translation_time () =
         error_s [%message "PRISM returned error when verifying" stderr_output] |> ok_exn;
       if print_raw_prism then print_s [%message "Raw PRISM output" (lines : string list)];
       print_output annotations lines)
+    ()
 ;;
 
 let benchmark_translation ~iterations ~ctx_file ~batch_size =
@@ -142,15 +151,20 @@ let benchmark_translation ~iterations ~ctx_file ~batch_size =
 ;;
 
 let benchmark_prism ~iterations ~ctx_file =
-  with_prism_files
-    ~ctx_file
-    ~print_ast:false
-    ~print_translation_time:false
-    ~f:(fun ~model_output_file ~prop_output_file ~annotations:_ ->
-      Microbenchmark.benchmark_function
-        ~iterations
-        ~f:(fun () -> run_prism ~model_output_file ~prop_output_file |> ignore)
-        ())
+  let annotations = Psl.Annotation.all in
+  List.map annotations ~f:(fun annotation ->
+    ( annotation
+    , with_prism_files
+        ~ctx_file
+        ~print_ast:false
+        ~print_translation_time:false
+        ~f:(fun ~model_output_file ~prop_output_file ~annotations:_ ->
+          Microbenchmark.benchmark_function
+            ~iterations
+            ~f:(fun () -> run_prism ~model_output_file ~prop_output_file |> ignore)
+            ())
+        ~only_annotation:annotation
+        () ))
 ;;
 
 let benchmark ~iterations ~directory ~translation_batch_size () =
@@ -170,7 +184,7 @@ let benchmark ~iterations ~directory ~translation_batch_size () =
         [%message
           ctx_file
             (translation_runtimes : Time_float.Span.t list)
-            (prism_runtimes : Time_float.Span.t list)]
+            (prism_runtimes : (Psl.Annotation.t * Time_float.Span.t list) list)]
     with
     | _ -> print_s [%message "skipping due to exception" ctx_file])
 ;;

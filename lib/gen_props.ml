@@ -29,9 +29,7 @@ let safety context =
 ;;
 
 let generate context =
-  [ "Type safety", safety context
-  ; "Probabilistic deadlock freedom", deadlock_freedom
-  ; "Normalised probabilistic deadlock freedom", normalised_deadlock_freedom
-  ; "Probabilistic termination", termination
-  ]
+  List.zip_exn
+    Annotation.all
+    [ safety context; deadlock_freedom; normalised_deadlock_freedom; termination ]
 ;;

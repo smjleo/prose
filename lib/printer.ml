@@ -153,11 +153,15 @@ let rec print_path_prop ppf = function
 ;;
 
 let print_properties' ppf properties =
+  let print_annotation ppf annotation =
+    fprintf ppf "%s" (Psl.Annotation.to_string annotation)
+  in
   let rec print_property ppf = function
     | P (bound, path) -> fprintf ppf "P%a [ %a ]" print_bound bound print_path_prop path
     | Divide (p1, p2) -> fprintf ppf "(%a / %a)" print_property p1 print_property p2
   in
-  List.iter properties ~f:(fun (a, p) -> fprintf ppf "\n// %s\n%a\n" a print_property p)
+  List.iter properties ~f:(fun (a, p) ->
+    fprintf ppf "\n// %a\n%a\n" print_annotation a print_property p)
 ;;
 
 let print_properties ?output_file properties =
