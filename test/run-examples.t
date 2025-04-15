@@ -1568,33 +1568,11 @@ For each context file in this directory, run [prose output] to check the model a
   b : a & { l1 . end, l2 . end } 
    ======= PRISM output ========
   
-  Uncaught exception:
-    
-    ("probabilities sum to more than one" (sum_probabilities 1.1))
-  
-  Raised at Base__Error.raise in file "src/error.ml" (inlined), line 9, characters 21-37
-  Called from Base__Or_error.ok_exn in file "src/or_error.ml", line 124, characters 17-32
-  Called from Base__List0.iter in file "src/list0.ml", line 66, characters 4-7
-  Called from Prose.parse_and_translate in file "lib/prose.ml", line 18, characters 2-31
-  Called from Prose.output_and_return_annotations in file "lib/prose.ml", line 33, characters 40-69
-  Called from Prose.output in file "lib/prose.ml", line 53, characters 2-140
-  Called from Command.For_unix.run.(fun) in file "command/src/command.ml", line 3388, characters 8-270
-  Called from Base__Exn.handle_uncaught_aux in file "src/exn.ml", line 126, characters 6-10
+  Typing context is not well-formed: probabilities sum to greater than one. Found 1.100000
   
    ======= Property checking =======
   
-  Uncaught exception:
-    
-    ("probabilities sum to more than one" (sum_probabilities 1.1))
-  
-  Raised at Base__Error.raise in file "src/error.ml" (inlined), line 9, characters 21-37
-  Called from Base__Or_error.ok_exn in file "src/or_error.ml", line 124, characters 17-32
-  Called from Base__List0.iter in file "src/list0.ml", line 66, characters 4-7
-  Called from Prose.parse_and_translate in file "lib/prose.ml", line 18, characters 2-31
-  Called from Prose.output_and_return_annotations in file "lib/prose.ml", line 33, characters 40-69
-  Called from Prose.with_prism_files in file "lib/prose.ml", line 97, characters 4-154
-  Called from Command.For_unix.run.(fun) in file "command/src/command.ml", line 3388, characters 8-270
-  Called from Base__Exn.handle_uncaught_aux in file "src/exn.ml", line 126, characters 6-10
+  Typing context is not well-formed: probabilities sum to greater than one. Found 1.100000
   
   
   
@@ -2443,35 +2421,11 @@ For each context file in this directory, run [prose output] to check the model a
   b : mu t . a & { l1 . end, l2 . end }
    ======= PRISM output ========
   
-  Uncaught exception:
-    
-    ("unbound variable" t1)
-  
-  Raised at Base__Error.raise in file "src/error.ml" (inlined), line 9, characters 21-37
-  Called from Base__Or_error.ok_exn in file "src/or_error.ml", line 124, characters 17-32
-  Called from Base__List0.iter in file "src/list0.ml", line 66, characters 4-7
-  Called from Base__List0.iter in file "src/list0.ml", line 66, characters 4-7
-  Called from Prose.parse_and_translate in file "lib/prose.ml", line 18, characters 2-31
-  Called from Prose.output_and_return_annotations in file "lib/prose.ml", line 33, characters 40-69
-  Called from Prose.output in file "lib/prose.ml", line 53, characters 2-140
-  Called from Command.For_unix.run.(fun) in file "command/src/command.ml", line 3388, characters 8-270
-  Called from Base__Exn.handle_uncaught_aux in file "src/exn.ml", line 126, characters 6-10
+  Typing context is not well-formed: unbound variable t1
   
    ======= Property checking =======
   
-  Uncaught exception:
-    
-    ("unbound variable" t1)
-  
-  Raised at Base__Error.raise in file "src/error.ml" (inlined), line 9, characters 21-37
-  Called from Base__Or_error.ok_exn in file "src/or_error.ml", line 124, characters 17-32
-  Called from Base__List0.iter in file "src/list0.ml", line 66, characters 4-7
-  Called from Base__List0.iter in file "src/list0.ml", line 66, characters 4-7
-  Called from Prose.parse_and_translate in file "lib/prose.ml", line 18, characters 2-31
-  Called from Prose.output_and_return_annotations in file "lib/prose.ml", line 33, characters 40-69
-  Called from Prose.with_prism_files in file "lib/prose.ml", line 97, characters 4-154
-  Called from Command.For_unix.run.(fun) in file "command/src/command.ml", line 3388, characters 8-270
-  Called from Base__Exn.handle_uncaught_aux in file "src/exn.ml", line 126, characters 6-10
+  Typing context is not well-formed: unbound variable t1
   
   
   
