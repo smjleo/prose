@@ -140,7 +140,7 @@ let verify ~ctx_file ~print_ast ~print_raw_prism ~print_translation_time () =
 ;;
 
 let benchmark_translation ~iterations ~ctx_file ~batch_size =
-  Microbenchmark.benchmark_function
+  Microbenchmark.measure
     ~iterations
     ~batch_size
     ~f:(fun () -> parse_and_translate ~ctx_file)
@@ -156,7 +156,7 @@ let benchmark_prism ~iterations ~ctx_file =
         ~print_ast:false
         ~print_translation_time:false
         ~f:(fun ~model_output_file ~prop_output_file ~annotations:_ ->
-          Microbenchmark.benchmark_function
+          Microbenchmark.measure
             ~iterations
             ~f:(fun () ->
               let cmd =

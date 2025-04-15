@@ -1,6 +1,6 @@
 open! Core
 
-let benchmark_function ~iterations ?(batch_size = 1) ~f () =
+let measure ~iterations ?(batch_size = 1) ~f () =
   (* Should be optimised automatically by compiler, but just in case *)
   let batch_size_minus_one = batch_size - 1 in
   List.init iterations ~f:(fun _i ->
