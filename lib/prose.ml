@@ -116,23 +116,20 @@ let with_prism_files ~ctx_file ~print_ast ~print_translation_time ~f ?only_annot
   res
 ;;
 
-let run_prism ~model_output_file ~prop_output_file =
-  let prism =
-    Core_unix.create_process ~prog:"prism" ~args:[ model_output_file; prop_output_file ]
-  in
-  let stdout = Core_unix.in_channel_of_descr prism.stdout in
-  let stderr = Core_unix.in_channel_of_descr prism.stderr in
-  let lines = In_channel.input_lines stdout in
-  lines, stderr
-;;
-
 let verify ~ctx_file ~print_ast ~print_raw_prism ~print_translation_time () =
   with_prism_files
     ~ctx_file
     ~print_ast
     ~print_translation_time
     ~f:(fun ~model_output_file ~prop_output_file ~annotations ->
-      let lines, stderr = run_prism ~model_output_file ~prop_output_file in
+      let prism =
+        Core_unix.create_process
+          ~prog:"prism"
+          ~args:[ model_output_file; prop_output_file ]
+      in
+      let stdout = Core_unix.in_channel_of_descr prism.stdout in
+      let stderr = Core_unix.in_channel_of_descr prism.stderr in
+      let lines = In_channel.input_lines stdout in
       let stderr_output = In_channel.input_all stderr in
       if String.length stderr_output <> 0
       then
@@ -161,7 +158,11 @@ let benchmark_prism ~iterations ~ctx_file =
         ~f:(fun ~model_output_file ~prop_output_file ~annotations:_ ->
           Microbenchmark.benchmark_function
             ~iterations
-            ~f:(fun () -> run_prism ~model_output_file ~prop_output_file |> ignore)
+            ~f:(fun () ->
+              let cmd =
+                sprintf "prism %s %s > /dev/null" model_output_file prop_output_file
+              in
+              Sys_unix.command_exn cmd)
             ())
         ~only_annotation:annotation
         () ))
