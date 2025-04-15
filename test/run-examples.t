@@ -139,9 +139,17 @@ For each context file in this directory, run [prose output] to check the model a
   label "cando_c_a_branch" = a=0;
   label "cando_s_c_branch" = c=0;
   label "cando_s_e_branch" = false;
+  
+  // Type safety
   P>=1 [ (G ((("cando_a_a_authorise" & "cando_a_a_branch") => "cando_a_a_authorise_branch") & ((("cando_a_s_authorise" & "cando_a_s_branch") => "cando_a_s_authorise_branch") & ((("cando_b_s_connect" & "cando_b_s_branch") => "cando_b_s_connect_branch") & ((("cando_b_s_networkerror" & "cando_b_s_branch") => "cando_b_s_networkerror_branch") & ((("cando_b_s_retry" & "cando_b_s_branch") => "cando_b_s_retry_branch") & ((("cando_c_a_pass" & "cando_c_a_branch") => "cando_c_a_pass_branch") & ((("cando_c_a_quit" & "cando_c_a_branch") => "cando_c_a_quit_branch") & ((("cando_s_c_cancel" & "cando_s_c_branch") => "cando_s_c_cancel_branch") & ((("cando_s_c_login" & "cando_s_c_branch") => "cando_s_c_login_branch") & (("cando_s_e_terminate" & "cando_s_e_branch") => "cando_s_e_terminate_branch"))))))))))) ]
+  
+  // Probabilistic deadlock freedom
   Pmin=? [ (G (("deadlock" | fail) => "end")) ]
+  
+  // Normalised probabilistic deadlock freedom
   (Pmin=? [ (G (("deadlock" | fail) => "end")) ] / Pmin=? [ (G (!fail)) ])
+  
+  // Probabilistic termination
   Pmin=? [ (F ("deadlock" | fail)) ]
   
    ======= Property checking =======
@@ -605,9 +613,17 @@ For each context file in this directory, run [prose output] to check the model a
   label "cando_q5_dice5_branch" = dice5=0;
   label "cando_q6_dice6_branch" = dice6=0;
   label "cando_q6_q0_branch" = q0=4;
+  
+  // Type safety
   P>=1 [ (G ((("cando_dice1_dummy_repeat" & "cando_dice1_dummy_branch") => "cando_dice1_dummy_repeat_branch") & ((("cando_p0_q0_l1" & "cando_p0_q0_branch") => "cando_p0_q0_l1_branch") & ((("cando_p0_q0_l2" & "cando_p0_q0_branch") => "cando_p0_q0_l2_branch") & ((("cando_p1_q1_l3" & "cando_p1_q1_branch") => "cando_p1_q1_l3_branch") & ((("cando_p1_q1_l4" & "cando_p1_q1_branch") => "cando_p1_q1_l4_branch") & ((("cando_p2_q2_l5" & "cando_p2_q2_branch") => "cando_p2_q2_l5_branch") & ((("cando_p2_q2_l6" & "cando_p2_q2_branch") => "cando_p2_q2_l6_branch") & ((("cando_p3_q3_d1" & "cando_p3_q3_branch") => "cando_p3_q3_d1_branch") & ((("cando_p3_q3_l1" & "cando_p3_q3_branch") => "cando_p3_q3_l1_branch") & ((("cando_p4_q4_d2" & "cando_p4_q4_branch") => "cando_p4_q4_d2_branch") & ((("cando_p4_q4_d3" & "cando_p4_q4_branch") => "cando_p4_q4_d3_branch") & ((("cando_p5_q5_d4" & "cando_p5_q5_branch") => "cando_p5_q5_d4_branch") & ((("cando_p5_q5_d5" & "cando_p5_q5_branch") => "cando_p5_q5_d5_branch") & ((("cando_p6_q6_d6" & "cando_p6_q6_branch") => "cando_p6_q6_d6_branch") & ((("cando_p6_q6_l2" & "cando_p6_q6_branch") => "cando_p6_q6_l2_branch") & ((("cando_q0_p1_go" & "cando_q0_p1_branch") => "cando_q0_p1_go_branch") & ((("cando_q0_p2_go" & "cando_q0_p2_branch") => "cando_q0_p2_go_branch") & ((("cando_q1_p3_go" & "cando_q1_p3_branch") => "cando_q1_p3_go_branch") & ((("cando_q1_p4_go" & "cando_q1_p4_branch") => "cando_q1_p4_go_branch") & ((("cando_q2_p5_go" & "cando_q2_p5_branch") => "cando_q2_p5_go_branch") & ((("cando_q2_p6_go" & "cando_q2_p6_branch") => "cando_q2_p6_go_branch") & ((("cando_q3_dice1_done" & "cando_q3_dice1_branch") => "cando_q3_dice1_done_branch") & ((("cando_q3_q0_redo" & "cando_q3_q0_branch") => "cando_q3_q0_redo_branch") & ((("cando_q4_dice2_done" & "cando_q4_dice2_branch") => "cando_q4_dice2_done_branch") & ((("cando_q4_dice3_done" & "cando_q4_dice3_branch") => "cando_q4_dice3_done_branch") & ((("cando_q5_dice4_done" & "cando_q5_dice4_branch") => "cando_q5_dice4_done_branch") & ((("cando_q5_dice5_done" & "cando_q5_dice5_branch") => "cando_q5_dice5_done_branch") & ((("cando_q6_dice6_done" & "cando_q6_dice6_branch") => "cando_q6_dice6_done_branch") & (("cando_q6_q0_redo" & "cando_q6_q0_branch") => "cando_q6_q0_redo_branch")))))))))))))))))))))))))))))) ]
+  
+  // Probabilistic deadlock freedom
   Pmin=? [ (G (("deadlock" | fail) => "end")) ]
+  
+  // Normalised probabilistic deadlock freedom
   (Pmin=? [ (G (("deadlock" | fail) => "end")) ] / Pmin=? [ (G (!fail)) ])
+  
+  // Probabilistic termination
   Pmin=? [ (F ("deadlock" | fail)) ]
   
    ======= Property checking =======
@@ -745,9 +761,17 @@ For each context file in this directory, run [prose output] to check the model a
   label "cando_car_host_branch" = host=0;
   label "cando_host_player_branch" = player=0;
   label "cando_player_host_branch" = (host=4) | (host=8) | (host=13) | (host=15);
+  
+  // Type safety
   P>=1 [ (G ((("cando_car_host_l1" & "cando_car_host_branch") => "cando_car_host_l1_branch") & ((("cando_car_host_l2" & "cando_car_host_branch") => "cando_car_host_l2_branch") & ((("cando_car_host_l3" & "cando_car_host_branch") => "cando_car_host_l3_branch") & ((("cando_host_player_l2" & "cando_host_player_branch") => "cando_host_player_l2_branch") & ((("cando_host_player_l3" & "cando_host_player_branch") => "cando_host_player_l3_branch") & ((("cando_player_host_l1" & "cando_player_host_branch") => "cando_player_host_l1_branch") & ((("cando_player_host_l2" & "cando_player_host_branch") => "cando_player_host_l2_branch") & (("cando_player_host_l3" & "cando_player_host_branch") => "cando_player_host_l3_branch"))))))))) ]
+  
+  // Probabilistic deadlock freedom
   Pmin=? [ (G (("deadlock" | fail) => "end")) ]
+  
+  // Normalised probabilistic deadlock freedom
   (Pmin=? [ (G (("deadlock" | fail) => "end")) ] / Pmin=? [ (G (!fail)) ])
+  
+  // Probabilistic termination
   Pmin=? [ (F ("deadlock" | fail)) ]
   
    ======= Property checking =======
@@ -884,9 +908,17 @@ For each context file in this directory, run [prose output] to check the model a
   label "cando_car_host_branch" = host=0;
   label "cando_host_player_branch" = player=0;
   label "cando_player_host_branch" = (host=4) | (host=8) | (host=13) | (host=15);
+  
+  // Type safety
   P>=1 [ (G ((("cando_car_host_l1" & "cando_car_host_branch") => "cando_car_host_l1_branch") & ((("cando_car_host_l2" & "cando_car_host_branch") => "cando_car_host_l2_branch") & ((("cando_car_host_l3" & "cando_car_host_branch") => "cando_car_host_l3_branch") & ((("cando_host_player_l2" & "cando_host_player_branch") => "cando_host_player_l2_branch") & ((("cando_host_player_l3" & "cando_host_player_branch") => "cando_host_player_l3_branch") & ((("cando_player_host_l1" & "cando_player_host_branch") => "cando_player_host_l1_branch") & ((("cando_player_host_l2" & "cando_player_host_branch") => "cando_player_host_l2_branch") & (("cando_player_host_l3" & "cando_player_host_branch") => "cando_player_host_l3_branch"))))))))) ]
+  
+  // Probabilistic deadlock freedom
   Pmin=? [ (G (("deadlock" | fail) => "end")) ]
+  
+  // Normalised probabilistic deadlock freedom
   (Pmin=? [ (G (("deadlock" | fail) => "end")) ] / Pmin=? [ (G (!fail)) ])
+  
+  // Probabilistic termination
   Pmin=? [ (F ("deadlock" | fail)) ]
   
    ======= Property checking =======
@@ -947,9 +979,17 @@ For each context file in this directory, run [prose output] to check the model a
   label "cando_p_q_l2" = false;
   label "cando_p_q_l2_branch" = q=0;
   label "cando_p_q_branch" = q=0;
+  
+  // Type safety
   P>=1 [ (G ((("cando_p_q_l1" & "cando_p_q_branch") => "cando_p_q_l1_branch") & (("cando_p_q_l2" & "cando_p_q_branch") => "cando_p_q_l2_branch"))) ]
+  
+  // Probabilistic deadlock freedom
   Pmin=? [ (G (("deadlock" | fail) => "end")) ]
+  
+  // Normalised probabilistic deadlock freedom
   (Pmin=? [ (G (("deadlock" | fail) => "end")) ] / Pmin=? [ (G (!fail)) ])
+  
+  // Probabilistic termination
   Pmin=? [ (F ("deadlock" | fail)) ]
   
    ======= Property checking =======
@@ -1229,9 +1269,17 @@ For each context file in this directory, run [prose output] to check the model a
   label "cando_workerC1_workerA1_branch" = workerA1=5;
   label "cando_workerC2_workerA2_branch" = workerA2=5;
   label "cando_workerC3_workerA3_branch" = workerA3=5;
+  
+  // Type safety
   P>=1 [ (G ((("cando_starter_workerA1_datum" & "cando_starter_workerA1_branch") => "cando_starter_workerA1_datum_branch") & ((("cando_starter_workerA2_datum" & "cando_starter_workerA2_branch") => "cando_starter_workerA2_datum_branch") & ((("cando_starter_workerA3_datum" & "cando_starter_workerA3_branch") => "cando_starter_workerA3_datum_branch") & ((("cando_workerA1_workerB1_datum" & "cando_workerA1_workerB1_branch") => "cando_workerA1_workerB1_datum_branch") & ((("cando_workerA1_workerB1_stop" & "cando_workerA1_workerB1_branch") => "cando_workerA1_workerB1_stop_branch") & ((("cando_workerA2_workerB2_datum" & "cando_workerA2_workerB2_branch") => "cando_workerA2_workerB2_datum_branch") & ((("cando_workerA2_workerB2_stop" & "cando_workerA2_workerB2_branch") => "cando_workerA2_workerB2_stop_branch") & ((("cando_workerA3_workerB3_datum" & "cando_workerA3_workerB3_branch") => "cando_workerA3_workerB3_datum_branch") & ((("cando_workerA3_workerB3_stop" & "cando_workerA3_workerB3_branch") => "cando_workerA3_workerB3_stop_branch") & ((("cando_workerB1_workerC1_datum" & "cando_workerB1_workerC1_branch") => "cando_workerB1_workerC1_datum_branch") & ((("cando_workerB1_workerC1_stop" & "cando_workerB1_workerC1_branch") => "cando_workerB1_workerC1_stop_branch") & ((("cando_workerB2_workerC2_datum" & "cando_workerB2_workerC2_branch") => "cando_workerB2_workerC2_datum_branch") & ((("cando_workerB2_workerC2_stop" & "cando_workerB2_workerC2_branch") => "cando_workerB2_workerC2_stop_branch") & ((("cando_workerB3_workerC3_datum" & "cando_workerB3_workerC3_branch") => "cando_workerB3_workerC3_datum_branch") & ((("cando_workerB3_workerC3_stop" & "cando_workerB3_workerC3_branch") => "cando_workerB3_workerC3_stop_branch") & ((("cando_workerC1_workerA1_result" & "cando_workerC1_workerA1_branch") => "cando_workerC1_workerA1_result_branch") & ((("cando_workerC2_workerA2_result" & "cando_workerC2_workerA2_branch") => "cando_workerC2_workerA2_result_branch") & (("cando_workerC3_workerA3_result" & "cando_workerC3_workerA3_branch") => "cando_workerC3_workerA3_result_branch"))))))))))))))))))) ]
+  
+  // Probabilistic deadlock freedom
   Pmin=? [ (G (("deadlock" | fail) => "end")) ]
+  
+  // Normalised probabilistic deadlock freedom
   (Pmin=? [ (G (("deadlock" | fail) => "end")) ] / Pmin=? [ (G (!fail)) ])
+  
+  // Probabilistic termination
   Pmin=? [ (F ("deadlock" | fail)) ]
   
    ======= Property checking =======
@@ -1300,9 +1348,17 @@ For each context file in this directory, run [prose output] to check the model a
   label "cando_a_b_l2" = (a=0) | (a=3);
   label "cando_a_b_l2_branch" = b=0;
   label "cando_a_b_branch" = b=0;
+  
+  // Type safety
   P>=1 [ (G ((("cando_a_b_l1" & "cando_a_b_branch") => "cando_a_b_l1_branch") & (("cando_a_b_l2" & "cando_a_b_branch") => "cando_a_b_l2_branch"))) ]
+  
+  // Probabilistic deadlock freedom
   Pmin=? [ (G (("deadlock" | fail) => "end")) ]
+  
+  // Normalised probabilistic deadlock freedom
   (Pmin=? [ (G (("deadlock" | fail) => "end")) ] / Pmin=? [ (G (!fail)) ])
+  
+  // Probabilistic termination
   Pmin=? [ (F ("deadlock" | fail)) ]
   
    ======= Property checking =======
@@ -1376,9 +1432,17 @@ For each context file in this directory, run [prose output] to check the model a
   label "cando_alice_carol_c_branch" = false;
   label "cando_alice_bob_branch" = bob=0;
   label "cando_alice_carol_branch" = false;
+  
+  // Type safety
   P>=1 [ (G ((("cando_alice_bob_a" & "cando_alice_bob_branch") => "cando_alice_bob_a_branch") & ((("cando_alice_bob_b" & "cando_alice_bob_branch") => "cando_alice_bob_b_branch") & ((("cando_alice_bob_c" & "cando_alice_bob_branch") => "cando_alice_bob_c_branch") & (("cando_alice_carol_c" & "cando_alice_carol_branch") => "cando_alice_carol_c_branch"))))) ]
+  
+  // Probabilistic deadlock freedom
   Pmin=? [ (G (("deadlock" | fail) => "end")) ]
+  
+  // Normalised probabilistic deadlock freedom
   (Pmin=? [ (G (("deadlock" | fail) => "end")) ] / Pmin=? [ (G (!fail)) ])
+  
+  // Probabilistic termination
   Pmin=? [ (F ("deadlock" | fail)) ]
   
    ======= Property checking =======
@@ -1467,9 +1531,17 @@ For each context file in this directory, run [prose output] to check the model a
   label "cando_a_b_branch" = b=0;
   label "cando_b_a_branch" = a=4;
   label "cando_commander_a_branch" = a=0;
+  
+  // Type safety
   P>=1 [ (G ((("cando_a_b_msg" & "cando_a_b_branch") => "cando_a_b_msg_branch") & ((("cando_b_a_msg" & "cando_b_a_branch") => "cando_b_a_msg_branch") & ((("cando_commander_a_deadlock" & "cando_commander_a_branch") => "cando_commander_a_deadlock_branch") & (("cando_commander_a_nodeadlock" & "cando_commander_a_branch") => "cando_commander_a_nodeadlock_branch"))))) ]
+  
+  // Probabilistic deadlock freedom
   Pmin=? [ (G (("deadlock" | fail) => "end")) ]
+  
+  // Normalised probabilistic deadlock freedom
   (Pmin=? [ (G (("deadlock" | fail) => "end")) ] / Pmin=? [ (G (!fail)) ])
+  
+  // Probabilistic termination
   Pmin=? [ (F ("deadlock" | fail)) ]
   
    ======= Property checking =======
@@ -1503,7 +1575,9 @@ For each context file in this directory, run [prose output] to check the model a
   Raised at Base__Error.raise in file "src/error.ml" (inlined), line 9, characters 21-37
   Called from Base__Or_error.ok_exn in file "src/or_error.ml", line 124, characters 17-32
   Called from Base__List0.iter in file "src/list0.ml", line 66, characters 4-7
-  Called from Dune__exe__Main.output in file "bin/main.ml", line 36, characters 2-31
+  Called from Dune__exe__Main.output_and_return_annotations in file "bin/main.ml", line 36, characters 2-31
+  Called from Dune__exe__Main.output in file "bin/main.ml" (inlined), line 57, characters 2-139
+  Called from Dune__exe__Main.output_command.(fun) in file "bin/main.ml", line 168, characters 5-127
   Called from Command.For_unix.run.(fun) in file "command/src/command.ml", line 3388, characters 8-270
   Called from Base__Exn.handle_uncaught_aux in file "src/exn.ml", line 126, characters 6-10
   
@@ -1516,8 +1590,8 @@ For each context file in this directory, run [prose output] to check the model a
   Raised at Base__Error.raise in file "src/error.ml" (inlined), line 9, characters 21-37
   Called from Base__Or_error.ok_exn in file "src/or_error.ml", line 124, characters 17-32
   Called from Base__List0.iter in file "src/list0.ml", line 66, characters 4-7
-  Called from Dune__exe__Main.output in file "bin/main.ml", line 36, characters 2-31
-  Called from Dune__exe__Main.verify in file "bin/main.ml", line 90, characters 2-116
+  Called from Dune__exe__Main.output_and_return_annotations in file "bin/main.ml", line 36, characters 2-31
+  Called from Dune__exe__Main.verify in file "bin/main.ml", line 101, characters 4-153
   Called from Command.For_unix.run.(fun) in file "command/src/command.ml", line 3388, characters 8-270
   Called from Base__Exn.handle_uncaught_aux in file "src/exn.ml", line 126, characters 6-10
   
@@ -1695,9 +1769,17 @@ For each context file in this directory, run [prose output] to check the model a
   label "cando_worker1_reducer_branch" = reducer=0;
   label "cando_worker2_reducer_branch" = reducer=2;
   label "cando_worker3_reducer_branch" = reducer=4;
+  
+  // Type safety
   P>=1 [ (G ((("cando_mapper_worker1_datum" & "cando_mapper_worker1_branch") => "cando_mapper_worker1_datum_branch") & ((("cando_mapper_worker1_stop" & "cando_mapper_worker1_branch") => "cando_mapper_worker1_stop_branch") & ((("cando_mapper_worker2_datum" & "cando_mapper_worker2_branch") => "cando_mapper_worker2_datum_branch") & ((("cando_mapper_worker2_stop" & "cando_mapper_worker2_branch") => "cando_mapper_worker2_stop_branch") & ((("cando_mapper_worker3_datum" & "cando_mapper_worker3_branch") => "cando_mapper_worker3_datum_branch") & ((("cando_mapper_worker3_stop" & "cando_mapper_worker3_branch") => "cando_mapper_worker3_stop_branch") & ((("cando_reducer_mapper_continue" & "cando_reducer_mapper_branch") => "cando_reducer_mapper_continue_branch") & ((("cando_reducer_mapper_stop" & "cando_reducer_mapper_branch") => "cando_reducer_mapper_stop_branch") & ((("cando_worker1_reducer_result" & "cando_worker1_reducer_branch") => "cando_worker1_reducer_result_branch") & ((("cando_worker2_reducer_result" & "cando_worker2_reducer_branch") => "cando_worker2_reducer_result_branch") & (("cando_worker3_reducer_result" & "cando_worker3_reducer_branch") => "cando_worker3_reducer_result_branch")))))))))))) ]
+  
+  // Probabilistic deadlock freedom
   Pmin=? [ (G (("deadlock" | fail) => "end")) ]
+  
+  // Normalised probabilistic deadlock freedom
   (Pmin=? [ (G (("deadlock" | fail) => "end")) ] / Pmin=? [ (G (!fail)) ])
+  
+  // Probabilistic termination
   Pmin=? [ (F ("deadlock" | fail)) ]
   
    ======= Property checking =======
@@ -1818,9 +1900,17 @@ For each context file in this directory, run [prose output] to check the model a
   label "cando_alice_shop_branch" = (shop=0) | (shop=4);
   label "cando_bob_alice_branch" = alice=7;
   label "cando_shop_alice_branch" = alice=2;
+  
+  // Type safety
   P>=1 [ (G ((("cando_alice_bob_cancel" & "cando_alice_bob_branch") => "cando_alice_bob_cancel_branch") & ((("cando_alice_bob_split" & "cando_alice_bob_branch") => "cando_alice_bob_split_branch") & ((("cando_alice_shop_buy" & "cando_alice_shop_branch") => "cando_alice_shop_buy_branch") & ((("cando_alice_shop_no" & "cando_alice_shop_branch") => "cando_alice_shop_no_branch") & ((("cando_alice_shop_query" & "cando_alice_shop_branch") => "cando_alice_shop_query_branch") & ((("cando_bob_alice_no" & "cando_bob_alice_branch") => "cando_bob_alice_no_branch") & ((("cando_bob_alice_yes" & "cando_bob_alice_branch") => "cando_bob_alice_yes_branch") & (("cando_shop_alice_price" & "cando_shop_alice_branch") => "cando_shop_alice_price_branch"))))))))) ]
+  
+  // Probabilistic deadlock freedom
   Pmin=? [ (G (("deadlock" | fail) => "end")) ]
+  
+  // Normalised probabilistic deadlock freedom
   (Pmin=? [ (G (("deadlock" | fail) => "end")) ] / Pmin=? [ (G (!fail)) ])
+  
+  // Probabilistic termination
   Pmin=? [ (F ("deadlock" | fail)) ]
   
    ======= Property checking =======
@@ -1987,9 +2077,17 @@ For each context file in this directory, run [prose output] to check the model a
   label "cando_p_q_branch" = (q=0) | (q=2);
   label "cando_p1_q1_branch" = (q1=0) | (q1=2);
   label "cando_p2_q2_branch" = (q2=0) | (q2=2);
+  
+  // Type safety
   P>=1 [ (G ((("cando_p_q_l1" & "cando_p_q_branch") => "cando_p_q_l1_branch") & ((("cando_p_q_l2" & "cando_p_q_branch") => "cando_p_q_l2_branch") & ((("cando_p1_q1_l1" & "cando_p1_q1_branch") => "cando_p1_q1_l1_branch") & ((("cando_p1_q1_l2" & "cando_p1_q1_branch") => "cando_p1_q1_l2_branch") & ((("cando_p2_q2_l1" & "cando_p2_q2_branch") => "cando_p2_q2_l1_branch") & (("cando_p2_q2_l2" & "cando_p2_q2_branch") => "cando_p2_q2_l2_branch"))))))) ]
+  
+  // Probabilistic deadlock freedom
   Pmin=? [ (G (("deadlock" | fail) => "end")) ]
+  
+  // Normalised probabilistic deadlock freedom
   (Pmin=? [ (G (("deadlock" | fail) => "end")) ] / Pmin=? [ (G (!fail)) ])
+  
+  // Probabilistic termination
   Pmin=? [ (F ("deadlock" | fail)) ]
   
    ======= Property checking =======
@@ -2050,9 +2148,17 @@ For each context file in this directory, run [prose output] to check the model a
   label "cando_alice_bob_b" = alice=0;
   label "cando_alice_bob_b_branch" = bob=0;
   label "cando_alice_bob_branch" = bob=0;
+  
+  // Type safety
   P>=1 [ (G ((("cando_alice_bob_a" & "cando_alice_bob_branch") => "cando_alice_bob_a_branch") & (("cando_alice_bob_b" & "cando_alice_bob_branch") => "cando_alice_bob_b_branch"))) ]
+  
+  // Probabilistic deadlock freedom
   Pmin=? [ (G (("deadlock" | fail) => "end")) ]
+  
+  // Normalised probabilistic deadlock freedom
   (Pmin=? [ (G (("deadlock" | fail) => "end")) ] / Pmin=? [ (G (!fail)) ])
+  
+  // Probabilistic termination
   Pmin=? [ (F ("deadlock" | fail)) ]
   
    ======= Property checking =======
@@ -2142,9 +2248,17 @@ For each context file in this directory, run [prose output] to check the model a
   label "cando_a_b_branch" = b=0;
   label "cando_b_a_branch" = a=4;
   label "cando_commander_a_branch" = a=0;
+  
+  // Type safety
   P>=1 [ (G ((("cando_a_b_msg" & "cando_a_b_branch") => "cando_a_b_msg_branch") & ((("cando_b_a_msg" & "cando_b_a_branch") => "cando_b_a_msg_branch") & ((("cando_commander_a_deadlock" & "cando_commander_a_branch") => "cando_commander_a_deadlock_branch") & (("cando_commander_a_nodeadlock" & "cando_commander_a_branch") => "cando_commander_a_nodeadlock_branch"))))) ]
+  
+  // Probabilistic deadlock freedom
   Pmin=? [ (G (("deadlock" | fail) => "end")) ]
+  
+  // Normalised probabilistic deadlock freedom
   (Pmin=? [ (G (("deadlock" | fail) => "end")) ] / Pmin=? [ (G (!fail)) ])
+  
+  // Probabilistic termination
   Pmin=? [ (F ("deadlock" | fail)) ]
   
    ======= Property checking =======
@@ -2291,9 +2405,17 @@ For each context file in this directory, run [prose output] to check the model a
   label "cando_b_a_branch" = a=0;
   label "cando_b_c_branch" = c=0;
   label "cando_charlie_bob_branch" = bob=0;
+  
+  // Type safety
   P>=1 [ (G ((("cando_alice_bob_l1" & "cando_alice_bob_branch") => "cando_alice_bob_l1_branch") & ((("cando_alice_bob_l2" & "cando_alice_bob_branch") => "cando_alice_bob_l2_branch") & ((("cando_b_a_l1" & "cando_b_a_branch") => "cando_b_a_l1_branch") & ((("cando_b_a_l2" & "cando_b_a_branch") => "cando_b_a_l2_branch") & ((("cando_b_c_l1" & "cando_b_c_branch") => "cando_b_c_l1_branch") & ((("cando_b_c_l2" & "cando_b_c_branch") => "cando_b_c_l2_branch") & ((("cando_charlie_bob_l1" & "cando_charlie_bob_branch") => "cando_charlie_bob_l1_branch") & (("cando_charlie_bob_l2" & "cando_charlie_bob_branch") => "cando_charlie_bob_l2_branch"))))))))) ]
+  
+  // Probabilistic deadlock freedom
   Pmin=? [ (G (("deadlock" | fail) => "end")) ]
+  
+  // Normalised probabilistic deadlock freedom
   (Pmin=? [ (G (("deadlock" | fail) => "end")) ] / Pmin=? [ (G (!fail)) ])
+  
+  // Probabilistic termination
   Pmin=? [ (F ("deadlock" | fail)) ]
   
    ======= Property checking =======
@@ -2328,7 +2450,9 @@ For each context file in this directory, run [prose output] to check the model a
   Called from Base__Or_error.ok_exn in file "src/or_error.ml", line 124, characters 17-32
   Called from Base__List0.iter in file "src/list0.ml", line 66, characters 4-7
   Called from Base__List0.iter in file "src/list0.ml", line 66, characters 4-7
-  Called from Dune__exe__Main.output in file "bin/main.ml", line 36, characters 2-31
+  Called from Dune__exe__Main.output_and_return_annotations in file "bin/main.ml", line 36, characters 2-31
+  Called from Dune__exe__Main.output in file "bin/main.ml" (inlined), line 57, characters 2-139
+  Called from Dune__exe__Main.output_command.(fun) in file "bin/main.ml", line 168, characters 5-127
   Called from Command.For_unix.run.(fun) in file "command/src/command.ml", line 3388, characters 8-270
   Called from Base__Exn.handle_uncaught_aux in file "src/exn.ml", line 126, characters 6-10
   
@@ -2342,8 +2466,8 @@ For each context file in this directory, run [prose output] to check the model a
   Called from Base__Or_error.ok_exn in file "src/or_error.ml", line 124, characters 17-32
   Called from Base__List0.iter in file "src/list0.ml", line 66, characters 4-7
   Called from Base__List0.iter in file "src/list0.ml", line 66, characters 4-7
-  Called from Dune__exe__Main.output in file "bin/main.ml", line 36, characters 2-31
-  Called from Dune__exe__Main.verify in file "bin/main.ml", line 90, characters 2-116
+  Called from Dune__exe__Main.output_and_return_annotations in file "bin/main.ml", line 36, characters 2-31
+  Called from Dune__exe__Main.verify in file "bin/main.ml", line 101, characters 4-153
   Called from Command.For_unix.run.(fun) in file "command/src/command.ml", line 3388, characters 8-270
   Called from Base__Exn.handle_uncaught_aux in file "src/exn.ml", line 126, characters 6-10
   
@@ -2437,9 +2561,17 @@ For each context file in this directory, run [prose output] to check the model a
   label "cando_c_d_l3_branch" = d=0;
   label "cando_a_b_branch" = b=0;
   label "cando_c_d_branch" = d=0;
+  
+  // Type safety
   P>=1 [ (G ((("cando_a_b_l1" & "cando_a_b_branch") => "cando_a_b_l1_branch") & ((("cando_a_b_l2" & "cando_a_b_branch") => "cando_a_b_l2_branch") & ((("cando_a_b_l3" & "cando_a_b_branch") => "cando_a_b_l3_branch") & ((("cando_c_d_l1" & "cando_c_d_branch") => "cando_c_d_l1_branch") & ((("cando_c_d_l2" & "cando_c_d_branch") => "cando_c_d_l2_branch") & (("cando_c_d_l3" & "cando_c_d_branch") => "cando_c_d_l3_branch"))))))) ]
+  
+  // Probabilistic deadlock freedom
   Pmin=? [ (G (("deadlock" | fail) => "end")) ]
+  
+  // Normalised probabilistic deadlock freedom
   (Pmin=? [ (G (("deadlock" | fail) => "end")) ] / Pmin=? [ (G (!fail)) ])
+  
+  // Probabilistic termination
   Pmin=? [ (F ("deadlock" | fail)) ]
   
    ======= Property checking =======
@@ -2530,9 +2662,17 @@ For each context file in this directory, run [prose output] to check the model a
   label "cando_alice_bob_l5" = alice=0;
   label "cando_alice_bob_l5_branch" = false;
   label "cando_alice_bob_branch" = (bob=0) | (bob=2);
+  
+  // Type safety
   P>=1 [ (G ((("cando_alice_bob_l1" & "cando_alice_bob_branch") => "cando_alice_bob_l1_branch") & ((("cando_alice_bob_l2" & "cando_alice_bob_branch") => "cando_alice_bob_l2_branch") & ((("cando_alice_bob_l3" & "cando_alice_bob_branch") => "cando_alice_bob_l3_branch") & ((("cando_alice_bob_l4" & "cando_alice_bob_branch") => "cando_alice_bob_l4_branch") & (("cando_alice_bob_l5" & "cando_alice_bob_branch") => "cando_alice_bob_l5_branch")))))) ]
+  
+  // Probabilistic deadlock freedom
   Pmin=? [ (G (("deadlock" | fail) => "end")) ]
+  
+  // Normalised probabilistic deadlock freedom
   (Pmin=? [ (G (("deadlock" | fail) => "end")) ] / Pmin=? [ (G (!fail)) ])
+  
+  // Probabilistic termination
   Pmin=? [ (F ("deadlock" | fail)) ]
   
    ======= Property checking =======

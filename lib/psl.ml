@@ -1,4 +1,6 @@
-type property =
+type annotated_property = string * property
+
+and property =
   | P of bound * path_property
   | Divide of property * property
 

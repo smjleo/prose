@@ -1,3 +1,3 @@
 open! Core
 
-val translate : Ast.context -> Prism.model * Psl.property list
+val translate : Ast.context -> Prism.model * Psl.annotated_property list

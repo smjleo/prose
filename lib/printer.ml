@@ -157,7 +157,7 @@ let print_properties' ppf properties =
     | P (bound, path) -> fprintf ppf "P%a [ %a ]" print_bound bound print_path_prop path
     | Divide (p1, p2) -> fprintf ppf "(%a / %a)" print_property p1 print_property p2
   in
-  List.iter properties ~f:(fun p -> fprintf ppf "%a\n" print_property p)
+  List.iter properties ~f:(fun (a, p) -> fprintf ppf "\n// %s\n%a\n" a print_property p)
 ;;
 
 let print_properties ?output_file properties =

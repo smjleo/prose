@@ -29,5 +29,9 @@ let safety context =
 ;;
 
 let generate context =
-  [ safety context; deadlock_freedom; normalised_deadlock_freedom; termination ]
+  [ "Type safety", safety context
+  ; "Probabilistic deadlock freedom", deadlock_freedom
+  ; "Normalised probabilistic deadlock freedom", normalised_deadlock_freedom
+  ; "Probabilistic termination", termination
+  ]
 ;;

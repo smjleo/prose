@@ -18,7 +18,7 @@ let parse lexbuf =
     error_s [%message "Syntax error" (line : int) (column : int)] |> ok_exn
 ;;
 
-let output
+let output_and_return_annotations
       ctx_file
       ?model_output_file
       ?prop_output_file
@@ -41,59 +41,71 @@ let output
   if print_translation_time then print_s [%message (translation_time : Time_float.Span.t)];
   Printer.print_model ?output_file:model_output_file translated;
   Printer.print_properties ?output_file:prop_output_file properties;
-  In_channel.close inx
+  In_channel.close inx;
+  let annotations = List.map properties ~f:(fun (a, _p) -> a) in
+  annotations
 ;;
 
-type checked_output =
-  { safety : string
-  ; pdf : string
-  ; normalised_pdf : string
-  ; termination : string
-  }
+let output
+      ctx_file
+      ?model_output_file
+      ?prop_output_file
+      ~print_ast
+      ~print_translation_time
+      ()
+  =
+  output_and_return_annotations
+    ctx_file
+    ?model_output_file
+    ?prop_output_file
+    ~print_ast
+    ~print_translation_time
+    ()
+  |> ignore
+;;
 
 let parse_prism_output lines =
-  let results =
-    List.fold_left lines ~init:[] ~f:(fun accum line ->
-      match String.is_prefix line ~prefix:"Result: " with
-      | false -> accum
-      | true -> line :: accum)
-    |> List.rev
-  in
-  match results with
-  | [ safety; pdf; normalised_pdf; termination ] ->
-    { safety; pdf; normalised_pdf; termination }
-  | _ ->
-    let full_output = String.concat ~sep:"\n" lines in
-    error_s
-      [%message
-        "PRISM output contains an unexpected number of results, likely PRISM returned an \
-         error"
-          full_output
-          (results : string list)]
-    |> ok_exn
+  List.fold_left lines ~init:[] ~f:(fun accum line ->
+    match String.is_prefix line ~prefix:"Result: " with
+    | false -> accum
+    | true -> line :: accum)
+  |> List.rev
 ;;
 
-let print_output { pdf; normalised_pdf; safety; termination } =
-  print_endline "Type safety";
-  print_endline safety;
-  print_endline "\nProbabilistic deadlock freedom";
-  print_endline pdf;
-  print_endline "\nNormalised probabilistic deadlock freedom";
-  print_endline normalised_pdf;
-  print_endline "\nProbabilistic termination";
-  print_endline termination
+let print_output annotations lines =
+  let output = parse_prism_output lines in
+  (* I wish [List.iteri2] existed *)
+  let annotated_output =
+    match List.zip annotations output with
+    | Ok x -> x
+    | Unequal_lengths ->
+      let full_output = String.concat ~sep:"\n" lines in
+      error_s
+        [%message
+          "PRISM output contains an unexpected number of results, likely PRISM returned \
+           an error"
+            full_output
+            (output : string list)]
+      |> ok_exn
+  in
+  List.iteri annotated_output ~f:(fun i (a, o) ->
+    if i > 0 then print_endline "";
+    print_endline a;
+    print_endline o)
 ;;
 
 let verify ctx_file ~print_ast ~print_raw_prism ~print_translation_time () =
   let model_output_file = Filename_unix.temp_file "model" ".prism" in
   let prop_output_file = Filename_unix.temp_file "properties" ".props" in
-  output
-    ctx_file
-    ~model_output_file
-    ~prop_output_file
-    ~print_ast
-    ~print_translation_time
-    ();
+  let annotations =
+    output_and_return_annotations
+      ctx_file
+      ~model_output_file
+      ~prop_output_file
+      ~print_ast
+      ~print_translation_time
+      ()
+  in
   let prism =
     Core_unix.create_process ~prog:"prism" ~args:[ model_output_file; prop_output_file ]
   in
@@ -104,10 +116,9 @@ let verify ctx_file ~print_ast ~print_raw_prism ~print_translation_time () =
   if String.length stderr_output <> 0
   then error_s [%message "PRISM returned error when verifying" stderr_output] |> ok_exn;
   if print_raw_prism then print_s [%message "Raw PRISM output" (lines : string list)];
-  let output = parse_prism_output lines in
-  print_output output;
   Core_unix.remove model_output_file;
-  Core_unix.remove prop_output_file
+  Core_unix.remove prop_output_file;
+  print_output annotations lines
 ;;
 
 let ctx_file_flag =
