@@ -1575,9 +1575,8 @@ For each context file in this directory, run [prose output] to check the model a
   Raised at Base__Error.raise in file "src/error.ml" (inlined), line 9, characters 21-37
   Called from Base__Or_error.ok_exn in file "src/or_error.ml", line 124, characters 17-32
   Called from Base__List0.iter in file "src/list0.ml", line 66, characters 4-7
-  Called from Dune__exe__Main.output_and_return_annotations in file "bin/main.ml", line 36, characters 2-31
-  Called from Dune__exe__Main.output in file "bin/main.ml" (inlined), line 57, characters 2-139
-  Called from Dune__exe__Main.output_command.(fun) in file "bin/main.ml", line 168, characters 5-127
+  Called from Prose.output_and_return_annotations in file "lib/prose.ml", line 27, characters 2-31
+  Called from Prose.output in file "lib/prose.ml", line 48, characters 2-140
   Called from Command.For_unix.run.(fun) in file "command/src/command.ml", line 3388, characters 8-270
   Called from Base__Exn.handle_uncaught_aux in file "src/exn.ml", line 126, characters 6-10
   
@@ -1590,8 +1589,8 @@ For each context file in this directory, run [prose output] to check the model a
   Raised at Base__Error.raise in file "src/error.ml" (inlined), line 9, characters 21-37
   Called from Base__Or_error.ok_exn in file "src/or_error.ml", line 124, characters 17-32
   Called from Base__List0.iter in file "src/list0.ml", line 66, characters 4-7
-  Called from Dune__exe__Main.output_and_return_annotations in file "bin/main.ml", line 36, characters 2-31
-  Called from Dune__exe__Main.verify in file "bin/main.ml", line 101, characters 4-153
+  Called from Prose.output_and_return_annotations in file "lib/prose.ml", line 27, characters 2-31
+  Called from Prose.verify in file "lib/prose.ml", line 92, characters 4-154
   Called from Command.For_unix.run.(fun) in file "command/src/command.ml", line 3388, characters 8-270
   Called from Base__Exn.handle_uncaught_aux in file "src/exn.ml", line 126, characters 6-10
   
@@ -2450,9 +2449,8 @@ For each context file in this directory, run [prose output] to check the model a
   Called from Base__Or_error.ok_exn in file "src/or_error.ml", line 124, characters 17-32
   Called from Base__List0.iter in file "src/list0.ml", line 66, characters 4-7
   Called from Base__List0.iter in file "src/list0.ml", line 66, characters 4-7
-  Called from Dune__exe__Main.output_and_return_annotations in file "bin/main.ml", line 36, characters 2-31
-  Called from Dune__exe__Main.output in file "bin/main.ml" (inlined), line 57, characters 2-139
-  Called from Dune__exe__Main.output_command.(fun) in file "bin/main.ml", line 168, characters 5-127
+  Called from Prose.output_and_return_annotations in file "lib/prose.ml", line 27, characters 2-31
+  Called from Prose.output in file "lib/prose.ml", line 48, characters 2-140
   Called from Command.For_unix.run.(fun) in file "command/src/command.ml", line 3388, characters 8-270
   Called from Base__Exn.handle_uncaught_aux in file "src/exn.ml", line 126, characters 6-10
   
@@ -2466,8 +2464,8 @@ For each context file in this directory, run [prose output] to check the model a
   Called from Base__Or_error.ok_exn in file "src/or_error.ml", line 124, characters 17-32
   Called from Base__List0.iter in file "src/list0.ml", line 66, characters 4-7
   Called from Base__List0.iter in file "src/list0.ml", line 66, characters 4-7
-  Called from Dune__exe__Main.output_and_return_annotations in file "bin/main.ml", line 36, characters 2-31
-  Called from Dune__exe__Main.verify in file "bin/main.ml", line 101, characters 4-153
+  Called from Prose.output_and_return_annotations in file "lib/prose.ml", line 27, characters 2-31
+  Called from Prose.verify in file "lib/prose.ml", line 92, characters 4-154
   Called from Command.For_unix.run.(fun) in file "command/src/command.ml", line 3388, characters 8-270
   Called from Base__Exn.handle_uncaught_aux in file "src/exn.ml", line 126, characters 6-10
   

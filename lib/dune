@@ -6,4 +6,4 @@
 (library
  (name prose)
  (preprocess (pps ppx_jane))
- (libraries core))
+ (libraries core core_unix core_unix.filename_unix))
