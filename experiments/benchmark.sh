@@ -4,6 +4,7 @@ REPEATS=30
 TIMESTAMP=$(date +"%Y-%m-%d_%H:%M:%S")
 OUTPUT_DIR="experiments/results"
 OUTPUT_FILE="$OUTPUT_DIR/benchmark_${TIMESTAMP}.csv"
+STATS_SCRIPT="experiments/stats.py"
 FILES=$(find examples -name "*.ctx")
 
 mkdir -p "$OUTPUT_DIR"
@@ -31,3 +32,5 @@ for file in examples/*.ctx; do
 done
 
 echo "Results saved to $OUTPUT_FILE"
+
+$STATS_SCRIPT $OUTPUT_FILE

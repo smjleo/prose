@@ -10,6 +10,12 @@ Prose is a compiler from sub-**pro**babilistic multiparty **se**ssion types into
 
 Ensure that the location of your `prism` executable is in your `PATH`.
 
+For the end-to-end benchmark and analysis scripts, we additionally require:
+* zsh
+* [Python and `pip`](https://www.python.org/downloads/)
+* `pip install numpy scipy pandas`
+
+
 ### Usage
 To verify probabilistic properties (e.g. safety and deadlock-freedom), run `dune exec prose -- verify [path/to/file.ctx]`.
 
@@ -20,7 +26,7 @@ For examples of session types, see [examples/](examples/).
 ### Benchmarking
 There are two types of benchmarks: end-to-end and granular.
 
-The end-to-end benchmark measures the runtime of invoking `prose`, from start to finish. This can be run using [experiments/benchmark.sh](experiments/benchmark.sh), and the resulting data will be placed in [experiments/results/](experiments/results/). The resulting CSVs can be analysed using [experiments/stats.py](experiments/stats.py).
+The end-to-end benchmark measures the runtime of invoking `prose`, from start to finish. This can be run using [experiments/benchmark.sh](experiments/benchmark.sh), which invokes [experiments/stats.py](experiments/stats.py) for analysis. The raw data is also placed in [experiments/results/](experiments/results/).
 
 The granular benchmark measures the time taken for the translation and the PRISM verification of each property, all separately. This is done directly via the Prose CLI: `dune exec prose -- benchmark [path/to/dir]` runs benchmarks on all context files in the directory given. 
 
