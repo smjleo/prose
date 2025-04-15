@@ -9,13 +9,13 @@ let parse lexbuf =
     error_s [%message "Syntax error" (line : int) (column : int)] |> ok_exn
 ;;
 
-let parse_and_translate ~ctx_file =
+let parse_and_translate ~on_error ~ctx_file =
   let inx = In_channel.create ctx_file in
   let lexbuf = Lexing.from_channel inx in
   lexbuf.lex_curr_p <- { lexbuf.lex_curr_p with pos_fname = ctx_file };
   let context = parse lexbuf in
   In_channel.close inx;
-  Well_formed.check_exn context;
+  Well_formed.check_context ~on_error context;
   let translated, properties = Translate.translate context in
   context, translated, properties
 ;;
@@ -24,6 +24,7 @@ let output_and_return_annotations
       ~ctx_file
       ~print_ast
       ~print_translation_time
+      ~on_error
       ?model_output_file
       ?prop_output_file
       ?only_annotation
@@ -31,7 +32,7 @@ let output_and_return_annotations
   =
   let dbg_print_s sexp = if print_ast then print_s sexp in
   let t0 = Time_float.now () in
-  let context, translated, properties = parse_and_translate ~ctx_file in
+  let context, translated, properties = parse_and_translate ~on_error ~ctx_file in
   dbg_print_s [%message (context : Ast.context)];
   let t1 = Time_float.now () in
   let translation_time = Time_float.diff t1 t0 in
@@ -63,6 +64,7 @@ let output
     ?prop_output_file
     ~print_ast
     ~print_translation_time
+    ~on_error:`Print_and_exit
     ()
   |> ignore
 ;;
@@ -97,7 +99,15 @@ let print_output annotations lines =
     print_endline o)
 ;;
 
-let with_prism_files ~ctx_file ~print_ast ~print_translation_time ~f ?only_annotation () =
+let with_prism_files
+      ~ctx_file
+      ~print_ast
+      ~print_translation_time
+      ~on_error
+      ~f
+      ?only_annotation
+      ()
+  =
   let model_output_file = Filename_unix.temp_file "model" ".prism" in
   let prop_output_file = Filename_unix.temp_file "properties" ".props" in
   let annotations =
@@ -107,6 +117,7 @@ let with_prism_files ~ctx_file ~print_ast ~print_translation_time ~f ?only_annot
       ~prop_output_file
       ~print_ast
       ~print_translation_time
+      ~on_error
       ?only_annotation
       ()
   in
@@ -121,6 +132,7 @@ let verify ~ctx_file ~print_ast ~print_raw_prism ~print_translation_time () =
     ~ctx_file
     ~print_ast
     ~print_translation_time
+    ~on_error:`Print_and_exit
     ~f:(fun ~model_output_file ~prop_output_file ~annotations ->
       let prism =
         Core_unix.create_process
@@ -143,49 +155,51 @@ let benchmark_translation ~iterations ~ctx_file ~batch_size =
   Microbenchmark.measure
     ~iterations
     ~batch_size
-    ~f:(fun () -> parse_and_translate ~ctx_file)
+    ~f:(fun () -> parse_and_translate ~on_error:`Raise ~ctx_file)
     ()
 ;;
 
-let benchmark_prism ~iterations ~ctx_file =
-  let annotations = Psl.Annotation.all in
+let benchmark_prism ~annotations ~iterations ~ctx_file =
+  (* TODO: These numbers don't actually make much sense (end-to-end is faster?) - investigate *)
   List.map annotations ~f:(fun annotation ->
-    ( annotation
-    , with_prism_files
-        ~ctx_file
-        ~print_ast:false
-        ~print_translation_time:false
-        ~f:(fun ~model_output_file ~prop_output_file ~annotations:_ ->
-          Microbenchmark.measure
-            ~iterations
-            ~f:(fun () ->
-              let cmd =
-                sprintf "prism %s %s > /dev/null" model_output_file prop_output_file
-              in
-              Sys_unix.command_exn cmd)
-            ())
-        ~only_annotation:annotation
-        () ))
+    with_prism_files
+      ~ctx_file
+      ~print_ast:false
+      ~print_translation_time:false
+      ~on_error:`Raise
+      ~f:(fun ~model_output_file ~prop_output_file ~annotations:_ ->
+        Microbenchmark.measure
+          ~iterations
+          ~f:(fun () ->
+            let cmd =
+              sprintf "prism %s %s > /dev/null" model_output_file prop_output_file
+            in
+            Sys_unix.command_exn cmd)
+          ())
+      ~only_annotation:annotation
+      ())
 ;;
 
 let benchmark ~iterations ~directory ~translation_batch_size () =
-  let filenames = Sys_unix.ls_dir directory in
-  List.iter filenames ~f:(fun ctx_file ->
-    let ctx_file = Filename.concat directory ctx_file in
-    try
-      let translation_runtimes =
-        benchmark_translation ~iterations ~ctx_file ~batch_size:translation_batch_size
-        |> List.map ~f:(fun time ->
-          let open Time_float.Span in
-          (* TODO: We take the sample mean for now, not sure if we should *)
-          time / Float.of_int translation_batch_size)
-      in
-      let prism_runtimes = benchmark_prism ~iterations ~ctx_file in
-      print_s
-        [%message
-          ctx_file
-            (translation_runtimes : Time_float.Span.t list)
-            (prism_runtimes : (Psl.Annotation.t * Time_float.Span.t list) list)]
-    with
-    | _ -> print_s [%message "skipping due to exception" ctx_file])
+  let annotations = Psl.Annotation.all in
+  Display_stats.print_header annotations;
+  let filenames = Sys_unix.ls_dir directory |> List.sort ~compare:String.compare in
+  let skipped =
+    List.filter_map filenames ~f:(fun basename ->
+      let ctx_file = Filename.concat directory basename in
+      try
+        let translation_runtimes =
+          benchmark_translation ~iterations ~ctx_file ~batch_size:translation_batch_size
+          |> List.map ~f:(fun time ->
+            let open Time_float.Span in
+            (* TODO: We take the sample mean for now, not sure if we should *)
+            time / Float.of_int translation_batch_size)
+        in
+        let prism_runtimes = benchmark_prism ~annotations ~iterations ~ctx_file in
+        Display_stats.print_row basename (translation_runtimes :: prism_runtimes);
+        None
+      with
+      | _ -> Some ctx_file)
+  in
+  print_s [%message "benchmark complete with skipped files" (skipped : string list)]
 ;;
