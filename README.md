@@ -6,6 +6,7 @@ Prose is a compiler from sub-**pro**babilistic multiparty **se**ssion types into
 * [OCaml and `opam`](https://ocaml.org/install)
 * [Dune](https://dune.build/install)
 * [PRISM](https://www.prismmodelchecker.org/manual/InstallingPRISM/Instructions)
+* `opam install core ppx_jane`
 
 Ensure that the location of your `prism` executable is in your `PATH`.
 

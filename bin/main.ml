@@ -63,12 +63,37 @@ let verify_command =
      Prose.verify ~ctx_file ~print_ast ~print_raw_prism ~print_translation_time)
 ;;
 
+let benchmark_command =
+  Command.basic
+    ~summary:
+      "Benchmark the parsing + translation and PRISM invokation runtimes for each file \
+       in the given directory."
+    (let%map_open.Command directory = anon ("directory" %: string)
+     and iterations =
+       flag
+         "-n"
+         (optional_with_default 30 int)
+         ~doc:"int How many times to run each measurement (default: 30)"
+     and translation_batch_size =
+       flag
+         "-tb"
+         (optional_with_default
+            (* Apparently [Time_float.now] takes about 800ns of overhead, and rough testing shows
+              parsing + translating together takes in the order of 100ns. Using 100 iterations
+              should help mitigate the overhead *)
+            100
+            int)
+         ~doc:"int Batch size for translation benchmarking measurements (default: 100)"
+     in
+     Prose.benchmark ~iterations ~directory ~translation_batch_size)
+;;
+
 let command =
   Command.group
     ~summary:
       "Commands to either verify the probilistic session type or output PRISM files for \
        inspection."
-    [ "output", output_command; "verify", verify_command ]
+    [ "output", output_command; "verify", verify_command; "benchmark", benchmark_command ]
 ;;
 
 let () = Command_unix.run command
