@@ -13,7 +13,9 @@ module Communication : sig
   val find_choice : t -> Ast.choice list -> Ast.choice option
 end
 
-type t [@@deriving sexp]
+type t [@@deriving compare, equal, sexp]
+
+module Map : Map.S with type Key.t = t
 
 (** Stores the mapping between each label and its ID, as well as who each
     participant sends messages to. *)
@@ -40,6 +42,7 @@ module Id_map : sig
 end
 
 val blank : t
+val is_blank : t -> bool
 val communication : Communication.t -> t
 val label : from_participant:string -> to_participant:string -> t
 val label_of_communication : Communication.t -> t

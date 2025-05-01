@@ -1,0 +1,13 @@
+(* Translation example from the thesis *)
+
+p : q (+) {
+      0.2 : l1 . mu t . q (+) l1 . t,
+      0.3 : l2 . q (+) l2 . end,
+      0.5 : l3 . end
+}
+
+q : p & {
+      l1 . mu t. p & l1 . t,
+      l2 . p & l2 . end,
+      l3 . end
+}

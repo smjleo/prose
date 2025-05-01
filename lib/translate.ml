@@ -1,69 +1,6 @@
 open! Core
 open Prism
 
-(** R(-) in the paper. Returns set of all participants in the context. *)
-let roles context =
-  let rec in_type = function
-    | Ast.End -> String.Set.empty
-    | Mu (_t, c) -> in_type c
-    | Variable _t -> String.Set.empty
-    | Internal { int_part; int_choices } ->
-      let bald_choices = List.map int_choices ~f:(fun (_p, c) -> c) in
-      Set.union (String.Set.singleton int_part) (in_choices bald_choices)
-    | External { ext_part; ext_choices } ->
-      Set.union (String.Set.singleton ext_part) (in_choices ext_choices)
-  and in_choices choices =
-    List.map choices ~f:(fun { Ast.ch_cont; _ } -> in_type ch_cont)
-    |> String.Set.union_list
-  in
-  let in_context_item { Ast.ctx_part; ctx_type } =
-    Set.union (String.Set.singleton ctx_part) (in_type ctx_type)
-  in
-  List.map context ~f:in_context_item |> String.Set.union_list
-;;
-
-(** CR(-) in the paper. *)
-let closed_roles context =
-  List.map context ~f:(fun { Ast.ctx_part; _ } -> ctx_part) |> String.Set.of_list
-;;
-
-(** OR(-) in the paper. *)
-let open_roles context = Set.diff (roles context) (closed_roles context)
-
-(** Generate the closure module, which ensures that any CR <--> OR communication
-    does not go through. *)
-let closure context =
-  let closure_var = StringVar "closure" in
-  let dummy_update = BoolUpdate (closure_var, BoolConst false) in
-  let dummy_command from_participant to_participant =
-    { action = Action.communication { from_participant; to_participant; label = None }
-    ; guard = BoolConst false
-    ; updates = [ 1.0, [ dummy_update ] ]
-    }
-  in
-  let closed_roles = Set.to_list (closed_roles context) in
-  let open_roles = Set.to_list (open_roles context) in
-  let disallow participant_pairs =
-    List.map participant_pairs ~f:(fun (p1, p2) ->
-      [ dummy_command p1 p2; dummy_command p2 p1 ])
-    |> List.concat
-  in
-  let closed_open = List.cartesian_product closed_roles open_roles |> disallow in
-  (* Where both participants are closed, but only one tries to synchronise *)
-  let sync_alone =
-    List.cartesian_product closed_roles closed_roles
-    |> List.filter ~f:(fun (c1, c2) ->
-      Type_utils.communicates_exn ~context ~from_participant:c1 ~to_participant:c2
-      && not
-           (Type_utils.communicates_exn ~context ~from_participant:c2 ~to_participant:c1))
-    |> disallow
-  in
-  { locals = [ Bool closure_var ]
-  ; participant = "closure"
-  ; commands = List.concat [ closed_open; sync_alone ]
-  }
-;;
-
 (** The (| - |) function in the paper, which takes a session type and
     produces a list of commands for the PRISM module. *)
 let rec translate_type ~id_map ~participant ~state ~state_size ~var_map ty =
@@ -91,9 +28,6 @@ let rec translate_type ~id_map ~participant ~state ~state_size ~var_map ty =
       ; label
       }
     in
-    let label_var =
-      ActionVar (Action.label ~from_participant:participant ~to_participant:int_part)
-    in
     let int_choices =
       (* We sort the internal choice according to their ID, so that the index used to
          denote the next state is canonical. *)
@@ -110,13 +44,8 @@ let rec translate_type ~id_map ~participant ~state ~state_size ~var_map ty =
       ; updates =
           ( 1.0 -. List.sum (module Float) int_choices ~f:(fun (p, _c) -> p)
           , [ IntUpdate (state_var, IntConst (state_size + 1)) ] )
-          :: List.mapi int_choices ~f:(fun i (prob, { ch_label; _ }) ->
-            let communication = new_communication (Some ch_label) in
-            let id = Action.Id_map.id id_map communication |> Option.value_exn in
-            ( prob
-            , [ IntUpdate (state_var, IntConst (state + i + 1))
-              ; IntUpdate (label_var, IntConst id)
-              ] ))
+          :: List.mapi int_choices ~f:(fun i (prob, _) ->
+            prob, [ IntUpdate (state_var, IntConst (state + i + 1)) ])
       }
     in
     let communications =
@@ -130,7 +59,6 @@ let rec translate_type ~id_map ~participant ~state ~state_size ~var_map ty =
     let choices =
       List.mapi bald_choices ~f:(fun i { ch_label; ch_cont; _ } ->
         let communication = new_communication (Some ch_label) in
-        let id = Action.Id_map.id id_map communication |> Option.value_exn in
         let new_state =
           match ch_cont with
           | End -> state_size
@@ -145,16 +73,8 @@ let rec translate_type ~id_map ~participant ~state ~state_size ~var_map ty =
               ~id_map
         in
         { action = Action.communication communication
-        ; guard =
-            And
-              ( Eq (Var state_var, IntConst (state + i + 1))
-              , Eq (Var label_var, IntConst id) )
-        ; updates =
-            [ ( 1.0
-              , [ IntUpdate (state_var, IntConst new_state)
-                ; IntUpdate (label_var, IntConst 0)
-                ] )
-            ]
+        ; guard = Eq (Var state_var, IntConst (state + i + 1))
+        ; updates = [ 1.0, [ IntUpdate (state_var, IntConst new_state) ] ]
         })
     in
     let continuations =
@@ -173,6 +93,12 @@ let rec translate_type ~id_map ~participant ~state ~state_size ~var_map ty =
     in
     List.concat [ [ initial ]; choices; continuations ]
   | External { ext_part; ext_choices } ->
+    let new_communication label =
+      { Action.Communication.from_participant = ext_part
+      ; to_participant = participant
+      ; label
+      }
+    in
     let initial =
       { action =
           Action.communication
@@ -183,61 +109,38 @@ let rec translate_type ~id_map ~participant ~state ~state_size ~var_map ty =
       }
     in
     let communications =
-      Action.Id_map.communications
-        id_map
-        ~from_participant:ext_part
-        ~to_participant:participant
-    in
-    let present_communications =
-      (* Only communications of the form p::q::l_i where l_i is present in ext_choices *)
-      List.filter communications ~f:(fun communication ->
-        Action.Communication.find_choice communication ext_choices |> Option.is_some)
+      List.map ext_choices ~f:(fun { ch_label; _ } -> new_communication (Some ch_label))
     in
     let choices =
-      List.map communications ~f:(fun communication ->
-        match Action.Communication.find_choice communication ext_choices with
-        | None ->
-          { action = Action.communication communication
-          ; guard = BoolConst false
-          ; updates = [ 1.0, [ IntUpdate (state_var, IntConst (state + 1)) ] ]
-          }
-        | Some { ch_cont; _ } ->
-          let new_state =
-            match ch_cont with
-            | End -> state_size
-            | Variable t -> Map.find_exn var_map t
-            | Mu _ | Internal _ | External _ ->
-              Type_utils.next_state
-                ~direction:`External
-                ~state
-                ~communication
-                ~communications:present_communications
-                ~choices:ext_choices
-                ~id_map
-          in
-          let id = Action.Id_map.id id_map communication |> Option.value_exn in
-          let label_var = ActionVar (Action.label_of_communication communication) in
-          { action = Action.communication communication
-          ; guard =
-              And
-                (Eq (Var state_var, IntConst (state + 1)), Eq (Var label_var, IntConst id))
-          ; updates = [ 1.0, [ IntUpdate (state_var, IntConst new_state) ] ]
-          })
+      List.map ext_choices ~f:(fun { ch_cont; ch_label; _ } ->
+        let communication = new_communication (Some ch_label) in
+        let new_state =
+          match ch_cont with
+          | End -> state_size
+          | Variable t -> Map.find_exn var_map t
+          | Mu _ | Internal _ | External _ ->
+            Type_utils.next_state
+              ~direction:`External
+              ~state
+              ~communication
+              ~communications
+              ~choices:ext_choices
+              ~id_map
+        in
+        { action = Action.communication communication
+        ; guard = Eq (Var state_var, IntConst (state + 1))
+        ; updates = [ 1.0, [ IntUpdate (state_var, IntConst new_state) ] ]
+        })
     in
     let continuations =
       List.concat_map ext_choices ~f:(fun { ch_cont; ch_label; ch_sort = _ } ->
-        let communication =
-          { Action.Communication.from_participant = ext_part
-          ; to_participant = participant
-          ; label = Some ch_label
-          }
-        in
+        let communication = new_communication (Some ch_label) in
         let new_state =
           Type_utils.next_state
             ~direction:`External
             ~state
             ~communication
-            ~communications:present_communications
+            ~communications
             ~choices:ext_choices
             ~id_map
         in
@@ -247,13 +150,7 @@ let rec translate_type ~id_map ~participant ~state ~state_size ~var_map ty =
 ;;
 
 let translate_ctx_item ~id_map { Ast.ctx_part; ctx_type } =
-  let to_var = function
-    | `Int (action, max) -> Int (ActionVar action, max)
-    | `Bool action -> Bool (ActionVar action)
-  in
-  { locals =
-      Int (StringVar ctx_part, Type_utils.state_space ctx_type + 1)
-      :: List.map (Action.Id_map.local_vars id_map ctx_part) ~f:to_var
+  { locals = [ Int (StringVar ctx_part, Type_utils.state_space ctx_type + 1) ]
   ; participant = ctx_part
   ; commands =
       { action = Action.blank
@@ -271,10 +168,51 @@ let translate_ctx_item ~id_map { Ast.ctx_part; ctx_type } =
   }
 ;;
 
+(** Generate the closure module, which ensures that any isolated transitions
+    does not go through. *)
+let closure modules =
+  let closure_var = StringVar "closure" in
+  let dummy_update = BoolUpdate (closure_var, BoolConst false) in
+  let disallow action =
+    { action; guard = BoolConst false; updates = [ 1.0, [ dummy_update ] ] }
+  in
+  let get_unique_actions { commands; _ } =
+    List.map commands ~f:(fun { action; _ } -> action)
+    |> List.sort ~compare:Action.compare
+    |> List.remove_consecutive_duplicates ~equal:Action.equal
+  in
+  let commands = List.map modules ~f:get_unique_actions |> List.concat in
+  let actions =
+    List.fold_left commands ~init:Action.Map.empty ~f:(fun accum action ->
+      Map.update accum action ~f:(function
+        | None -> 1
+        | Some x -> x + 1))
+  in
+  let commands =
+    Map.to_alist actions
+    |> List.filter_map ~f:(fun (action, amount) ->
+      match amount with
+      | 1 ->
+        (* We should block this from synchronising by itself *)
+        Some (disallow action)
+      | 2 ->
+        (* This is fine *)
+        None
+      | n ->
+        (* We shouldn't have any zeros *)
+        assert (n > 2);
+        (* If more than two participants have this, then this must be an epsilon transition *)
+        assert (Action.is_blank action);
+        None)
+  in
+  { locals = [ Bool closure_var ]; participant = "closure"; commands }
+;;
+
 let translate context =
   let id_map = Action.Communication.in_context context |> Action.Id_map.of_list in
+  let modules = List.map ~f:(translate_ctx_item ~id_map) context in
   ( { globals = [ Bool (StringVar "fail") ]
-    ; modules = closure context :: List.map ~f:(translate_ctx_item ~id_map) context
+    ; modules = closure modules :: modules
     ; labels = Gen_labels.generate ~id_map context
     }
   , Gen_props.generate context )

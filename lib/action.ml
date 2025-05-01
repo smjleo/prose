@@ -64,12 +64,22 @@ module Communication = struct
   ;;
 end
 
-type t =
-  | Blank
-  | Communication of Communication.t
-[@@deriving compare, equal, sexp]
+module T = struct
+  type t =
+    | Blank
+    | Communication of Communication.t
+  [@@deriving compare, equal, sexp]
+end
+
+include T
 
 let blank = Blank
+
+let is_blank = function
+  | Blank -> true
+  | Communication _ -> false
+;;
+
 let communication c = Communication c
 
 let label ~from_participant ~to_participant =
@@ -165,3 +175,5 @@ module Id_map = struct
         , communications t ~from_participant:p ~to_participant:q |> List.length ))
   ;;
 end
+
+module Map = Map.Make (T)
