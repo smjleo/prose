@@ -44,3 +44,10 @@ and sort =
   | Int
   | Str
   | Bool (* TODO: need more? *)
+
+let sort_to_string = function
+  | Unit -> "unit"
+  | Int -> "int"
+  | Str -> "str"
+  | Bool -> "bool"
+;;

@@ -1,12 +1,23 @@
 open! Core
 
 module Communication = struct
+  module Tag = struct
+    type t =
+      { label : string
+      ; sort : string
+      }
+    [@@deriving compare, equal, sexp]
+
+    let tag label sort = { label; sort = Ast.sort_to_string sort }
+    let to_string { label; sort } = label ^ "_" ^ sort
+  end
+
   module T = struct
     type t =
       { (* TODO: consider using custom types for participants and labels *)
         from_participant : string
       ; to_participant : string
-      ; label : string option
+      ; tag : Tag.t option
       }
     [@@deriving compare, equal, sexp]
   end
@@ -20,11 +31,11 @@ module Communication = struct
       | Mu (_var, stype) -> recurse direction participant stype
       | Variable _var -> CSet.empty
       | Internal { int_part; int_choices } ->
-        let each_choice (_p, { Ast.ch_label; ch_sort = _; ch_cont }) =
+        let each_choice (_p, { Ast.ch_label; ch_sort; ch_cont }) =
           let cur =
             { from_participant = participant
             ; to_participant = int_part
-            ; label = Some ch_label
+            ; tag = Some (Tag.tag ch_label ch_sort)
             }
           in
           let rest = recurse direction participant ch_cont in
@@ -35,11 +46,11 @@ module Communication = struct
         List.map ~f:each_choice int_choices |> CSet.union_list
       | External { ext_part; ext_choices } ->
         (* TODO: clean up dup with above *)
-        let each_choice { Ast.ch_label; ch_sort = _; ch_cont } =
+        let each_choice { Ast.ch_label; ch_sort; ch_cont } =
           let cur =
             { from_participant = ext_part
             ; to_participant = participant
-            ; label = Some ch_label
+            ; tag = Some (Tag.tag ch_label ch_sort)
             }
           in
           let rest = recurse direction participant ch_cont in
@@ -56,11 +67,12 @@ module Communication = struct
     List.map ~f:in_context_item context |> CSet.union_list |> Set.to_list
   ;;
 
-  let find_choice { label; _ } choices =
-    match label with
+  let find_choice { tag; _ } choices =
+    match tag with
     | None -> None
-    | Some label ->
-      List.find choices ~f:(fun { Ast.ch_label; _ } -> String.equal ch_label label)
+    | Some tag ->
+      List.find choices ~f:(fun { Ast.ch_label; ch_sort; _ } ->
+        Tag.equal (Tag.tag ch_label ch_sort) tag)
   ;;
 end
 
@@ -82,23 +94,13 @@ let is_blank = function
 
 let communication c = Communication c
 
-let label ~from_participant ~to_participant =
-  (* TODO: Ideally should have a separate variant for this, rather
-     than reusing label *)
-  Communication { from_participant; to_participant; label = Some "label" }
-;;
-
-let label_of_communication { Communication.from_participant; to_participant; label = _ } =
-  label ~from_participant ~to_participant
-;;
-
 let to_string = function
   | Blank -> ""
-  | Communication { from_participant; to_participant; label } ->
+  | Communication { from_participant; to_participant; tag } ->
     let parts = from_participant ^ "_" ^ to_participant in
-    (match label with
+    (match tag with
      | None -> parts
-     | Some label -> parts ^ "_" ^ label)
+     | Some tag -> parts ^ "_" ^ Communication.Tag.to_string tag)
 ;;
 
 module Id_map = struct
@@ -116,7 +118,7 @@ module Id_map = struct
     include KT
     include Comparator.Make (KT)
 
-    let of_communication { Communication.from_participant; to_participant; label = _ } =
+    let of_communication { Communication.from_participant; to_participant; tag = _ } =
       { from_participant; to_participant }
     ;;
   end
@@ -162,17 +164,6 @@ module Id_map = struct
   let communications { ids; sending_to = _ } ~from_participant ~to_participant =
     let key = { Key.from_participant; to_participant } in
     Map.find ids key |> Option.value ~default:[]
-  ;;
-
-  let local_vars t p =
-    (* We need p::q::label for all q, with maximum values being the number of
-       labels (i.e. highest ID) *)
-    let qs = Map.find t.sending_to p |> Option.value ~default:String.Set.empty in
-    Set.to_list qs
-    |> List.map ~f:(fun q ->
-      `Int
-        ( label ~from_participant:p ~to_participant:q
-        , communications t ~from_participant:p ~to_participant:q |> List.length ))
   ;;
 end
 

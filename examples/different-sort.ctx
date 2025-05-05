@@ -1,0 +1,5 @@
+(* What happens if two participants try to communicate on the same label but different sorts? *)
+
+p : q (+) l(Int) . end
+
+q : p & l(Bool) . end

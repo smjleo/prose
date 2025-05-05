@@ -22,18 +22,26 @@ let rec translate_type ~id_map ~participant ~state ~state_size ~var_map ty =
       ty
   | Variable _var -> []
   | Internal { int_part; int_choices } ->
-    let new_communication label =
+    let new_communication label_sort =
+      (* Beware, different definition to [new_communication] in [External]! *)
+      let tag =
+        match label_sort with
+        | None -> None
+        | Some (label, sort) -> Some (Action.Communication.Tag.tag label sort)
+      in
       { Action.Communication.from_participant = participant
       ; to_participant = int_part
-      ; label
+      ; tag
       }
     in
     let int_choices =
       (* We sort the internal choice according to their ID, so that the index used to
          denote the next state is canonical. *)
       List.sort int_choices ~compare:(fun (_f1, c1) (_f2, c2) ->
-        let id { Ast.ch_label; _ } =
-          new_communication (Some ch_label) |> Action.Id_map.id id_map |> Option.value_exn
+        let id { Ast.ch_label; ch_sort; _ } =
+          new_communication (Some (ch_label, ch_sort))
+          |> Action.Id_map.id id_map
+          |> Option.value_exn
         in
         Int.compare (id c1) (id c2))
     in
@@ -49,16 +57,16 @@ let rec translate_type ~id_map ~participant ~state ~state_size ~var_map ty =
       }
     in
     let communications =
-      List.map int_choices ~f:(fun (_p, { ch_label; _ }) ->
-        new_communication (Some ch_label))
+      List.map int_choices ~f:(fun (_p, { ch_label; ch_sort; _ }) ->
+        new_communication (Some (ch_label, ch_sort)))
     in
     let bald_choices =
       (* Choices without probabilities *)
       List.map int_choices ~f:(fun (_p, c) -> c)
     in
     let choices =
-      List.mapi bald_choices ~f:(fun i { ch_label; ch_cont; _ } ->
-        let communication = new_communication (Some ch_label) in
+      List.mapi bald_choices ~f:(fun i { ch_label; ch_sort; ch_cont } ->
+        let communication = new_communication (Some (ch_label, ch_sort)) in
         let new_state =
           match ch_cont with
           | End -> state_size
@@ -78,8 +86,8 @@ let rec translate_type ~id_map ~participant ~state ~state_size ~var_map ty =
         })
     in
     let continuations =
-      List.concat_map bald_choices ~f:(fun { ch_cont; ch_label; ch_sort = _ } ->
-        let communication = new_communication (Some ch_label) in
+      List.concat_map bald_choices ~f:(fun { ch_cont; ch_label; ch_sort } ->
+        let communication = new_communication (Some (ch_label, ch_sort)) in
         let new_state =
           Type_utils.next_state
             ~direction:`Internal
@@ -93,27 +101,34 @@ let rec translate_type ~id_map ~participant ~state ~state_size ~var_map ty =
     in
     List.concat [ [ initial ]; choices; continuations ]
   | External { ext_part; ext_choices } ->
-    let new_communication label =
+    let new_communication label_sort =
+      (* Beware, different definition to [new_communication] in [Internal]! *)
+      let tag =
+        match label_sort with
+        | None -> None
+        | Some (label, sort) -> Some (Action.Communication.Tag.tag label sort)
+      in
       { Action.Communication.from_participant = ext_part
       ; to_participant = participant
-      ; label
+      ; tag
       }
     in
     let initial =
       { action =
           Action.communication
-            { from_participant = ext_part; to_participant = participant; label = None }
+            { from_participant = ext_part; to_participant = participant; tag = None }
       ; guard =
           And (Eq (Var state_var, IntConst state), Eq (Var fail_var, BoolConst false))
       ; updates = [ 1.0, [ IntUpdate (state_var, IntConst (state + 1)) ] ]
       }
     in
     let communications =
-      List.map ext_choices ~f:(fun { ch_label; _ } -> new_communication (Some ch_label))
+      List.map ext_choices ~f:(fun { ch_label; ch_sort; _ } ->
+        new_communication (Some (ch_label, ch_sort)))
     in
     let choices =
-      List.map ext_choices ~f:(fun { ch_cont; ch_label; _ } ->
-        let communication = new_communication (Some ch_label) in
+      List.map ext_choices ~f:(fun { ch_cont; ch_label; ch_sort } ->
+        let communication = new_communication (Some (ch_label, ch_sort)) in
         let new_state =
           match ch_cont with
           | End -> state_size
@@ -133,8 +148,8 @@ let rec translate_type ~id_map ~participant ~state ~state_size ~var_map ty =
         })
     in
     let continuations =
-      List.concat_map ext_choices ~f:(fun { ch_cont; ch_label; ch_sort = _ } ->
-        let communication = new_communication (Some ch_label) in
+      List.concat_map ext_choices ~f:(fun { ch_cont; ch_label; ch_sort } ->
+        let communication = new_communication (Some (ch_label, ch_sort)) in
         let new_state =
           Type_utils.next_state
             ~direction:`External

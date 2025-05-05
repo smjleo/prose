@@ -20,9 +20,9 @@ let safety context =
   let communications = Action.Communication.in_context context in
   let clauses =
     List.map communications ~f:(fun communication ->
-      let unlabelled = { communication with label = None } in
+      let untagged = { communication with tag = None } in
       Implies
-        ( And (Label (Prism.Can_do communication), Label (Prism.Can_do_branch unlabelled))
+        ( And (Label (Prism.Can_do communication), Label (Prism.Can_do_branch untagged))
         , Label (Prism.Can_do_branch communication) ))
   in
   P (Ge 1.0, G (conjunction clauses))

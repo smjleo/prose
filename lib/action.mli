@@ -1,11 +1,20 @@
 open! Core
 
 module Communication : sig
+  (** A label-sort pair, so that usages of the same label with different sorts
+      essentially count as different labels. *)
+  module Tag : sig
+    type t [@@deriving compare, equal, sexp]
+
+    val tag : string -> Ast.sort -> t
+    val to_string : t -> string
+  end
+
   type t =
     { (* TODO: consider using custom types for participants and labels *)
       from_participant : string
     ; to_participant : string
-    ; label : string option
+    ; tag : Tag.t option
     }
   [@@deriving compare, equal, sexp]
 
@@ -32,18 +41,9 @@ module Id_map : sig
     -> from_participant:string
     -> to_participant:string
     -> Communication.t list
-
-  (** All the local variables for a participant module. We don't return
-      a Prism.var_type because this would introduce a dependency cycle
-      (since Prism depends on Action).
-
-      TODO: Lift variable into a separate file? *)
-  val local_vars : t -> string -> [ `Int of action * int | `Bool of action ] list
 end
 
 val blank : t
 val is_blank : t -> bool
 val communication : Communication.t -> t
-val label : from_participant:string -> to_participant:string -> t
-val label_of_communication : Communication.t -> t
 val to_string : t -> string
