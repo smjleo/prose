@@ -6,6 +6,7 @@ module Annotation = struct
     | Probabilistic_deadlock_freedom
     | Normalised_probabilistic_deadlock_freedom
     | Probabilisic_termination
+    | Normalised_probabilistic_termination
   [@@deriving equal, sexp_of]
 
   let all =
@@ -13,6 +14,7 @@ module Annotation = struct
     ; Probabilistic_deadlock_freedom
     ; Normalised_probabilistic_deadlock_freedom
     ; Probabilisic_termination
+    ; Normalised_probabilistic_termination
     ]
   ;;
 
@@ -22,6 +24,7 @@ module Annotation = struct
     | Normalised_probabilistic_deadlock_freedom ->
       "Normalised probabilistic deadlock freedom"
     | Probabilisic_termination -> "Probabilistic termination"
+    | Normalised_probabilistic_termination -> "Normalised probabilistic termination"
   ;;
 end
 

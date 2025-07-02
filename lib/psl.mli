@@ -6,6 +6,7 @@ module Annotation : sig
     | Probabilistic_deadlock_freedom
     | Normalised_probabilistic_deadlock_freedom
     | Probabilisic_termination
+    | Normalised_probabilistic_termination
   [@@deriving equal, sexp_of]
 
   val all : t list

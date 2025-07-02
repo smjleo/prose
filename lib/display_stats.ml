@@ -1,10 +1,13 @@
 open! Core
 
-let annotation_to_short_string = function
-  | Psl.Annotation.Type_safety -> "Safe"
-  | Psl.Annotation.Probabilistic_deadlock_freedom -> "PDF"
-  | Psl.Annotation.Normalised_probabilistic_deadlock_freedom -> "NPDF"
-  | Psl.Annotation.Probabilisic_termination -> "PTerm"
+let annotation_to_short_string =
+  let open Psl.Annotation in
+  function
+  | Type_safety -> "Safe"
+  | Probabilistic_deadlock_freedom -> "PDF"
+  | Normalised_probabilistic_deadlock_freedom -> "NPDF"
+  | Probabilisic_termination -> "PTerm"
+  | Normalised_probabilistic_termination -> "NTerm"
 ;;
 
 let default_filename_col_width = 30

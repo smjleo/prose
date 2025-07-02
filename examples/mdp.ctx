@@ -1,0 +1,7 @@
+a : b (+) { 0.3 : l1 . end, 0.4 : l2 . mu t . b (+) { 0.9 : l2 . t } }
+
+b : a & { l1 . end, l2 . mu t . a & l2 . t }
+
+c : d (+) l3 . end
+
+d : c & l3 . end

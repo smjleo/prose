@@ -1,7 +1,10 @@
 open! Core
 open Prism
 
-(** The (| - |) function in the paper, which takes a session type and
+let fail_var = StringVar "fail"
+let not_fail = Eq (Var fail_var, BoolConst false)
+
+(** The {| - |} function in the paper, which takes a session type and
     produces a list of commands for the PRISM module. *)
 let rec translate_type ~id_map ~participant ~state ~state_size ~var_map ty =
   let state_var =
@@ -9,7 +12,6 @@ let rec translate_type ~id_map ~participant ~state ~state_size ~var_map ty =
        S_p in the paper. *)
     StringVar participant
   in
-  let fail_var = StringVar "fail" in
   match ty with
   | Ast.End -> []
   | Mu (var, ty) ->
@@ -47,8 +49,7 @@ let rec translate_type ~id_map ~participant ~state ~state_size ~var_map ty =
     in
     let initial =
       { action = Action.communication (new_communication None)
-      ; guard =
-          And (Eq (Var state_var, IntConst state), Eq (Var fail_var, BoolConst false))
+      ; guard = And (Eq (Var state_var, IntConst state), not_fail)
       ; updates =
           ( 1.0 -. List.sum (module Float) int_choices ~f:(fun (p, _c) -> p)
           , [ IntUpdate (state_var, IntConst (state_size + 1)) ] )
@@ -81,7 +82,7 @@ let rec translate_type ~id_map ~participant ~state ~state_size ~var_map ty =
               ~id_map
         in
         { action = Action.communication communication
-        ; guard = Eq (Var state_var, IntConst (state + i + 1))
+        ; guard = And (Eq (Var state_var, IntConst (state + i + 1)), not_fail)
         ; updates = [ 1.0, [ IntUpdate (state_var, IntConst new_state) ] ]
         })
     in
@@ -117,8 +118,7 @@ let rec translate_type ~id_map ~participant ~state ~state_size ~var_map ty =
       { action =
           Action.communication
             { from_participant = ext_part; to_participant = participant; tag = None }
-      ; guard =
-          And (Eq (Var state_var, IntConst state), Eq (Var fail_var, BoolConst false))
+      ; guard = And (Eq (Var state_var, IntConst state), not_fail)
       ; updates = [ 1.0, [ IntUpdate (state_var, IntConst (state + 1)) ] ]
       }
     in
@@ -143,7 +143,7 @@ let rec translate_type ~id_map ~participant ~state ~state_size ~var_map ty =
               ~id_map
         in
         { action = Action.communication communication
-        ; guard = Eq (Var state_var, IntConst (state + 1))
+        ; guard = And (Eq (Var state_var, IntConst (state + 1)), not_fail)
         ; updates = [ 1.0, [ IntUpdate (state_var, IntConst new_state) ] ]
         })
     in
@@ -170,7 +170,9 @@ let translate_ctx_item ~id_map { Ast.ctx_part; ctx_type } =
   ; commands =
       { action = Action.blank
       ; guard =
-          Eq (Var (StringVar ctx_part), IntConst (Type_utils.state_space ctx_type + 1))
+          And
+            ( Eq (Var (StringVar ctx_part), IntConst (Type_utils.state_space ctx_type + 1))
+            , not_fail )
       ; updates = [ 1.0, [ BoolUpdate (StringVar "fail", BoolConst true) ] ]
       }
       :: translate_type
