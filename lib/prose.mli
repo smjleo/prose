@@ -36,5 +36,6 @@ val benchmark
   :  iterations:int
   -> directory:string
   -> translation_batch_size:int
+  -> latex:bool
   -> unit
   -> unit

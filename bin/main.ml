@@ -98,8 +98,8 @@ let benchmark_command =
             100
             int)
          ~doc:"int Batch size for translation benchmarking measurements (default: 100)"
-     in
-     Prose.benchmark ~iterations ~directory ~translation_batch_size)
+     and latex = flag "-latex" no_arg ~doc:"bool Output table in LaTeX format" in
+     Prose.benchmark ~iterations ~directory ~translation_batch_size ~latex)
 ;;
 
 let command =

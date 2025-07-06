@@ -173,7 +173,8 @@ let benchmark_translation ~iterations ~ctx_file ~batch_size =
   Microbenchmark.measure
     ~iterations
     ~batch_size
-    ~f:(fun () -> parse_and_translate ~on_error:`Raise ~ctx_file)
+    ~f:(fun () ->
+      parse_and_translate ~on_error:`Raise ~on_warning:`Ignore ~balance:false ~ctx_file)
     ()
 ;;
 
@@ -200,7 +201,7 @@ let benchmark_prism ~annotations ~iterations ~ctx_file =
       ())
 ;;
 
-let benchmark ~iterations ~directory ~translation_batch_size () =
+let benchmark ~iterations ~directory ~translation_batch_size ~latex () =
   let annotations = Psl.Annotation.all in
   Display_stats.print_header annotations;
   let filenames = Sys_unix.ls_dir directory |> List.sort ~compare:String.compare in
@@ -216,7 +217,7 @@ let benchmark ~iterations ~directory ~translation_batch_size () =
             time / Float.of_int translation_batch_size)
         in
         let prism_runtimes = benchmark_prism ~annotations ~iterations ~ctx_file in
-        Display_stats.print_row basename (translation_runtimes :: prism_runtimes);
+        Display_stats.print_row basename (translation_runtimes :: prism_runtimes) ~latex;
         None
       with
       | _ -> Some ctx_file)

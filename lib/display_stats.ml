@@ -54,12 +54,19 @@ let print_row
       ?(data_col_width = default_data_col_width)
       filename
       runtimes
+      ~latex
   =
-  printf "%-*s" filename_col_width filename;
+  if latex
+  then printf "\\textsf{%s}" filename
+  else printf "%-*s" filename_col_width filename;
   List.iter runtimes ~f:(fun column ->
     let mean, sem = mean_sem column in
-    let cell = sprintf "%.2f (± %.2f)" mean sem in
-    printf "%-*s " data_col_width cell);
+    if latex
+    then printf " & $%.2f \\pm %.2f$" mean sem
+    else (
+      let cell = sprintf "%.2f (± %.2f)" mean sem in
+      printf "%-*s " data_col_width cell));
+  if latex then printf " \\\\";
   printf "\n";
   Out_channel.flush stdout
 ;;

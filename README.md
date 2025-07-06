@@ -32,6 +32,8 @@ The granular benchmark measures the time taken for the translation and the PRISM
 
 For example, use the [examples/](examples/) directory: `dune exec prose -- benchmark examples`.
 
+The granular benchmark also supports LaTeX `tabular` output (to reproduce the table in the paper): `dune exec prose -- benchmark examples -latex`.
+
 ### Testing
 `dune test test/run-examples.t` (alternatively, just `dune test`)
 

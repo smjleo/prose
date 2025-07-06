@@ -11,4 +11,5 @@ val print_row
   -> ?data_col_width:int
   -> string
   -> Time_float.Span.t list list
+  -> latex:bool
   -> unit
