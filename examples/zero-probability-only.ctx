@@ -1,0 +1,4 @@
+(* This context has only zero-probability reductions, making normalised properties undefined. *)
+
+p : q (+) { 0 : l1 . end }
+q : p & l1 . end

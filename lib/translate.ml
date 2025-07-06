@@ -51,10 +51,10 @@ let rec translate_type ~id_map ~participant ~state ~state_size ~var_map ty =
       { action = Action.communication (new_communication None)
       ; guard = And (Eq (Var state_var, IntConst state), not_fail)
       ; updates =
-          ( 1.0 -. List.sum (module Float) int_choices ~f:(fun (p, _c) -> p)
+          ( Prism.Float (1.0 -. List.sum (module Float) int_choices ~f:(fun (p, _c) -> p))
           , [ IntUpdate (state_var, IntConst (state_size + 1)) ] )
           :: List.mapi int_choices ~f:(fun i (prob, _) ->
-            prob, [ IntUpdate (state_var, IntConst (state + i + 1)) ])
+            Prism.Float prob, [ IntUpdate (state_var, IntConst (state + i + 1)) ])
       }
     in
     let communications =
@@ -83,7 +83,7 @@ let rec translate_type ~id_map ~participant ~state ~state_size ~var_map ty =
         in
         { action = Action.communication communication
         ; guard = And (Eq (Var state_var, IntConst (state + i + 1)), not_fail)
-        ; updates = [ 1.0, [ IntUpdate (state_var, IntConst new_state) ] ]
+        ; updates = [ Prism.Float 1.0, [ IntUpdate (state_var, IntConst new_state) ] ]
         })
     in
     let continuations =
@@ -119,7 +119,7 @@ let rec translate_type ~id_map ~participant ~state ~state_size ~var_map ty =
           Action.communication
             { from_participant = ext_part; to_participant = participant; tag = None }
       ; guard = And (Eq (Var state_var, IntConst state), not_fail)
-      ; updates = [ 1.0, [ IntUpdate (state_var, IntConst (state + 1)) ] ]
+      ; updates = [ Prism.Float 1.0, [ IntUpdate (state_var, IntConst (state + 1)) ] ]
       }
     in
     let communications =
@@ -144,7 +144,7 @@ let rec translate_type ~id_map ~participant ~state ~state_size ~var_map ty =
         in
         { action = Action.communication communication
         ; guard = And (Eq (Var state_var, IntConst (state + 1)), not_fail)
-        ; updates = [ 1.0, [ IntUpdate (state_var, IntConst new_state) ] ]
+        ; updates = [ Prism.Float 1.0, [ IntUpdate (state_var, IntConst new_state) ] ]
         })
     in
     let continuations =
@@ -173,7 +173,7 @@ let translate_ctx_item ~id_map { Ast.ctx_part; ctx_type } =
           And
             ( Eq (Var (StringVar ctx_part), IntConst (Type_utils.state_space ctx_type + 1))
             , not_fail )
-      ; updates = [ 1.0, [ BoolUpdate (StringVar "fail", BoolConst true) ] ]
+      ; updates = [ Prism.Float 1.0, [ BoolUpdate (StringVar "fail", BoolConst true) ] ]
       }
       :: translate_type
            ~id_map
@@ -191,7 +191,7 @@ let closure modules =
   let closure_var = StringVar "closure" in
   let dummy_update = BoolUpdate (closure_var, BoolConst false) in
   let disallow action =
-    { action; guard = BoolConst false; updates = [ 1.0, [ dummy_update ] ] }
+    { action; guard = BoolConst false; updates = [ Prism.Float 1.0, [ dummy_update ] ] }
   in
   let get_unique_actions { commands; _ } =
     List.map commands ~f:(fun { action; _ } -> action)

@@ -20,7 +20,7 @@ and pmodule =
 and command =
   { action : Action.t
   ; guard : bool expr
-  ; updates : (float * update list) list
+  ; updates : (probability * update list) list
   }
 
 and _ expr =
@@ -38,6 +38,10 @@ and _ variable =
 and update =
   | IntUpdate of int variable * int expr
   | BoolUpdate of bool variable * bool expr
+
+and probability =
+  | Float of float
+  | Fraction of int * int
 
 and label =
   { name : label_name

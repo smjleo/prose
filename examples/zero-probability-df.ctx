@@ -1,0 +1,4 @@
+(* This context has a zero-probability reduction into a deadlocked context. *)
+
+p : q (+) { 0.5 : l1 . end, 0 : l2 . q (+) l3 . end }
+q : p & { l1 . end, l2 . end }

@@ -7,6 +7,7 @@ val output
   :  ctx_file:string
   -> print_ast:bool
   -> print_translation_time:bool
+  -> balance:bool
   -> ?model_output_file:string
   -> ?prop_output_file:string
   -> unit
@@ -19,6 +20,7 @@ val verify
   -> print_ast:bool
   -> print_raw_prism:bool
   -> print_translation_time:bool
+  -> balance:bool
   -> unit
   -> unit
 

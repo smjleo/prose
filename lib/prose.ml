@@ -9,14 +9,19 @@ let parse lexbuf =
     error_s [%message "Syntax error" (line : int) (column : int)] |> ok_exn
 ;;
 
-let parse_and_translate ~on_error ~ctx_file =
+let parse_and_translate ~on_error ~on_warning ~ctx_file ~balance =
   let inx = In_channel.create ctx_file in
   let lexbuf = Lexing.from_channel inx in
   lexbuf.lex_curr_p <- { lexbuf.lex_curr_p with pos_fname = ctx_file };
   let context = parse lexbuf in
   In_channel.close inx;
-  Well_formed.check_context ~on_error context;
+  Well_formed.check_context ~on_error ~on_warning context;
   let translated, properties = Translate.translate context in
+  let translated =
+    match balance with
+    | false -> translated
+    | true -> Transform.balance_probabilities translated
+  in
   context, translated, properties
 ;;
 
@@ -25,6 +30,8 @@ let output_and_return_annotations
       ~print_ast
       ~print_translation_time
       ~on_error
+      ~on_warning
+      ~balance
       ?model_output_file
       ?prop_output_file
       ?only_annotation
@@ -32,7 +39,9 @@ let output_and_return_annotations
   =
   let dbg_print_s sexp = if print_ast then print_s sexp in
   let t0 = Time_float.now () in
-  let context, translated, properties = parse_and_translate ~on_error ~ctx_file in
+  let context, translated, properties =
+    parse_and_translate ~on_error ~on_warning ~ctx_file ~balance
+  in
   dbg_print_s [%message (context : Ast.context)];
   let t1 = Time_float.now () in
   let translation_time = Time_float.diff t1 t0 in
@@ -54,6 +63,7 @@ let output
       ~ctx_file
       ~print_ast
       ~print_translation_time
+      ~balance
       ?model_output_file
       ?prop_output_file
       ()
@@ -64,7 +74,9 @@ let output
     ?prop_output_file
     ~print_ast
     ~print_translation_time
+    ~balance
     ~on_error:`Print_and_exit
+    ~on_warning:`Print
     ()
   |> ignore
 ;;
@@ -104,6 +116,8 @@ let with_prism_files
       ~print_ast
       ~print_translation_time
       ~on_error
+      ~on_warning
+      ~balance
       ~f
       ?only_annotation
       ()
@@ -118,6 +132,8 @@ let with_prism_files
       ~print_ast
       ~print_translation_time
       ~on_error
+      ~on_warning
+      ~balance
       ?only_annotation
       ()
   in
@@ -127,12 +143,14 @@ let with_prism_files
   res
 ;;
 
-let verify ~ctx_file ~print_ast ~print_raw_prism ~print_translation_time () =
+let verify ~ctx_file ~print_ast ~print_raw_prism ~print_translation_time ~balance () =
   with_prism_files
     ~ctx_file
     ~print_ast
     ~print_translation_time
     ~on_error:`Print_and_exit
+    ~on_warning:`Print
+    ~balance
     ~f:(fun ~model_output_file ~prop_output_file ~annotations ->
       let prism =
         Core_unix.create_process
@@ -167,6 +185,8 @@ let benchmark_prism ~annotations ~iterations ~ctx_file =
       ~print_ast:false
       ~print_translation_time:false
       ~on_error:`Raise
+      ~on_warning:`Ignore
+      ~balance:false
       ~f:(fun ~model_output_file ~prop_output_file ~annotations:_ ->
         Microbenchmark.measure
           ~iterations

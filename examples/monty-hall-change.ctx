@@ -7,9 +7,9 @@
    Compare with [monty-hall-stay.ctx]. *)
 
 car : host (+) {
-        0.333333 : l1 . end,
-        0.333333 : l2 . end,
-        0.333334 : l3 . end
+        0.3 : l1 . end,
+        0.3 : l2 . end,
+        0.3 : l3 . end
       }
 
 host : car & {

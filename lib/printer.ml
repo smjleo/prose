@@ -61,6 +61,17 @@ let print_updates ppf updates =
   print_list ppf updates ~print ~sep:"&"
 ;;
 
+let print_probability ppf = function
+  | Float p ->
+    (* TODO: %g is nice because it cuts trailing zeroes, but it's not
+       nice because it might choose %e instead of %f if it's more
+       compact. For now we just pray that the user hasn't put some
+       ridiculous probability, but it should be straightforward to
+       just write another formatter for floats *)
+    fprintf ppf "%g" p
+  | Fraction (d, n) -> fprintf ppf "%d/%d" d n
+;;
+
 let print_command ppf { action; guard; updates } =
   fprintf ppf "[%s] %a -> " (Action.to_string action) print_expr guard;
   let print ppf (prob, updates) =
@@ -69,7 +80,7 @@ let print_command ppf { action; guard; updates } =
        compact. For now we just pray that the user hasn't put some
        ridiculous probability, but it should be straightforward to
        just write another formatter for floats *)
-    fprintf ppf "%g:%a" prob print_updates updates
+    fprintf ppf "%a:%a" print_probability prob print_updates updates
   in
   print_list ppf updates ~print ~sep:" + ";
   fprintf ppf ";\n"

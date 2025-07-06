@@ -1,9 +1,9 @@
-(* Translation example from the thesis *)
+(* Translation example *)
 
 p : q (+) {
       0.2 : l1 . mu t . q (+) l1 . t,
       0.3 : l2 . q (+) l2 . end,
-      0.5 : l3 . end
+      0.4 : l3 . end
 }
 
 q : p & {

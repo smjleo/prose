@@ -26,6 +26,17 @@ let print_translation_time_flag =
     ~doc:"Print time taken for translation of context into PRISM"
 ;;
 
+let balance_flag =
+  let open Command.Param in
+  flag
+    "-balance"
+    no_arg
+    ~doc:
+      "Balance probabilities of selection to all have equal probability. This should be \
+       used when checking non-probabilistic properties (e.g. safety) of typing contexts \
+       that contain zero-probability transitions."
+;;
+
 let output_command =
   Command.basic
     ~summary:
@@ -43,13 +54,15 @@ let output_command =
          (optional string)
          ~doc:"string Write PRISM property output to filename (default: print to stdout)"
      and print_ast = print_ast_flag
-     and print_translation_time = print_translation_time_flag in
+     and print_translation_time = print_translation_time_flag
+     and balance = balance_flag in
      Prose.output
        ~ctx_file
        ?model_output_file
        ?prop_output_file
        ~print_ast
-       ~print_translation_time)
+       ~print_translation_time
+       ~balance)
 ;;
 
 let verify_command =
@@ -59,8 +72,9 @@ let verify_command =
     (let%map_open.Command ctx_file = ctx_file_flag
      and print_ast = print_ast_flag
      and print_raw_prism = print_raw_prism_flag
-     and print_translation_time = print_translation_time_flag in
-     Prose.verify ~ctx_file ~print_ast ~print_raw_prism ~print_translation_time)
+     and print_translation_time = print_translation_time_flag
+     and balance = balance_flag in
+     Prose.verify ~ctx_file ~print_ast ~print_raw_prism ~print_translation_time ~balance)
 ;;
 
 let benchmark_command =

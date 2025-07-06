@@ -801,9 +801,9 @@ For each context file in this directory, run [prose output] to check the model a
      Compare with [monty-hall-stay.ctx]. *)
   
   car : host (+) {
-          0.333333 : l1 . end,
-          0.333333 : l2 . end,
-          0.333334 : l3 . end
+          0.3 : l1 . end,
+          0.3 : l2 . end,
+          0.3 : l3 . end
         }
   
   host : car & {
@@ -834,7 +834,7 @@ For each context file in this directory, run [prose output] to check the model a
     car : [0..5] init 0;
   
     [] (car=5) & (fail=false) -> 1:(fail'=true);
-    [car_host] (car=0) & (fail=false) -> 0:(car'=5) + 0.333334:(car'=1) + 0.333333:(car'=2) + 0.333333:(car'=3);
+    [car_host] (car=0) & (fail=false) -> 0.1:(car'=5) + 0.3:(car'=1) + 0.3:(car'=2) + 0.3:(car'=3);
     [car_host_l3_unit] (car=1) & (fail=false) -> 1:(car'=4);
     [car_host_l2_unit] (car=2) & (fail=false) -> 1:(car'=4);
     [car_host_l1_unit] (car=3) & (fail=false) -> 1:(car'=4);
@@ -920,16 +920,16 @@ For each context file in this directory, run [prose output] to check the model a
   Result: false
   
   Probabilistic deadlock freedom
-  Result: 0.666667 (exact floating point)
+  Result: 0.6 (exact floating point)
   
   Normalised probabilistic deadlock freedom
-  Result: 0.666667
+  Result: 0.6666666666666666
   
   Probabilistic termination
-  Result: 1.0 (exact floating point)
+  Result: 0.8999999999999999 (exact floating point)
   
   Normalised probabilistic termination
-  Result: 1.0
+  Result: 0.9999999999999999
   
   
   
@@ -943,9 +943,9 @@ For each context file in this directory, run [prose output] to check the model a
      Compare with [monty-hall-change.ctx]. *)
   
   car : host (+) {
-          0.333333 : l1 . end,
-          0.333333 : l2 . end,
-          0.333334 : l3 . end
+          0.3 : l1 . end,
+          0.3 : l2 . end,
+          0.3 : l3 . end
         }
   
   host : car & {
@@ -978,7 +978,7 @@ For each context file in this directory, run [prose output] to check the model a
     car : [0..5] init 0;
   
     [] (car=5) & (fail=false) -> 1:(fail'=true);
-    [car_host] (car=0) & (fail=false) -> 0:(car'=5) + 0.333334:(car'=1) + 0.333333:(car'=2) + 0.333333:(car'=3);
+    [car_host] (car=0) & (fail=false) -> 0.1:(car'=5) + 0.3:(car'=1) + 0.3:(car'=2) + 0.3:(car'=3);
     [car_host_l3_unit] (car=1) & (fail=false) -> 1:(car'=4);
     [car_host_l2_unit] (car=2) & (fail=false) -> 1:(car'=4);
     [car_host_l1_unit] (car=3) & (fail=false) -> 1:(car'=4);
@@ -1064,16 +1064,16 @@ For each context file in this directory, run [prose output] to check the model a
   Result: false
   
   Probabilistic deadlock freedom
-  Result: 0.333333 (exact floating point)
+  Result: 0.30000000000000004 (exact floating point)
   
   Normalised probabilistic deadlock freedom
-  Result: 0.333333
+  Result: 0.33333333333333337
   
   Probabilistic termination
-  Result: 1.0 (exact floating point)
+  Result: 0.8999999999999999 (exact floating point)
   
   Normalised probabilistic termination
-  Result: 1.0
+  Result: 0.9999999999999999
   
   
   
@@ -2591,12 +2591,12 @@ For each context file in this directory, run [prose output] to check the model a
   
    ======= TEST ../examples/translation-example.ctx =======
   
-  (* Translation example from the thesis *)
+  (* Translation example *)
   
   p : q (+) {
         0.2 : l1 . mu t . q (+) l1 . t,
         0.3 : l2 . q (+) l2 . end,
-        0.5 : l3 . end
+        0.4 : l3 . end
   }
   
   q : p & {
@@ -2617,7 +2617,7 @@ For each context file in this directory, run [prose output] to check the model a
     p : [0..9] init 0;
   
     [] (p=9) & (fail=false) -> 1:(fail'=true);
-    [p_q] (p=0) & (fail=false) -> 0:(p'=9) + 0.5:(p'=1) + 0.3:(p'=2) + 0.2:(p'=3);
+    [p_q] (p=0) & (fail=false) -> 0.1:(p'=9) + 0.4:(p'=1) + 0.3:(p'=2) + 0.2:(p'=3);
     [p_q_l3_unit] (p=1) & (fail=false) -> 1:(p'=8);
     [p_q_l2_unit] (p=2) & (fail=false) -> 1:(p'=4);
     [p_q_l1_unit] (p=3) & (fail=false) -> 1:(p'=6);
@@ -2671,16 +2671,16 @@ For each context file in this directory, run [prose output] to check the model a
   Result: true
   
   Probabilistic deadlock freedom
-  Result: 1.0 (exact floating point)
+  Result: 0.9 (exact floating point)
   
   Normalised probabilistic deadlock freedom
   Result: 1.0
   
   Probabilistic termination
-  Result: 0.8 (exact floating point)
+  Result: 0.7 (exact floating point)
   
   Normalised probabilistic termination
-  Result: 0.8
+  Result: 0.7777777777777777
   
   
   
@@ -2920,6 +2920,252 @@ For each context file in this directory, run [prose output] to check the model a
   
   Probabilistic termination
   Result: 1.0 (exact floating point)
+  
+  Normalised probabilistic termination
+  Result: 1.0
+  
+  
+  
+  
+   ======= TEST ../examples/zero-probability-df.ctx =======
+  
+  (* This context has a zero-probability reduction into a deadlocked context. *)
+  
+  p : q (+) { 0.5 : l1 . end, 0 : l2 . q (+) l3 . end }
+  q : p & { l1 . end, l2 . end }
+   ======= PRISM output ========
+  
+  Warning: found zero-probability in context. Non-probabilistic properties (e.g. safety) may be inaccurate, and normalised probabilities may be undefined. If you are not already, use flag [-balance] to check non-probabilistic properties. See help options for [verify]/[output] for more details on [-balance].
+  
+  global fail : bool init false;
+  
+  module closure
+    closure : bool init false;
+  
+    [p_q_l3_unit] false -> 1:(closure'=false);
+  endmodule
+  
+  module p
+    p : [0..6] init 0;
+  
+    [] (p=6) & (fail=false) -> 1:(fail'=true);
+    [p_q] (p=0) & (fail=false) -> 0.5:(p'=6) + 0:(p'=1) + 0.5:(p'=2);
+    [p_q_l2_unit] (p=1) & (fail=false) -> 1:(p'=3);
+    [p_q_l1_unit] (p=2) & (fail=false) -> 1:(p'=5);
+    [p_q] (p=3) & (fail=false) -> 0:(p'=6) + 1:(p'=4);
+    [p_q_l3_unit] (p=4) & (fail=false) -> 1:(p'=5);
+  endmodule
+  
+  module q
+    q : [0..3] init 0;
+  
+    [] (q=3) & (fail=false) -> 1:(fail'=true);
+    [p_q] (q=0) & (fail=false) -> 1:(q'=1);
+    [p_q_l1_unit] (q=1) & (fail=false) -> 1:(q'=2);
+    [p_q_l2_unit] (q=1) & (fail=false) -> 1:(q'=2);
+  endmodule
+  
+  label "end" = (p=5) & (q=2);
+  label "cando_p_q_l1_unit" = p=0;
+  label "cando_p_q_l1_unit_branch" = q=0;
+  label "cando_p_q_l2_unit" = p=0;
+  label "cando_p_q_l2_unit_branch" = q=0;
+  label "cando_p_q_l3_unit" = p=3;
+  label "cando_p_q_l3_unit_branch" = false;
+  label "cando_p_q_branch" = q=0;
+  
+  // Type safety
+  P>=1 [ (G ((("cando_p_q_l1_unit" & "cando_p_q_branch") => "cando_p_q_l1_unit_branch") & ((("cando_p_q_l2_unit" & "cando_p_q_branch") => "cando_p_q_l2_unit_branch") & (("cando_p_q_l3_unit" & "cando_p_q_branch") => "cando_p_q_l3_unit_branch")))) ]
+  
+  // Probabilistic deadlock freedom
+  Pmin=? [ (G ("deadlock" => "end")) ]
+  
+  // Normalised probabilistic deadlock freedom
+  (Pmin=? [ (G ("deadlock" => "end")) ] / Pmin=? [ (G (!fail)) ])
+  
+  // Probabilistic termination
+  Pmin=? [ (F ("deadlock" & (!fail))) ]
+  
+  // Normalised probabilistic termination
+  (Pmin=? [ (F ("deadlock" & (!fail))) ] / Pmin=? [ (G (!fail)) ])
+  
+   ======= Property checking =======
+  
+  Warning: found zero-probability in context. Non-probabilistic properties (e.g. safety) may be inaccurate, and normalised probabilities may be undefined. If you are not already, use flag [-balance] to check non-probabilistic properties. See help options for [verify]/[output] for more details on [-balance].
+  
+  Type safety
+  Result: true
+  
+  Probabilistic deadlock freedom
+  Result: 0.5 (exact floating point)
+  
+  Normalised probabilistic deadlock freedom
+  Result: 1.0
+  
+  Probabilistic termination
+  Result: 0.5 (exact floating point)
+  
+  Normalised probabilistic termination
+  Result: 1.0
+  
+  
+  
+  
+   ======= TEST ../examples/zero-probability-only.ctx =======
+  
+  (* This context has only zero-probability reductions, making normalised properties undefined. *)
+  
+  p : q (+) { 0 : l1 . end }
+  q : p & l1 . end
+   ======= PRISM output ========
+  
+  Warning: found zero-probability in context. Non-probabilistic properties (e.g. safety) may be inaccurate, and normalised probabilities may be undefined. If you are not already, use flag [-balance] to check non-probabilistic properties. See help options for [verify]/[output] for more details on [-balance].
+  
+  global fail : bool init false;
+  
+  module closure
+    closure : bool init false;
+  
+  endmodule
+  
+  module p
+    p : [0..3] init 0;
+  
+    [] (p=3) & (fail=false) -> 1:(fail'=true);
+    [p_q] (p=0) & (fail=false) -> 1:(p'=3) + 0:(p'=1);
+    [p_q_l1_unit] (p=1) & (fail=false) -> 1:(p'=2);
+  endmodule
+  
+  module q
+    q : [0..3] init 0;
+  
+    [] (q=3) & (fail=false) -> 1:(fail'=true);
+    [p_q] (q=0) & (fail=false) -> 1:(q'=1);
+    [p_q_l1_unit] (q=1) & (fail=false) -> 1:(q'=2);
+  endmodule
+  
+  label "end" = (p=2) & (q=2);
+  label "cando_p_q_l1_unit" = p=0;
+  label "cando_p_q_l1_unit_branch" = q=0;
+  label "cando_p_q_branch" = q=0;
+  
+  // Type safety
+  P>=1 [ (G (("cando_p_q_l1_unit" & "cando_p_q_branch") => "cando_p_q_l1_unit_branch")) ]
+  
+  // Probabilistic deadlock freedom
+  Pmin=? [ (G ("deadlock" => "end")) ]
+  
+  // Normalised probabilistic deadlock freedom
+  (Pmin=? [ (G ("deadlock" => "end")) ] / Pmin=? [ (G (!fail)) ])
+  
+  // Probabilistic termination
+  Pmin=? [ (F ("deadlock" & (!fail))) ]
+  
+  // Normalised probabilistic termination
+  (Pmin=? [ (F ("deadlock" & (!fail))) ] / Pmin=? [ (G (!fail)) ])
+  
+   ======= Property checking =======
+  
+  Warning: found zero-probability in context. Non-probabilistic properties (e.g. safety) may be inaccurate, and normalised probabilities may be undefined. If you are not already, use flag [-balance] to check non-probabilistic properties. See help options for [verify]/[output] for more details on [-balance].
+  
+  Type safety
+  Result: true
+  
+  Probabilistic deadlock freedom
+  Result: 0.0 (exact floating point)
+  
+  Normalised probabilistic deadlock freedom
+  Result: 0.0
+  
+  Probabilistic termination
+  Result: 0.0 (exact floating point)
+  
+  Normalised probabilistic termination
+  Result: 0.0
+  
+  
+  
+  
+   ======= TEST ../examples/zero-probability-unsafe.ctx =======
+  
+  (* This context has a zero-probability reduction into an unsafe context. *)
+  
+  p : q (+) { 0.5 : l1 . end, 0 : l2 . q (+) l3 . end }
+  q : p & { l1 . end, l2 . p & l2 . end }
+  
+   ======= PRISM output ========
+  
+  Warning: found zero-probability in context. Non-probabilistic properties (e.g. safety) may be inaccurate, and normalised probabilities may be undefined. If you are not already, use flag [-balance] to check non-probabilistic properties. See help options for [verify]/[output] for more details on [-balance].
+  
+  global fail : bool init false;
+  
+  module closure
+    closure : bool init false;
+  
+    [p_q_l3_unit] false -> 1:(closure'=false);
+  endmodule
+  
+  module p
+    p : [0..6] init 0;
+  
+    [] (p=6) & (fail=false) -> 1:(fail'=true);
+    [p_q] (p=0) & (fail=false) -> 0.5:(p'=6) + 0:(p'=1) + 0.5:(p'=2);
+    [p_q_l2_unit] (p=1) & (fail=false) -> 1:(p'=3);
+    [p_q_l1_unit] (p=2) & (fail=false) -> 1:(p'=5);
+    [p_q] (p=3) & (fail=false) -> 0:(p'=6) + 1:(p'=4);
+    [p_q_l3_unit] (p=4) & (fail=false) -> 1:(p'=5);
+  endmodule
+  
+  module q
+    q : [0..5] init 0;
+  
+    [] (q=5) & (fail=false) -> 1:(fail'=true);
+    [p_q] (q=0) & (fail=false) -> 1:(q'=1);
+    [p_q_l1_unit] (q=1) & (fail=false) -> 1:(q'=4);
+    [p_q_l2_unit] (q=1) & (fail=false) -> 1:(q'=2);
+    [p_q] (q=2) & (fail=false) -> 1:(q'=3);
+    [p_q_l2_unit] (q=3) & (fail=false) -> 1:(q'=4);
+  endmodule
+  
+  label "end" = (p=5) & (q=4);
+  label "cando_p_q_l1_unit" = p=0;
+  label "cando_p_q_l1_unit_branch" = q=0;
+  label "cando_p_q_l2_unit" = p=0;
+  label "cando_p_q_l2_unit_branch" = (q=0) | (q=2);
+  label "cando_p_q_l3_unit" = p=3;
+  label "cando_p_q_l3_unit_branch" = false;
+  label "cando_p_q_branch" = (q=0) | (q=2);
+  
+  // Type safety
+  P>=1 [ (G ((("cando_p_q_l1_unit" & "cando_p_q_branch") => "cando_p_q_l1_unit_branch") & ((("cando_p_q_l2_unit" & "cando_p_q_branch") => "cando_p_q_l2_unit_branch") & (("cando_p_q_l3_unit" & "cando_p_q_branch") => "cando_p_q_l3_unit_branch")))) ]
+  
+  // Probabilistic deadlock freedom
+  Pmin=? [ (G ("deadlock" => "end")) ]
+  
+  // Normalised probabilistic deadlock freedom
+  (Pmin=? [ (G ("deadlock" => "end")) ] / Pmin=? [ (G (!fail)) ])
+  
+  // Probabilistic termination
+  Pmin=? [ (F ("deadlock" & (!fail))) ]
+  
+  // Normalised probabilistic termination
+  (Pmin=? [ (F ("deadlock" & (!fail))) ] / Pmin=? [ (G (!fail)) ])
+  
+   ======= Property checking =======
+  
+  Warning: found zero-probability in context. Non-probabilistic properties (e.g. safety) may be inaccurate, and normalised probabilities may be undefined. If you are not already, use flag [-balance] to check non-probabilistic properties. See help options for [verify]/[output] for more details on [-balance].
+  
+  Type safety
+  Result: true
+  
+  Probabilistic deadlock freedom
+  Result: 0.5 (exact floating point)
+  
+  Normalised probabilistic deadlock freedom
+  Result: 1.0
+  
+  Probabilistic termination
+  Result: 0.5 (exact floating point)
   
   Normalised probabilistic termination
   Result: 1.0
