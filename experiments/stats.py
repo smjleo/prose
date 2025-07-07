@@ -13,7 +13,7 @@ if 'file' not in df.columns or 'runtime_us' not in df.columns:
 
 stats = df.groupby('file')['runtime_us'].agg(['mean', 'sem']).reset_index()
 
-print(f"{'file':<30} {'mean (s)':<12} {'sem (s)':<12}")
+print(f"{'file':<30} {'mean (us)':<12} {'sem (us)':<12}")
 print("-" * 60)
 
 for _, row in stats.iterrows():
