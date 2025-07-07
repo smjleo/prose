@@ -8,7 +8,7 @@ STATS_SCRIPT="experiments/stats.py"
 FILES=$(find examples -name "*.ctx")
 
 mkdir -p "$OUTPUT_DIR"
-echo "file,runtime_seconds" > "$OUTPUT_FILE"
+echo "file,runtime_us" > "$OUTPUT_FILE"
 
 echo "Running dune build"
 dune build
@@ -17,11 +17,12 @@ benchmark() {
     local file=$1
     local basename=$(basename "$file")
 
-    export TIMEFMT="%*E"
-
     for i in {1..$REPEATS}; do
-        # ideally we use -f, but apparently the macOS version of /usr/bin/time doesn't have this option
-        runtime=$((/usr/bin/time -p _build/default/bin/main.exe verify $file > /dev/null ) 2>&1 | awk '/real/ {print $2}')
+        # ideally we use `time`, but macOS only has 10us precision
+        start_nano=$(gdate +%s%N)
+        _build/default/bin/main.exe verify $file > /dev/null
+        end_nano=$(gdate +%s%N)
+        runtime=$(((end_nano - start_nano)/1000000))
         echo "$basename,$runtime" >> "$OUTPUT_FILE"
     done
 }

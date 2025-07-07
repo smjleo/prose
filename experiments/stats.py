@@ -8,10 +8,10 @@ from scipy.stats import sem
 from glob import glob
 
 df = pd.read_csv(sys.argv[1])
-if 'file' not in df.columns or 'runtime_seconds' not in df.columns:
-    raise Exception("CSV file must contain 'file' and 'runtime_seconds' columns")
+if 'file' not in df.columns or 'runtime_us' not in df.columns:
+    raise Exception("CSV file must contain 'file' and 'runtime_us' columns")
 
-stats = df.groupby('file')['runtime_seconds'].agg(['mean', 'sem']).reset_index()
+stats = df.groupby('file')['runtime_us'].agg(['mean', 'sem']).reset_index()
 
 print(f"{'file':<30} {'mean (s)':<12} {'sem (s)':<12}")
 print("-" * 60)
