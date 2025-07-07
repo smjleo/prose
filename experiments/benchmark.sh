@@ -8,7 +8,7 @@ STATS_SCRIPT="experiments/stats.py"
 FILES=$(find examples -name "*.ctx")
 
 mkdir -p "$OUTPUT_DIR"
-echo "file,runtime_us" > "$OUTPUT_FILE"
+echo "file,runtime_ms" > "$OUTPUT_FILE"
 
 echo "Running dune build"
 dune build
