@@ -9,20 +9,36 @@ let parse lexbuf =
     error_s [%message "Syntax error" (line : int) (column : int)] |> ok_exn
 ;;
 
+let parse_session lexbuf =
+  try Session_parser.session Session_lexer.read lexbuf with
+  | Session_parser.Error ->
+    let pos = lexbuf.lex_curr_p in
+    let line = pos.pos_lnum in
+    let column = pos.pos_cnum - pos.pos_bol in
+    error_s [%message "Session syntax error" (line : int) (column : int)] |> ok_exn
+;;
+
 let parse_and_translate ~on_error ~on_warning ~ctx_file ~balance =
   let inx = In_channel.create ctx_file in
   let lexbuf = Lexing.from_channel inx in
   lexbuf.lex_curr_p <- { lexbuf.lex_curr_p with pos_fname = ctx_file };
-  let context = parse lexbuf in
-  In_channel.close inx;
-  Well_formed.check_context ~on_error ~on_warning context;
-  let translated, properties = Translate.translate context in
-  let translated =
-    match balance with
-    | false -> translated
-    | true -> Transform.balance_probabilities translated
-  in
-  context, translated, properties
+  if String.is_suffix ctx_file ~suffix:".sess"
+  then (
+    let session = parse_session lexbuf in
+    In_channel.close inx;
+    print_s [%sexp (session : Ast.session)];
+    failwith "Session files are not yet supported for translation")
+  else (
+    let context = parse lexbuf in
+    In_channel.close inx;
+    Well_formed.check_context ~on_error ~on_warning context;
+    let translated, properties = Translate.translate context in
+    let translated =
+      match balance with
+      | false -> translated
+      | true -> Transform.balance_probabilities translated
+    in
+    context, translated, properties)
 ;;
 
 let output_and_return_annotations

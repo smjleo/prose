@@ -1,0 +1,3 @@
+alice <- alice!request(42).nil
+bob <- bob?request(x).bob!response(x).nil
+charlie <- charlie?response(y).nil

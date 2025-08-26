@@ -1,7 +1,7 @@
 (menhir
- (modules parser))
+ (modules parser session_parser))
 
-(ocamllex lexer)
+(ocamllex lexer session_lexer)
 
 (library
  (name prose)

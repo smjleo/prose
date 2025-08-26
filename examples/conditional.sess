@@ -1,0 +1,1 @@
+server <- if true then server!success(1).nil else server!error(-1).nil

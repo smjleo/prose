@@ -87,9 +87,9 @@ and expr =
   | False
   | Int of int
   | Expr_var of variable
-  | Or of expr
+  | Or of expr * expr
   | Neg of expr
-  | Add of expr
+  | Add of expr * expr
   | Succ of expr
   | Less_than of expr * expr
   | Nondeterminism of expr * expr

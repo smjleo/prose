@@ -1,0 +1,1 @@
+client <- flip (0.5) { H => client!heads(1).nil | T => client!tails(0).nil }

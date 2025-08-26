@@ -1,2 +1,4 @@
-bin/parser.mly
-bin/lexer.mll
+lib/parser.mly
+lib/lexer.mll
+lib/session_parser.mly
+lib/session_lexer.mll
