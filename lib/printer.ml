@@ -15,9 +15,12 @@ let rec print_expr : type a. Out_channel.t -> a expr -> unit =
   | Eq (e1, e2) ->
     let fmt =
       match e1, e2 with
-      | (And _ | Or _ | Eq _), (And _ | Or _ | Eq _) -> fprintf ppf "(%a)=(%a)"
-      | (And _ | Or _ | Eq _), (IntConst _ | BoolConst _ | Var _) -> fprintf ppf "(%a)=%a"
-      | (IntConst _ | BoolConst _ | Var _), (And _ | Or _ | Eq _) -> fprintf ppf "%a=(%a)"
+      | (And _ | Or _ | Eq _ | Neg _), (And _ | Or _ | Eq _ | Neg _) ->
+        fprintf ppf "(%a)=(%a)"
+      | (And _ | Or _ | Eq _ | Neg _), (IntConst _ | BoolConst _ | Var _) ->
+        fprintf ppf "(%a)=%a"
+      | (IntConst _ | BoolConst _ | Var _), (And _ | Or _ | Eq _ | Neg _) ->
+        fprintf ppf "%a=(%a)"
       | (IntConst _ | BoolConst _ | Var _), (IntConst _ | BoolConst _ | Var _) ->
         fprintf ppf "%a=%a"
     in
@@ -40,6 +43,7 @@ let rec print_expr : type a. Out_channel.t -> a expr -> unit =
       | _ -> fprintf ppf "(%a) | (%a)"
     in
     fmt print_expr e1 print_expr e2
+  | Neg e -> fprintf ppf "!(%a)" print_expr e
 ;;
 
 let print_list ppf list ~print ~sep =

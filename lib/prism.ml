@@ -30,6 +30,7 @@ and _ expr =
   | Eq : 'a expr * 'a expr -> bool expr
   | And : bool expr * bool expr -> bool expr
   | Or : bool expr * bool expr -> bool expr
+  | Neg : bool expr -> bool expr
 
 and _ variable =
   | StringVar : string -> 'a variable
