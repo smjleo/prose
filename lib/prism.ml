@@ -31,6 +31,8 @@ and _ expr =
   | And : bool expr * bool expr -> bool expr
   | Or : bool expr * bool expr -> bool expr
   | Neg : bool expr -> bool expr
+  | Add : int expr * int expr -> int expr
+  | Lt : int expr * int expr -> bool expr
 
 and _ variable =
   | StringVar : string -> 'a variable

@@ -9,6 +9,7 @@ module Communication = struct
     [@@deriving compare, equal, sexp]
 
     let tag label sort = { label; sort = Ast.sort_to_string sort }
+    let of_label label = tag label Unit
     let to_string { label; sort } = label ^ "_" ^ sort
   end
 

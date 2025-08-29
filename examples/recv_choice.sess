@@ -1,1 +1,0 @@
-server <- { server?login(user).server?password(pwd).nil + server?guest(x).nil }

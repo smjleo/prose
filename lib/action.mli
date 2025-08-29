@@ -7,6 +7,9 @@ module Communication : sig
     type t [@@deriving compare, equal, sexp]
 
     val tag : string -> Ast.sort -> t
+
+    (* TODO: hack, remove later *)
+    val of_label : string -> t
     val to_string : t -> string
   end
 

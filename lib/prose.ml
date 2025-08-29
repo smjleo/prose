@@ -1,5 +1,7 @@
 open! Core
 
+let dbg_print_s ~print_ast sexp = if print_ast then print_s sexp
+
 let parse lexbuf =
   try Parser.context Lexer.read lexbuf with
   | Parser.Error ->
@@ -18,7 +20,8 @@ let parse_session lexbuf =
     error_s [%message "Session syntax error" (line : int) (column : int)] |> ok_exn
 ;;
 
-let parse_and_translate ~on_error ~on_warning ~ctx_file ~balance =
+let parse_and_translate ~on_error ~on_warning ~ctx_file ~balance ~print_ast =
+  let dbg_print_s = dbg_print_s ~print_ast in
   let inx = In_channel.create ctx_file in
   let lexbuf = Lexing.from_channel inx in
   lexbuf.lex_curr_p <- { lexbuf.lex_curr_p with pos_fname = ctx_file };
@@ -26,8 +29,9 @@ let parse_and_translate ~on_error ~on_warning ~ctx_file ~balance =
   then (
     let session = parse_session lexbuf in
     In_channel.close inx;
-    print_s [%sexp (session : Ast.session)];
-    failwith "Session files are not yet supported for translation")
+    let translated = Translate_session.translate session in
+    (* TODO: populate properties *)
+    translated, [])
   else (
     let context = parse lexbuf in
     In_channel.close inx;
@@ -38,7 +42,8 @@ let parse_and_translate ~on_error ~on_warning ~ctx_file ~balance =
       | false -> translated
       | true -> Transform.balance_probabilities translated
     in
-    context, translated, properties)
+    dbg_print_s [%message (context : Ast.context)];
+    translated, properties)
 ;;
 
 let output_and_return_annotations
@@ -53,12 +58,11 @@ let output_and_return_annotations
       ?only_annotation
       ()
   =
-  let dbg_print_s sexp = if print_ast then print_s sexp in
+  let dbg_print_s = dbg_print_s ~print_ast in
   let t0 = Time_float.now () in
-  let context, translated, properties =
-    parse_and_translate ~on_error ~on_warning ~ctx_file ~balance
+  let translated, properties =
+    parse_and_translate ~on_error ~on_warning ~ctx_file ~balance ~print_ast
   in
-  dbg_print_s [%message (context : Ast.context)];
   let t1 = Time_float.now () in
   let translation_time = Time_float.diff t1 t0 in
   if print_translation_time then print_s [%message (translation_time : Time_float.Span.t)];
@@ -195,7 +199,6 @@ let benchmark_translation ~iterations ~ctx_file ~batch_size =
 ;;
 
 let benchmark_prism ~annotations ~iterations ~ctx_file =
-  (* TODO: These numbers don't actually make much sense (end-to-end is faster?) - investigate *)
   List.map annotations ~f:(fun annotation ->
     with_prism_files
       ~ctx_file

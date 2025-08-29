@@ -1,2 +1,2 @@
-alice <- alice!msg(42).nil
-bob <- bob?msg(x).nil
+alice <- bob!msg(42).nil
+bob <- alice?msg(x).nil

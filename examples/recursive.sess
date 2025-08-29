@@ -1,1 +1,0 @@
-counter <- mu X . counter!count(1).X

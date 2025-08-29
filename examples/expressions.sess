@@ -1,2 +1,3 @@
-alice <- alice!result(succ 5 + 3).nil
-bob <- if x < 10 then bob!small(-1).nil else bob!big(x (+) y).nil
+alice <- bob!result(succ 5 + 3).nil
+
+bob <- if x < 10 then alice!small(-1).nil else alice!big(x + y).nil
