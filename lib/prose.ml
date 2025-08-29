@@ -29,9 +29,7 @@ let parse_and_translate ~on_error ~on_warning ~ctx_file ~balance ~print_ast =
   then (
     let session = parse_session lexbuf in
     In_channel.close inx;
-    let translated = Translate_session.translate session in
-    (* TODO: populate properties *)
-    translated, [])
+    Translate_session.translate session)
   else (
     let context = parse lexbuf in
     In_channel.close inx;

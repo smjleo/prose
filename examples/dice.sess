@@ -1,0 +1,62 @@
+p0 <- mu X .(flip (0.5) { H => q0!l1(0).nil | T => q0!l2(0).nil })
+
+q0 <- {
+  p0?l1(x) . mu X . (p1!go(0) . q3?redo(y) . X) + 
+  p0?l2(x) . mu X . (p2!go(0) . q6?redo(y) . X)
+}
+
+p1 <- mu X .
+      q0?go(x) .
+      flip (0.5) { H => q1!l3(0) . X | T => q1!l4(0) . X }
+
+q1 <- mu X . {
+        p1?l3(x) . p3!go(0) . X + 
+        p1?l4(x) . p4!go(0) . X
+      }
+
+p2 <- mu X .
+      q0?go(x) .
+      flip (0.5) { H => q2!l5(0) . X | T => q2!l6(0) . X }
+
+q2 <- mu X . {
+        p2?l5(x) . p5!go(0) . X + 
+        p2?l6(x) . p6!go(0) . X
+      }
+
+p3 <- mu X .
+     q1?go(x) .
+     flip (0.5) { H => q3!l1(0) . X | T => q3!d1(0) . nil }
+
+q3 <- mu X . {
+        p3?l1(x).q0!redo(0) . X + 
+        p3?d1(x).dice1!done(1) . nil
+      }
+
+p4 <- q1?go(x) .
+      flip (0.5) { H => q4!d2(0) . nil | T => q4!d3(0) . nil }
+
+q4 <- { p4?d2(x) . dice2!done(2) . nil + 
+        p4?d3(x) . dice3!done(3) . nil }
+
+p5 <- q2?go(x) . flip (0.5) { H => q5!d4(0) . nil | T => q5!d5(0) . nil }
+
+q5 <- { p5?d4(x) . dice4!done(4) . nil + 
+        p5?d5(x) . dice5!done(5) . nil }
+
+p6 <- mu X .
+      q2?go(x) .
+      flip (0.5) { H => q6!d6(0) . nil | T => q6!l2(0) . nil }
+
+q6 <- mu X. {
+        p6?d6(x) . dice6!done(6) . nil + 
+        p6?l2(x) . q0!redo(0) . X
+      }
+
+dice1 <- q3?done(x) . mu X . (dummy!repeat(0) . X)
+dice2 <- q4?done(x) . nil
+dice3 <- q4?done(x) . nil  
+dice4 <- q5?done(x) . nil
+dice5 <- q5?done(x) . nil
+dice6 <- q6?done(x) . nil
+
+dummy <- mu X . (dice1?repeat(x) . X)
