@@ -1,0 +1,73 @@
+w0 : mu t .
+     w1 & req . w1 (+) { 0.7 : res(Int) . t, 0.3 : err . t }
+
+w1 : mu t . w2 & req .
+            w0 (+) req .
+            w0 & {
+               res(Int) . w2 (+) { 0.5 : res(Int) . t, 0.3 : err . t },
+               err . w2 (+) err . t
+            }
+
+w2 : mu t . w3 & req .
+            w1 (+) req .
+            w1 & {
+               res(Int) . w3 (+) { 0.5 : res(Int) . t, 0.3 : err . t },
+               err . w3 (+) err . t
+            }
+
+w3 : mu t . w4 & req .
+            w2 (+) req .
+            w2 & {
+               res(Int) . w4 (+) { 0.5 : res(Int) . t, 0.3 : err . t },
+               err . w4 (+) err . t
+            }
+
+w4 : mu t . w5 & req .
+            w3 (+) req .
+            w3 & {
+               res(Int) . w5 (+) { 0.5 : res(Int) . t, 0.3 : err . t },
+               err . w5 (+) err . t
+            }
+
+w5 : mu t . w6 & req .
+            w4 (+) req .
+            w4 & {
+               res(Int) . w6 (+) { 0.5 : res(Int) . t, 0.3 : err . t },
+               err . w6 (+) err . t
+            }
+
+w6 : mu t . w7 & req .
+            w5 (+) req .
+            w5 & {
+               res(Int) . w7 (+) { 0.5 : res(Int) . t, 0.3 : err . t },
+               err . w7 (+) err . t
+            }
+
+w7 : mu t . w8 & req .
+            w6 (+) req .
+            w6 & {
+               res(Int) . w8 (+) { 0.5 : res(Int) . t, 0.3 : err . t },
+               err . w8 (+) err . t
+            }
+
+w8 : mu t . w9 & req .
+            w7 (+) req .
+            w7 & {
+               res(Int) . w9 (+) { 0.5 : res(Int) . t, 0.3 : err . t },
+               err . w9 (+) err . t
+            }
+
+w9 : mu t . w10 & req .
+            w8 (+) req .
+            w8 & {
+               res(Int) . w10 (+) { 0.5 : res(Int) . t, 0.3 : err . t },
+               err . w10 (+) err . t
+            }
+
+w10 : w9 (+) req .
+     w9 & {
+        res(Int) . mu t . dummy (+) done . t,
+        err . end
+     }
+
+dummy : mu t . w10 & done . t
