@@ -10,7 +10,7 @@ let state_utils ~env =
 ;;
 
 (* TODO: complete hack *)
-let max_int_value = 10
+let max_int_value = 3630000
 
 let rec translate_process ~env process =
   let _state, state_var, at_current_state = state_utils ~env in
@@ -83,19 +83,27 @@ and translate_send ~env { send_part; send_label; send_expr; send_cont } =
   in
   let action_without_tag = Action.communication communication_without_tag in
   let action_with_tag = Action.communication communication_with_tag in
-  (* TODO: assuming all sending exprs are ints for now *)
-  let expr, env = translate_int_expr ~env send_expr in
-  let env =
-    Session_env.register_action_var env action_with_tag ~max_value:max_int_value
+  let expr, env =
+    match send_expr with
+    | Some expr ->
+      (* TODO: assuming all sending exprs are ints for now *)
+      let expr, env = translate_int_expr ~env expr in
+      let env =
+        Session_env.register_action_var env action_with_tag ~max_value:max_int_value
+      in
+      Some expr, env
+    | None -> None, env
   in
   let handshake =
     { action = action_without_tag
     ; guard = at_current_state
     ; updates =
         [ ( Float 1.0
-          , [ IntUpdate (state_var, IntConst (state + 1))
-            ; IntUpdate (ActionVar action_with_tag, expr)
-            ] )
+          , [ IntUpdate (state_var, IntConst (state + 1)) ]
+            @ (match expr with
+               | Some expr -> [ IntUpdate (ActionVar action_with_tag, expr) ]
+               | None -> [])
+            )
         ]
     }
   in
@@ -136,9 +144,15 @@ and translate_recv ~env descs =
   let translate_recv_item ~env { recv_part = recv_part'; recv_label; recv_var; recv_cont }
     =
     assert (String.equal recv_part recv_part');
-    let prefixed_var = Session_env.participant env ^ "_" ^ recv_var in
-    let env =
-      Session_env.register_variable env ~var:prefixed_var ~max_value:max_int_value
+    let prefixed_var, env =
+      match recv_var with
+      | Some var ->
+        let prefixed_var = Session_env.participant env ^ "_" ^ var in
+        let env =
+          Session_env.register_variable env ~var:prefixed_var ~max_value:max_int_value
+        in
+        Some prefixed_var, env
+      | None -> None, env
     in
     let communication_with_tag =
       { communication_without_tag with
@@ -151,9 +165,11 @@ and translate_recv ~env descs =
       ; guard = at_handshake_state
       ; updates =
           [ ( Float 1.0
-            , [ IntUpdate (state_var, IntConst (Session_env.current_state env + 1))
-              ; IntUpdate (StringVar prefixed_var, Var (ActionVar action_with_tag))
-              ] )
+            , [ IntUpdate (state_var, IntConst (Session_env.current_state env + 1)) ]
+              @ (match prefixed_var with
+                 | Some var -> [ IntUpdate (StringVar var, Var (ActionVar action_with_tag)) ]
+                 | None -> [])
+            )
           ]
       }
     in
@@ -188,7 +204,7 @@ and translate_bool_expr ~env expr =
     let e1_expr, env = translate_int_expr ~env e1 in
     let e2_expr, env = translate_int_expr ~env e2 in
     Lt (e1_expr, e2_expr), env
-  | Int _ | Add _ | Succ _ -> failwith "expected bool, got integer"
+  | Int _ | Add _ | Mul _ | Succ _ -> failwith "expected bool, got integer"
   | Nondeterminism _ -> failwith "unimplemented"
 
 and translate_int_expr ~env expr =
@@ -204,6 +220,10 @@ and translate_int_expr ~env expr =
     let e1_expr, env = translate_int_expr ~env e1 in
     let e2_expr, env = translate_int_expr ~env e2 in
     Add (e1_expr, e2_expr), env
+  | Mul (e1, e2) ->
+    let e1_expr, env = translate_int_expr ~env e1 in
+    let e2_expr, env = translate_int_expr ~env e2 in
+    Mul (e1_expr, e2_expr), env
   | Succ e ->
     let e_expr, env = translate_int_expr ~env e in
     Add (e_expr, IntConst 1), env

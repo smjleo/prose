@@ -5,6 +5,7 @@
 %token SEND
 %token RECV
 %token PLUS
+%token STAR
 %token DOT
 %token LPAREN
 %token RPAREN
@@ -33,7 +34,7 @@
 
 %right NONDET
 %left OR
-%left PLUS  
+%left PLUS
 %left LT
 %right NEG SUCC
 
@@ -51,8 +52,8 @@ process:
 | NIL                                                    { Nil }
 | MU var = IDENT DOT cont = process                      { Mu (var, cont) }
 | var = IDENT                                            { Proc_var var }
-| send_part = IDENT SEND send_label = IDENT LPAREN send_expr = expr RPAREN DOT send_cont = process
-  { Send { send_part; send_label; send_expr; send_cont } }
+| send_part = IDENT SEND send_label = IDENT send_payload = send_payload DOT send_cont = process
+  { Send { send_part; send_label; send_expr = send_payload; send_cont } }
 | recv_list = recv_choices                               { Receive recv_list }
 | IF expr = expr THEN then_proc = process ELSE else_proc = process
   { If_then_else (expr, then_proc, else_proc) }
@@ -60,14 +61,22 @@ process:
   { Flip (prob, head_proc, tail_proc) }
 | LPAREN p = process RPAREN                              { p }
 
+send_payload:
+| LPAREN send_expr = expr RPAREN                         { Some send_expr }
+| LPAREN RPAREN                                          { None }
+
+recv_payload:
+| LPAREN recv_var = IDENT RPAREN                         { Some recv_var }
+| LPAREN RPAREN                                          { None }
+
 recv_choices:
 | recv = recv_choice                                     { [recv] }
 | LBRACE recv_choice_list = separated_list(PLUS, recv_choice) RBRACE
   { recv_choice_list }
 
 recv_choice:
-| recv_part = IDENT RECV recv_label = IDENT LPAREN recv_var = IDENT RPAREN DOT recv_cont = process
-  { { recv_part; recv_label; recv_var; recv_cont } }
+| recv_part = IDENT RECV recv_label = IDENT recv_payload = recv_payload DOT recv_cont = process
+  { { recv_part; recv_label; recv_var = recv_payload; recv_cont } }
 
 expr:
 | TRUE                                                   { True }
@@ -77,6 +86,7 @@ expr:
 | e1 = expr OR e2 = expr                                 { Or (e1, e2) }
 | NEG e = expr                                           { Neg e }
 | e1 = expr PLUS e2 = expr                               { Add (e1, e2) }
+| e1 = expr STAR e2 = expr                               { Mul (e1, e2) }
 | SUCC e = expr                                          { Succ e }
 | e1 = expr LT e2 = expr                                 { Less_than (e1, e2) }
 | e1 = expr NONDET e2 = expr                             { Nondeterminism (e1, e2) }

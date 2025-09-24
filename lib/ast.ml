@@ -71,14 +71,14 @@ and process =
 and send_desc =
   { send_part : participant
   ; send_label : label
-  ; send_expr : expr
+  ; send_expr : expr option  (* None for synchronisation-only *)
   ; send_cont : process
   }
 
 and recv_desc =
   { recv_part : participant
   ; recv_label : label
-  ; recv_var : variable
+  ; recv_var : variable option  (* None for synchronisation-only *)
   ; recv_cont : process
   }
 
@@ -90,6 +90,7 @@ and expr =
   | Or of expr * expr
   | Neg of expr
   | Add of expr * expr
+  | Mul of expr * expr
   | Succ of expr
   | Less_than of expr * expr
   | Nondeterminism of expr * expr

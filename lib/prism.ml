@@ -32,6 +32,7 @@ and _ expr =
   | Or : bool expr * bool expr -> bool expr
   | Neg : bool expr -> bool expr
   | Add : int expr * int expr -> int expr
+  | Mul : int expr * int expr -> int expr
   | Lt : int expr * int expr -> bool expr
 
 and _ variable =

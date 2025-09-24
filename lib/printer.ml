@@ -15,12 +15,13 @@ let rec print_expr : type a. Out_channel.t -> a expr -> unit =
   | Eq (e1, e2) ->
     let fmt =
       match e1, e2 with
-      | ( (And _ | Or _ | Eq _ | Neg _ | Add _ | Lt _)
-        , (And _ | Or _ | Eq _ | Neg _ | Add _ | Lt _) ) -> fprintf ppf "(%a)=(%a)"
-      | (And _ | Or _ | Eq _ | Neg _ | Add _ | Lt _), (IntConst _ | BoolConst _ | Var _)
-        -> fprintf ppf "(%a)=%a"
-      | (IntConst _ | BoolConst _ | Var _), (And _ | Or _ | Eq _ | Neg _ | Add _ | Lt _)
-        -> fprintf ppf "%a=(%a)"
+      | ( (And _ | Or _ | Eq _ | Neg _ | Add _ | Mul _ | Lt _)
+        , (And _ | Or _ | Eq _ | Neg _ | Add _ | Mul _ | Lt _) ) ->
+        fprintf ppf "(%a)=(%a)"
+      | ( (And _ | Or _ | Eq _ | Neg _ | Add _ | Mul _ | Lt _)
+        , (IntConst _ | BoolConst _ | Var _) ) -> fprintf ppf "(%a)=%a"
+      | ( (IntConst _ | BoolConst _ | Var _)
+        , (And _ | Or _ | Eq _ | Neg _ | Add _ | Mul _ | Lt _) ) -> fprintf ppf "%a=(%a)"
       | (IntConst _ | BoolConst _ | Var _), (IntConst _ | BoolConst _ | Var _) ->
         fprintf ppf "%a=%a"
     in
@@ -45,6 +46,7 @@ let rec print_expr : type a. Out_channel.t -> a expr -> unit =
     fmt print_expr e1 print_expr e2
   | Neg e -> fprintf ppf "!(%a)" print_expr e
   | Add (e1, e2) -> fprintf ppf "(%a)+(%a)" print_expr e1 print_expr e2
+  | Mul (e1, e2) -> fprintf ppf "(%a)*(%a)" print_expr e1 print_expr e2
   | Lt (e1, e2) -> fprintf ppf "(%a)<(%a)" print_expr e1 print_expr e2
 ;;
 

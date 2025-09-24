@@ -21,6 +21,7 @@ rule read =
   | "!"      { SEND }
   | "?"      { RECV }
   | "+"      { PLUS }
+  | "*"      { STAR }
   | "."      { DOT }
   | "("      { LPAREN }
   | ")"      { RPAREN }
