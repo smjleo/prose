@@ -99,7 +99,7 @@ let print_var ppf = function
   | ActionVar action -> fprintf ppf "%s" (Action.to_string action)
 ;;
 
-let print_var_type ppf var ~global =
+let print_var_type ppf var ~global ~use_unbounded_ints =
   let global =
     match global with
     | true -> "global "
@@ -107,12 +107,17 @@ let print_var_type ppf var ~global =
   in
   match var with
   | Bool var -> fprintf ppf "%s%a : bool init false;\n" global print_var var
-  | Int (var, max) -> fprintf ppf "%s%a : [0..%d] init 0;\n" global print_var var max
+  | Int (var, max) ->
+    if use_unbounded_ints then
+      (* Using PRISM explicit engine (-ex) allows unbounded integers *)
+      fprintf ppf "%s%a : int init 0;\n" global print_var var
+    else
+      fprintf ppf "%s%a : [0..%d] init 0;\n" global print_var var max
 ;;
 
-let print_mod ppf { locals; participant; commands } =
+let print_mod ppf { locals; participant; commands } ~use_unbounded_ints =
   fprintf ppf "module %s\n" participant;
-  List.iter locals ~f:(fprintf ppf "  %a" (print_var_type ~global:false));
+  List.iter locals ~f:(fprintf ppf "  %a" (print_var_type ~global:false ~use_unbounded_ints));
   fprintf ppf "\n";
   List.iter commands ~f:(fprintf ppf "  %a" print_command);
   fprintf ppf "endmodule\n"
@@ -130,11 +135,11 @@ let print_label ppf { name; expr } =
   fprintf ppf "label \"%a\" = %a;\n" print_label_name name print_expr expr
 ;;
 
-let print_model' ppf { globals; modules; labels } =
-  List.iter globals ~f:(print_var_type ppf ~global:true);
+let print_model' ppf { globals; modules; labels } ~use_unbounded_ints =
+  List.iter globals ~f:(print_var_type ppf ~global:true ~use_unbounded_ints);
   fprintf ppf "\n";
   List.iter modules ~f:(fun m ->
-    print_mod ppf m;
+    print_mod ppf m ~use_unbounded_ints;
     fprintf ppf "\n");
   List.iter labels ~f:(print_label ppf)
 ;;
@@ -146,7 +151,8 @@ let print_with_file ?output_file ~f x =
   | Some output_file -> Out_channel.with_file output_file ~f
 ;;
 
-let print_model ?output_file model = print_with_file ?output_file ~f:print_model' model
+let print_model ?output_file ?(use_unbounded_ints=false) model =
+  print_with_file ?output_file ~f:(print_model' ~use_unbounded_ints) model
 
 open Psl
 

@@ -25,11 +25,13 @@ let parse_and_translate ~on_error ~on_warning ~ctx_file ~balance ~print_ast =
   let inx = In_channel.create ctx_file in
   let lexbuf = Lexing.from_channel inx in
   lexbuf.lex_curr_p <- { lexbuf.lex_curr_p with pos_fname = ctx_file };
-  if String.is_suffix ctx_file ~suffix:".sess"
+  let is_session_file = String.is_suffix ctx_file ~suffix:".sess" in
+  if is_session_file
   then (
     let session = parse_session lexbuf in
     In_channel.close inx;
-    Translate_session.translate session)
+    let translated, properties = Translate_session.translate session in
+    (translated, properties), is_session_file)
   else (
     let context = parse lexbuf in
     In_channel.close inx;
@@ -41,7 +43,7 @@ let parse_and_translate ~on_error ~on_warning ~ctx_file ~balance ~print_ast =
       | true -> Transform.balance_probabilities translated
     in
     dbg_print_s [%message (context : Ast.context)];
-    translated, properties)
+    (translated, properties), is_session_file)
 ;;
 
 let output_and_return_annotations
@@ -58,14 +60,17 @@ let output_and_return_annotations
   =
   let dbg_print_s = dbg_print_s ~print_ast in
   let t0 = Time_float.now () in
-  let translated, properties =
+  let (translated, properties), is_session_file =
     parse_and_translate ~on_error ~on_warning ~ctx_file ~balance ~print_ast
   in
   let t1 = Time_float.now () in
   let translation_time = Time_float.diff t1 t0 in
   if print_translation_time then print_s [%message (translation_time : Time_float.Span.t)];
   dbg_print_s [%message (translated : Prism.model)];
-  Printer.print_model ?output_file:model_output_file translated;
+  Printer.print_model
+    ?output_file:model_output_file
+    ~use_unbounded_ints:is_session_file
+    translated;
   let properties =
     match only_annotation with
     | None -> properties
@@ -142,6 +147,7 @@ let with_prism_files
   =
   let model_output_file = Filename_unix.temp_file "model" ".prism" in
   let prop_output_file = Filename_unix.temp_file "properties" ".props" in
+  let is_session_file = String.is_suffix ctx_file ~suffix:".sess" in
   let annotations =
     output_and_return_annotations
       ~ctx_file
@@ -155,7 +161,7 @@ let with_prism_files
       ?only_annotation
       ()
   in
-  let res = f ~model_output_file ~prop_output_file ~annotations in
+  let res = f ~model_output_file ~prop_output_file ~annotations ~is_session_file in
   Core_unix.remove model_output_file;
   Core_unix.remove prop_output_file;
   res
@@ -169,12 +175,15 @@ let verify ~ctx_file ~print_ast ~print_raw_prism ~print_translation_time ~balanc
     ~on_error:`Print_and_exit
     ~on_warning:`Print
     ~balance
-    ~f:(fun ~model_output_file ~prop_output_file ~annotations ->
-      let prism =
-        Core_unix.create_process
-          ~prog:"prism"
-          ~args:[ model_output_file; prop_output_file ]
+    ~f:(fun ~model_output_file ~prop_output_file ~annotations ~is_session_file ->
+      let prism_args =
+        if is_session_file
+        then
+          (* Use explicit engine (-ex) for session files to support unbounded integers *)
+          [ "-ex"; model_output_file; prop_output_file ]
+        else [ model_output_file; prop_output_file ]
       in
+      let prism = Core_unix.create_process ~prog:"prism" ~args:prism_args in
       let stdout = Core_unix.in_channel_of_descr prism.stdout in
       let stderr = Core_unix.in_channel_of_descr prism.stderr in
       let lines = In_channel.input_lines stdout in
@@ -192,7 +201,12 @@ let benchmark_translation ~iterations ~ctx_file ~batch_size =
     ~iterations
     ~batch_size
     ~f:(fun () ->
-      parse_and_translate ~on_error:`Raise ~on_warning:`Ignore ~balance:false ~ctx_file)
+      parse_and_translate
+        ~on_error:`Raise
+        ~on_warning:`Ignore
+        ~balance:false
+        ~ctx_file
+        ~print_ast:false)
     ()
 ;;
 
@@ -205,12 +219,15 @@ let benchmark_prism ~annotations ~iterations ~ctx_file =
       ~on_error:`Raise
       ~on_warning:`Ignore
       ~balance:false
-      ~f:(fun ~model_output_file ~prop_output_file ~annotations:_ ->
+      ~f:(fun ~model_output_file ~prop_output_file ~annotations:_ ~is_session_file ->
         Microbenchmark.measure
           ~iterations
           ~f:(fun () ->
             let cmd =
-              sprintf "prism %s %s > /dev/null" model_output_file prop_output_file
+              if is_session_file
+              then
+                sprintf "prism -ex %s %s > /dev/null" model_output_file prop_output_file
+              else sprintf "prism %s %s > /dev/null" model_output_file prop_output_file
             in
             Sys_unix.command_exn cmd)
           ())

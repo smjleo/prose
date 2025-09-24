@@ -9,7 +9,11 @@ let state_utils ~env =
   state, state_var, Eq (Var state_var, IntConst state)
 ;;
 
-(* TODO: complete hack *)
+(* NOTE: max_int_value is no longer used in session translation because
+   we use PRISM explicit engine (-ex) which supports unbounded integers.
+   The max_int_value is still defined for compatibility but has no effect.
+
+   TODO: eventually this max int should be an option. *)
 let max_int_value = 200
 
 let rec translate_process ~env process =

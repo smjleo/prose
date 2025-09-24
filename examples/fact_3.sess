@@ -1,0 +1,25 @@
+w0 <- mu X . { w1?req() . flip (0.7) { H => w1!res(1) . X | T => w1!err(0) . X } }
+
+w1 <- mu X . w2?req() .
+             w0!req() .
+             { w0?res(x) .
+               if x < 100 then 
+                 flip (0.7) { H => w2!res(x * 1) . X | T => w2!err(0) . X } 
+               else
+                 flip (0.5) { H => w2!res(x * 1) . X | T => w2!err(0) . X }
+             + w0?err(x) . w2!err(0) . X }
+
+w2 <- mu X . w3?req() .
+             w1!req() .
+             { w1?res(x) .
+               if x < 100 then 
+                 flip (0.7) { H => w3!res(x * 2) . X | T => w3!err(0) . X } 
+               else
+                 flip (0.5) { H => w3!res(x * 2) . X | T => w3!err(0) . X }
+             + w1?err(x) . w3!err(0) . X }
+
+w3 <- w2!req() .
+  { w2?res(x) . mu X . dummy!done() . X
+  + w2?err(x) . nil }
+
+dummy <- mu X . w3?done() . X
