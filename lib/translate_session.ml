@@ -10,7 +10,7 @@ let state_utils ~env =
 ;;
 
 (* TODO: complete hack *)
-let max_int_value = 3630000
+let max_int_value = 200
 
 let rec translate_process ~env process =
   let _state, state_var, at_current_state = state_utils ~env in
@@ -100,10 +100,10 @@ and translate_send ~env { send_part; send_label; send_expr; send_cont } =
     ; updates =
         [ ( Float 1.0
           , [ IntUpdate (state_var, IntConst (state + 1)) ]
-            @ (match expr with
-               | Some expr -> [ IntUpdate (ActionVar action_with_tag, expr) ]
-               | None -> [])
-            )
+            @
+            match expr with
+            | Some expr -> [ IntUpdate (ActionVar action_with_tag, expr) ]
+            | None -> [] )
         ]
     }
   in
@@ -166,10 +166,10 @@ and translate_recv ~env descs =
       ; updates =
           [ ( Float 1.0
             , [ IntUpdate (state_var, IntConst (Session_env.current_state env + 1)) ]
-              @ (match prefixed_var with
-                 | Some var -> [ IntUpdate (StringVar var, Var (ActionVar action_with_tag)) ]
-                 | None -> [])
-            )
+              @
+              match prefixed_var with
+              | Some var -> [ IntUpdate (StringVar var, Var (ActionVar action_with_tag)) ]
+              | None -> [] )
           ]
       }
     in
