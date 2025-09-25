@@ -689,6 +689,2331 @@ For each context file in this directory, run [prose output] to check the model a
   
   
   
+   ======= TEST ../examples/fact_10.ctx =======
+  
+  w0 : mu t .
+       w1 & req . w1 (+) { 0.7 : res(Int) . t, 0.3 : err . t }
+  
+  w1 : mu t . w2 & req .
+              w0 (+) req .
+              w0 & {
+                 res(Int) . w2 (+) { 0.5 : res(Int) . t, 0.3 : err . t },
+                 err . w2 (+) err . t
+              }
+  
+  w2 : mu t . w3 & req .
+              w1 (+) req .
+              w1 & {
+                 res(Int) . w3 (+) { 0.5 : res(Int) . t, 0.3 : err . t },
+                 err . w3 (+) err . t
+              }
+  
+  w3 : mu t . w4 & req .
+              w2 (+) req .
+              w2 & {
+                 res(Int) . w4 (+) { 0.5 : res(Int) . t, 0.3 : err . t },
+                 err . w4 (+) err . t
+              }
+  
+  w4 : mu t . w5 & req .
+              w3 (+) req .
+              w3 & {
+                 res(Int) . w5 (+) { 0.5 : res(Int) . t, 0.3 : err . t },
+                 err . w5 (+) err . t
+              }
+  
+  w5 : mu t . w6 & req .
+              w4 (+) req .
+              w4 & {
+                 res(Int) . w6 (+) { 0.5 : res(Int) . t, 0.3 : err . t },
+                 err . w6 (+) err . t
+              }
+  
+  w6 : mu t . w7 & req .
+              w5 (+) req .
+              w5 & {
+                 res(Int) . w7 (+) { 0.5 : res(Int) . t, 0.3 : err . t },
+                 err . w7 (+) err . t
+              }
+  
+  w7 : mu t . w8 & req .
+              w6 (+) req .
+              w6 & {
+                 res(Int) . w8 (+) { 0.5 : res(Int) . t, 0.3 : err . t },
+                 err . w8 (+) err . t
+              }
+  
+  w8 : mu t . w9 & req .
+              w7 (+) req .
+              w7 & {
+                 res(Int) . w9 (+) { 0.5 : res(Int) . t, 0.3 : err . t },
+                 err . w9 (+) err . t
+              }
+  
+  w9 : mu t . w10 & req .
+              w8 (+) req .
+              w8 & {
+                 res(Int) . w10 (+) { 0.5 : res(Int) . t, 0.3 : err . t },
+                 err . w10 (+) err . t
+              }
+  
+  w10 : w9 (+) req .
+       w9 & {
+          res(Int) . mu t . dummy (+) done . t,
+          err . end
+       }
+  
+  dummy : mu t . w10 & done . t
+  
+   ======= PRISM output ========
+  
+  global fail : bool init false;
+  
+  module closure
+    closure : bool init false;
+  
+  endmodule
+  
+  module w0
+    w0 : [0..6] init 0;
+  
+    [] (w0=6) & (fail=false) -> 1:(fail'=true);
+    [w1_w0] (w0=0) & (fail=false) -> 1:(w0'=1);
+    [w1_w0_req_unit] (w0=1) & (fail=false) -> 1:(w0'=2);
+    [w0_w1] (w0=2) & (fail=false) -> 0:(w0'=6) + 0.7:(w0'=3) + 0.3:(w0'=4);
+    [w0_w1_res_int] (w0=3) & (fail=false) -> 1:(w0'=0);
+    [w0_w1_err_unit] (w0=4) & (fail=false) -> 1:(w0'=0);
+  endmodule
+  
+  module w1
+    w1 : [0..12] init 0;
+  
+    [] (w1=12) & (fail=false) -> 1:(fail'=true);
+    [w2_w1] (w1=0) & (fail=false) -> 1:(w1'=1);
+    [w2_w1_req_unit] (w1=1) & (fail=false) -> 1:(w1'=2);
+    [w1_w0] (w1=2) & (fail=false) -> 0:(w1'=12) + 1:(w1'=3);
+    [w1_w0_req_unit] (w1=3) & (fail=false) -> 1:(w1'=4);
+    [w0_w1] (w1=4) & (fail=false) -> 1:(w1'=5);
+    [w0_w1_res_int] (w1=5) & (fail=false) -> 1:(w1'=6);
+    [w0_w1_err_unit] (w1=5) & (fail=false) -> 1:(w1'=9);
+    [w1_w2] (w1=6) & (fail=false) -> 0.2:(w1'=12) + 0.5:(w1'=7) + 0.3:(w1'=8);
+    [w1_w2_res_int] (w1=7) & (fail=false) -> 1:(w1'=0);
+    [w1_w2_err_unit] (w1=8) & (fail=false) -> 1:(w1'=0);
+    [w1_w2] (w1=9) & (fail=false) -> 0:(w1'=12) + 1:(w1'=10);
+    [w1_w2_err_unit] (w1=10) & (fail=false) -> 1:(w1'=0);
+  endmodule
+  
+  module w2
+    w2 : [0..12] init 0;
+  
+    [] (w2=12) & (fail=false) -> 1:(fail'=true);
+    [w3_w2] (w2=0) & (fail=false) -> 1:(w2'=1);
+    [w3_w2_req_unit] (w2=1) & (fail=false) -> 1:(w2'=2);
+    [w2_w1] (w2=2) & (fail=false) -> 0:(w2'=12) + 1:(w2'=3);
+    [w2_w1_req_unit] (w2=3) & (fail=false) -> 1:(w2'=4);
+    [w1_w2] (w2=4) & (fail=false) -> 1:(w2'=5);
+    [w1_w2_res_int] (w2=5) & (fail=false) -> 1:(w2'=6);
+    [w1_w2_err_unit] (w2=5) & (fail=false) -> 1:(w2'=9);
+    [w2_w3] (w2=6) & (fail=false) -> 0.2:(w2'=12) + 0.5:(w2'=7) + 0.3:(w2'=8);
+    [w2_w3_res_int] (w2=7) & (fail=false) -> 1:(w2'=0);
+    [w2_w3_err_unit] (w2=8) & (fail=false) -> 1:(w2'=0);
+    [w2_w3] (w2=9) & (fail=false) -> 0:(w2'=12) + 1:(w2'=10);
+    [w2_w3_err_unit] (w2=10) & (fail=false) -> 1:(w2'=0);
+  endmodule
+  
+  module w3
+    w3 : [0..12] init 0;
+  
+    [] (w3=12) & (fail=false) -> 1:(fail'=true);
+    [w4_w3] (w3=0) & (fail=false) -> 1:(w3'=1);
+    [w4_w3_req_unit] (w3=1) & (fail=false) -> 1:(w3'=2);
+    [w3_w2] (w3=2) & (fail=false) -> 0:(w3'=12) + 1:(w3'=3);
+    [w3_w2_req_unit] (w3=3) & (fail=false) -> 1:(w3'=4);
+    [w2_w3] (w3=4) & (fail=false) -> 1:(w3'=5);
+    [w2_w3_res_int] (w3=5) & (fail=false) -> 1:(w3'=6);
+    [w2_w3_err_unit] (w3=5) & (fail=false) -> 1:(w3'=9);
+    [w3_w4] (w3=6) & (fail=false) -> 0.2:(w3'=12) + 0.5:(w3'=7) + 0.3:(w3'=8);
+    [w3_w4_res_int] (w3=7) & (fail=false) -> 1:(w3'=0);
+    [w3_w4_err_unit] (w3=8) & (fail=false) -> 1:(w3'=0);
+    [w3_w4] (w3=9) & (fail=false) -> 0:(w3'=12) + 1:(w3'=10);
+    [w3_w4_err_unit] (w3=10) & (fail=false) -> 1:(w3'=0);
+  endmodule
+  
+  module w4
+    w4 : [0..12] init 0;
+  
+    [] (w4=12) & (fail=false) -> 1:(fail'=true);
+    [w5_w4] (w4=0) & (fail=false) -> 1:(w4'=1);
+    [w5_w4_req_unit] (w4=1) & (fail=false) -> 1:(w4'=2);
+    [w4_w3] (w4=2) & (fail=false) -> 0:(w4'=12) + 1:(w4'=3);
+    [w4_w3_req_unit] (w4=3) & (fail=false) -> 1:(w4'=4);
+    [w3_w4] (w4=4) & (fail=false) -> 1:(w4'=5);
+    [w3_w4_res_int] (w4=5) & (fail=false) -> 1:(w4'=6);
+    [w3_w4_err_unit] (w4=5) & (fail=false) -> 1:(w4'=9);
+    [w4_w5] (w4=6) & (fail=false) -> 0.2:(w4'=12) + 0.5:(w4'=7) + 0.3:(w4'=8);
+    [w4_w5_res_int] (w4=7) & (fail=false) -> 1:(w4'=0);
+    [w4_w5_err_unit] (w4=8) & (fail=false) -> 1:(w4'=0);
+    [w4_w5] (w4=9) & (fail=false) -> 0:(w4'=12) + 1:(w4'=10);
+    [w4_w5_err_unit] (w4=10) & (fail=false) -> 1:(w4'=0);
+  endmodule
+  
+  module w5
+    w5 : [0..12] init 0;
+  
+    [] (w5=12) & (fail=false) -> 1:(fail'=true);
+    [w6_w5] (w5=0) & (fail=false) -> 1:(w5'=1);
+    [w6_w5_req_unit] (w5=1) & (fail=false) -> 1:(w5'=2);
+    [w5_w4] (w5=2) & (fail=false) -> 0:(w5'=12) + 1:(w5'=3);
+    [w5_w4_req_unit] (w5=3) & (fail=false) -> 1:(w5'=4);
+    [w4_w5] (w5=4) & (fail=false) -> 1:(w5'=5);
+    [w4_w5_res_int] (w5=5) & (fail=false) -> 1:(w5'=6);
+    [w4_w5_err_unit] (w5=5) & (fail=false) -> 1:(w5'=9);
+    [w5_w6] (w5=6) & (fail=false) -> 0.2:(w5'=12) + 0.5:(w5'=7) + 0.3:(w5'=8);
+    [w5_w6_res_int] (w5=7) & (fail=false) -> 1:(w5'=0);
+    [w5_w6_err_unit] (w5=8) & (fail=false) -> 1:(w5'=0);
+    [w5_w6] (w5=9) & (fail=false) -> 0:(w5'=12) + 1:(w5'=10);
+    [w5_w6_err_unit] (w5=10) & (fail=false) -> 1:(w5'=0);
+  endmodule
+  
+  module w6
+    w6 : [0..12] init 0;
+  
+    [] (w6=12) & (fail=false) -> 1:(fail'=true);
+    [w7_w6] (w6=0) & (fail=false) -> 1:(w6'=1);
+    [w7_w6_req_unit] (w6=1) & (fail=false) -> 1:(w6'=2);
+    [w6_w5] (w6=2) & (fail=false) -> 0:(w6'=12) + 1:(w6'=3);
+    [w6_w5_req_unit] (w6=3) & (fail=false) -> 1:(w6'=4);
+    [w5_w6] (w6=4) & (fail=false) -> 1:(w6'=5);
+    [w5_w6_res_int] (w6=5) & (fail=false) -> 1:(w6'=6);
+    [w5_w6_err_unit] (w6=5) & (fail=false) -> 1:(w6'=9);
+    [w6_w7] (w6=6) & (fail=false) -> 0.2:(w6'=12) + 0.5:(w6'=7) + 0.3:(w6'=8);
+    [w6_w7_res_int] (w6=7) & (fail=false) -> 1:(w6'=0);
+    [w6_w7_err_unit] (w6=8) & (fail=false) -> 1:(w6'=0);
+    [w6_w7] (w6=9) & (fail=false) -> 0:(w6'=12) + 1:(w6'=10);
+    [w6_w7_err_unit] (w6=10) & (fail=false) -> 1:(w6'=0);
+  endmodule
+  
+  module w7
+    w7 : [0..12] init 0;
+  
+    [] (w7=12) & (fail=false) -> 1:(fail'=true);
+    [w8_w7] (w7=0) & (fail=false) -> 1:(w7'=1);
+    [w8_w7_req_unit] (w7=1) & (fail=false) -> 1:(w7'=2);
+    [w7_w6] (w7=2) & (fail=false) -> 0:(w7'=12) + 1:(w7'=3);
+    [w7_w6_req_unit] (w7=3) & (fail=false) -> 1:(w7'=4);
+    [w6_w7] (w7=4) & (fail=false) -> 1:(w7'=5);
+    [w6_w7_res_int] (w7=5) & (fail=false) -> 1:(w7'=6);
+    [w6_w7_err_unit] (w7=5) & (fail=false) -> 1:(w7'=9);
+    [w7_w8] (w7=6) & (fail=false) -> 0.2:(w7'=12) + 0.5:(w7'=7) + 0.3:(w7'=8);
+    [w7_w8_res_int] (w7=7) & (fail=false) -> 1:(w7'=0);
+    [w7_w8_err_unit] (w7=8) & (fail=false) -> 1:(w7'=0);
+    [w7_w8] (w7=9) & (fail=false) -> 0:(w7'=12) + 1:(w7'=10);
+    [w7_w8_err_unit] (w7=10) & (fail=false) -> 1:(w7'=0);
+  endmodule
+  
+  module w8
+    w8 : [0..12] init 0;
+  
+    [] (w8=12) & (fail=false) -> 1:(fail'=true);
+    [w9_w8] (w8=0) & (fail=false) -> 1:(w8'=1);
+    [w9_w8_req_unit] (w8=1) & (fail=false) -> 1:(w8'=2);
+    [w8_w7] (w8=2) & (fail=false) -> 0:(w8'=12) + 1:(w8'=3);
+    [w8_w7_req_unit] (w8=3) & (fail=false) -> 1:(w8'=4);
+    [w7_w8] (w8=4) & (fail=false) -> 1:(w8'=5);
+    [w7_w8_res_int] (w8=5) & (fail=false) -> 1:(w8'=6);
+    [w7_w8_err_unit] (w8=5) & (fail=false) -> 1:(w8'=9);
+    [w8_w9] (w8=6) & (fail=false) -> 0.2:(w8'=12) + 0.5:(w8'=7) + 0.3:(w8'=8);
+    [w8_w9_res_int] (w8=7) & (fail=false) -> 1:(w8'=0);
+    [w8_w9_err_unit] (w8=8) & (fail=false) -> 1:(w8'=0);
+    [w8_w9] (w8=9) & (fail=false) -> 0:(w8'=12) + 1:(w8'=10);
+    [w8_w9_err_unit] (w8=10) & (fail=false) -> 1:(w8'=0);
+  endmodule
+  
+  module w9
+    w9 : [0..12] init 0;
+  
+    [] (w9=12) & (fail=false) -> 1:(fail'=true);
+    [w10_w9] (w9=0) & (fail=false) -> 1:(w9'=1);
+    [w10_w9_req_unit] (w9=1) & (fail=false) -> 1:(w9'=2);
+    [w9_w8] (w9=2) & (fail=false) -> 0:(w9'=12) + 1:(w9'=3);
+    [w9_w8_req_unit] (w9=3) & (fail=false) -> 1:(w9'=4);
+    [w8_w9] (w9=4) & (fail=false) -> 1:(w9'=5);
+    [w8_w9_res_int] (w9=5) & (fail=false) -> 1:(w9'=6);
+    [w8_w9_err_unit] (w9=5) & (fail=false) -> 1:(w9'=9);
+    [w9_w10] (w9=6) & (fail=false) -> 0.2:(w9'=12) + 0.5:(w9'=7) + 0.3:(w9'=8);
+    [w9_w10_res_int] (w9=7) & (fail=false) -> 1:(w9'=0);
+    [w9_w10_err_unit] (w9=8) & (fail=false) -> 1:(w9'=0);
+    [w9_w10] (w9=9) & (fail=false) -> 0:(w9'=12) + 1:(w9'=10);
+    [w9_w10_err_unit] (w9=10) & (fail=false) -> 1:(w9'=0);
+  endmodule
+  
+  module w10
+    w10 : [0..7] init 0;
+  
+    [] (w10=7) & (fail=false) -> 1:(fail'=true);
+    [w10_w9] (w10=0) & (fail=false) -> 0:(w10'=7) + 1:(w10'=1);
+    [w10_w9_req_unit] (w10=1) & (fail=false) -> 1:(w10'=2);
+    [w9_w10] (w10=2) & (fail=false) -> 1:(w10'=3);
+    [w9_w10_res_int] (w10=3) & (fail=false) -> 1:(w10'=4);
+    [w9_w10_err_unit] (w10=3) & (fail=false) -> 1:(w10'=6);
+    [w10_dummy] (w10=4) & (fail=false) -> 0:(w10'=7) + 1:(w10'=5);
+    [w10_dummy_done_unit] (w10=5) & (fail=false) -> 1:(w10'=4);
+  endmodule
+  
+  module dummy
+    dummy : [0..3] init 0;
+  
+    [] (dummy=3) & (fail=false) -> 1:(fail'=true);
+    [w10_dummy] (dummy=0) & (fail=false) -> 1:(dummy'=1);
+    [w10_dummy_done_unit] (dummy=1) & (fail=false) -> 1:(dummy'=0);
+  endmodule
+  
+  label "end" = (w0=5) & (w1=11) & (w2=11) & (w3=11) & (w4=11) & (w5=11) & (w6=11) & (w7=11) & (w8=11) & (w9=11) & (w10=6) & (dummy=2);
+  label "cando_w0_w1_err_unit" = w0=2;
+  label "cando_w0_w1_err_unit_branch" = w1=4;
+  label "cando_w0_w1_res_int" = w0=2;
+  label "cando_w0_w1_res_int_branch" = w1=4;
+  label "cando_w1_w0_req_unit" = w1=2;
+  label "cando_w1_w0_req_unit_branch" = w0=0;
+  label "cando_w1_w2_err_unit" = (w1=6) | (w1=9);
+  label "cando_w1_w2_err_unit_branch" = w2=4;
+  label "cando_w1_w2_res_int" = w1=6;
+  label "cando_w1_w2_res_int_branch" = w2=4;
+  label "cando_w10_dummy_done_unit" = w10=4;
+  label "cando_w10_dummy_done_unit_branch" = dummy=0;
+  label "cando_w10_w9_req_unit" = w10=0;
+  label "cando_w10_w9_req_unit_branch" = w9=0;
+  label "cando_w2_w1_req_unit" = w2=2;
+  label "cando_w2_w1_req_unit_branch" = w1=0;
+  label "cando_w2_w3_err_unit" = (w2=6) | (w2=9);
+  label "cando_w2_w3_err_unit_branch" = w3=4;
+  label "cando_w2_w3_res_int" = w2=6;
+  label "cando_w2_w3_res_int_branch" = w3=4;
+  label "cando_w3_w2_req_unit" = w3=2;
+  label "cando_w3_w2_req_unit_branch" = w2=0;
+  label "cando_w3_w4_err_unit" = (w3=6) | (w3=9);
+  label "cando_w3_w4_err_unit_branch" = w4=4;
+  label "cando_w3_w4_res_int" = w3=6;
+  label "cando_w3_w4_res_int_branch" = w4=4;
+  label "cando_w4_w3_req_unit" = w4=2;
+  label "cando_w4_w3_req_unit_branch" = w3=0;
+  label "cando_w4_w5_err_unit" = (w4=6) | (w4=9);
+  label "cando_w4_w5_err_unit_branch" = w5=4;
+  label "cando_w4_w5_res_int" = w4=6;
+  label "cando_w4_w5_res_int_branch" = w5=4;
+  label "cando_w5_w4_req_unit" = w5=2;
+  label "cando_w5_w4_req_unit_branch" = w4=0;
+  label "cando_w5_w6_err_unit" = (w5=6) | (w5=9);
+  label "cando_w5_w6_err_unit_branch" = w6=4;
+  label "cando_w5_w6_res_int" = w5=6;
+  label "cando_w5_w6_res_int_branch" = w6=4;
+  label "cando_w6_w5_req_unit" = w6=2;
+  label "cando_w6_w5_req_unit_branch" = w5=0;
+  label "cando_w6_w7_err_unit" = (w6=6) | (w6=9);
+  label "cando_w6_w7_err_unit_branch" = w7=4;
+  label "cando_w6_w7_res_int" = w6=6;
+  label "cando_w6_w7_res_int_branch" = w7=4;
+  label "cando_w7_w6_req_unit" = w7=2;
+  label "cando_w7_w6_req_unit_branch" = w6=0;
+  label "cando_w7_w8_err_unit" = (w7=6) | (w7=9);
+  label "cando_w7_w8_err_unit_branch" = w8=4;
+  label "cando_w7_w8_res_int" = w7=6;
+  label "cando_w7_w8_res_int_branch" = w8=4;
+  label "cando_w8_w7_req_unit" = w8=2;
+  label "cando_w8_w7_req_unit_branch" = w7=0;
+  label "cando_w8_w9_err_unit" = (w8=6) | (w8=9);
+  label "cando_w8_w9_err_unit_branch" = w9=4;
+  label "cando_w8_w9_res_int" = w8=6;
+  label "cando_w8_w9_res_int_branch" = w9=4;
+  label "cando_w9_w10_err_unit" = (w9=6) | (w9=9);
+  label "cando_w9_w10_err_unit_branch" = w10=2;
+  label "cando_w9_w10_res_int" = w9=6;
+  label "cando_w9_w10_res_int_branch" = w10=2;
+  label "cando_w9_w8_req_unit" = w9=2;
+  label "cando_w9_w8_req_unit_branch" = w8=0;
+  label "cando_w0_w1_branch" = w1=4;
+  label "cando_w1_w0_branch" = w0=0;
+  label "cando_w1_w2_branch" = w2=4;
+  label "cando_w10_dummy_branch" = dummy=0;
+  label "cando_w10_w9_branch" = w9=0;
+  label "cando_w2_w1_branch" = w1=0;
+  label "cando_w2_w3_branch" = w3=4;
+  label "cando_w3_w2_branch" = w2=0;
+  label "cando_w3_w4_branch" = w4=4;
+  label "cando_w4_w3_branch" = w3=0;
+  label "cando_w4_w5_branch" = w5=4;
+  label "cando_w5_w4_branch" = w4=0;
+  label "cando_w5_w6_branch" = w6=4;
+  label "cando_w6_w5_branch" = w5=0;
+  label "cando_w6_w7_branch" = w7=4;
+  label "cando_w7_w6_branch" = w6=0;
+  label "cando_w7_w8_branch" = w8=4;
+  label "cando_w8_w7_branch" = w7=0;
+  label "cando_w8_w9_branch" = w9=4;
+  label "cando_w9_w10_branch" = w10=2;
+  label "cando_w9_w8_branch" = w8=0;
+  
+  // Type safety
+  P>=1 [ (G ((("cando_w0_w1_err_unit" & "cando_w0_w1_branch") => "cando_w0_w1_err_unit_branch") & ((("cando_w0_w1_res_int" & "cando_w0_w1_branch") => "cando_w0_w1_res_int_branch") & ((("cando_w1_w0_req_unit" & "cando_w1_w0_branch") => "cando_w1_w0_req_unit_branch") & ((("cando_w1_w2_err_unit" & "cando_w1_w2_branch") => "cando_w1_w2_err_unit_branch") & ((("cando_w1_w2_res_int" & "cando_w1_w2_branch") => "cando_w1_w2_res_int_branch") & ((("cando_w10_dummy_done_unit" & "cando_w10_dummy_branch") => "cando_w10_dummy_done_unit_branch") & ((("cando_w10_w9_req_unit" & "cando_w10_w9_branch") => "cando_w10_w9_req_unit_branch") & ((("cando_w2_w1_req_unit" & "cando_w2_w1_branch") => "cando_w2_w1_req_unit_branch") & ((("cando_w2_w3_err_unit" & "cando_w2_w3_branch") => "cando_w2_w3_err_unit_branch") & ((("cando_w2_w3_res_int" & "cando_w2_w3_branch") => "cando_w2_w3_res_int_branch") & ((("cando_w3_w2_req_unit" & "cando_w3_w2_branch") => "cando_w3_w2_req_unit_branch") & ((("cando_w3_w4_err_unit" & "cando_w3_w4_branch") => "cando_w3_w4_err_unit_branch") & ((("cando_w3_w4_res_int" & "cando_w3_w4_branch") => "cando_w3_w4_res_int_branch") & ((("cando_w4_w3_req_unit" & "cando_w4_w3_branch") => "cando_w4_w3_req_unit_branch") & ((("cando_w4_w5_err_unit" & "cando_w4_w5_branch") => "cando_w4_w5_err_unit_branch") & ((("cando_w4_w5_res_int" & "cando_w4_w5_branch") => "cando_w4_w5_res_int_branch") & ((("cando_w5_w4_req_unit" & "cando_w5_w4_branch") => "cando_w5_w4_req_unit_branch") & ((("cando_w5_w6_err_unit" & "cando_w5_w6_branch") => "cando_w5_w6_err_unit_branch") & ((("cando_w5_w6_res_int" & "cando_w5_w6_branch") => "cando_w5_w6_res_int_branch") & ((("cando_w6_w5_req_unit" & "cando_w6_w5_branch") => "cando_w6_w5_req_unit_branch") & ((("cando_w6_w7_err_unit" & "cando_w6_w7_branch") => "cando_w6_w7_err_unit_branch") & ((("cando_w6_w7_res_int" & "cando_w6_w7_branch") => "cando_w6_w7_res_int_branch") & ((("cando_w7_w6_req_unit" & "cando_w7_w6_branch") => "cando_w7_w6_req_unit_branch") & ((("cando_w7_w8_err_unit" & "cando_w7_w8_branch") => "cando_w7_w8_err_unit_branch") & ((("cando_w7_w8_res_int" & "cando_w7_w8_branch") => "cando_w7_w8_res_int_branch") & ((("cando_w8_w7_req_unit" & "cando_w8_w7_branch") => "cando_w8_w7_req_unit_branch") & ((("cando_w8_w9_err_unit" & "cando_w8_w9_branch") => "cando_w8_w9_err_unit_branch") & ((("cando_w8_w9_res_int" & "cando_w8_w9_branch") => "cando_w8_w9_res_int_branch") & ((("cando_w9_w10_err_unit" & "cando_w9_w10_branch") => "cando_w9_w10_err_unit_branch") & ((("cando_w9_w10_res_int" & "cando_w9_w10_branch") => "cando_w9_w10_res_int_branch") & (("cando_w9_w8_req_unit" & "cando_w9_w8_branch") => "cando_w9_w8_req_unit_branch")))))))))))))))))))))))))))))))) ]
+  
+  // Probabilistic deadlock freedom
+  Pmin=? [ (G ("deadlock" => "end")) ]
+  
+  // Normalised probabilistic deadlock freedom
+  (Pmin=? [ (G ("deadlock" => "end")) ] / Pmin=? [ (G (!fail)) ])
+  
+  // Probabilistic termination
+  Pmin=? [ (F ("deadlock" & (!fail))) ]
+  
+  // Normalised probabilistic termination
+  (Pmin=? [ (F ("deadlock" & (!fail))) ] / Pmin=? [ (G (!fail)) ])
+  
+   ======= Property checking =======
+  
+  Type safety
+  Result: true
+  
+  Probabilistic deadlock freedom
+  Result: 0.0013671875000000888 (exact floating point)
+  
+  Normalised probabilistic deadlock freedom
+  Result: 0.0018974303372006002
+  
+  Probabilistic termination
+  Result: 0.7191796875 (exact floating point)
+  
+  Normalised probabilistic termination
+  Result: 0.9981025696627995
+  
+  
+  
+  
+   ======= TEST ../examples/fact_11.ctx =======
+  
+  w0 : mu t .
+       w1 & req . w1 (+) { 0.7 : res(Int) . t, 0.3 : err . t }
+  
+  w1 : mu t . w2 & req .
+              w0 (+) req .
+              w0 & {
+                 res(Int) . w2 (+) { 0.5 : res(Int) . t, 0.3 : err . t },
+                 err . w2 (+) err . t
+              }
+  
+  w2 : mu t . w3 & req .
+              w1 (+) req .
+              w1 & {
+                 res(Int) . w3 (+) { 0.5 : res(Int) . t, 0.3 : err . t },
+                 err . w3 (+) err . t
+              }
+  
+  w3 : mu t . w4 & req .
+              w2 (+) req .
+              w2 & {
+                 res(Int) . w4 (+) { 0.5 : res(Int) . t, 0.3 : err . t },
+                 err . w4 (+) err . t
+              }
+  
+  w4 : mu t . w5 & req .
+              w3 (+) req .
+              w3 & {
+                 res(Int) . w5 (+) { 0.5 : res(Int) . t, 0.3 : err . t },
+                 err . w5 (+) err . t
+              }
+  
+  w5 : mu t . w6 & req .
+              w4 (+) req .
+              w4 & {
+                 res(Int) . w6 (+) { 0.5 : res(Int) . t, 0.3 : err . t },
+                 err . w6 (+) err . t
+              }
+  
+  w6 : mu t . w7 & req .
+              w5 (+) req .
+              w5 & {
+                 res(Int) . w7 (+) { 0.5 : res(Int) . t, 0.3 : err . t },
+                 err . w7 (+) err . t
+              }
+  
+  w7 : mu t . w8 & req .
+              w6 (+) req .
+              w6 & {
+                 res(Int) . w8 (+) { 0.5 : res(Int) . t, 0.3 : err . t },
+                 err . w8 (+) err . t
+              }
+  
+  w8 : mu t . w9 & req .
+              w7 (+) req .
+              w7 & {
+                 res(Int) . w9 (+) { 0.5 : res(Int) . t, 0.3 : err . t },
+                 err . w9 (+) err . t
+              }
+  
+  w9 : mu t . w10 & req .
+              w8 (+) req .
+              w8 & {
+                 res(Int) . w10 (+) { 0.5 : res(Int) . t, 0.3 : err . t },
+                 err . w10 (+) err . t
+              }
+  
+  w10 : mu t . w11 & req .
+              w9 (+) req .
+              w9 & {
+                 res(Int) . w11 (+) { 0.5 : res(Int) . t, 0.3 : err . t },
+                 err . w11 (+) err . t
+              }
+  
+  w11 : w10 (+) req .
+       w10 & {
+          res(Int) . mu t . dummy (+) done . t,
+          err . end
+       }
+  
+  dummy : mu t . w11 & done . t
+  
+   ======= PRISM output ========
+  
+  global fail : bool init false;
+  
+  module closure
+    closure : bool init false;
+  
+  endmodule
+  
+  module w0
+    w0 : [0..6] init 0;
+  
+    [] (w0=6) & (fail=false) -> 1:(fail'=true);
+    [w1_w0] (w0=0) & (fail=false) -> 1:(w0'=1);
+    [w1_w0_req_unit] (w0=1) & (fail=false) -> 1:(w0'=2);
+    [w0_w1] (w0=2) & (fail=false) -> 0:(w0'=6) + 0.7:(w0'=3) + 0.3:(w0'=4);
+    [w0_w1_res_int] (w0=3) & (fail=false) -> 1:(w0'=0);
+    [w0_w1_err_unit] (w0=4) & (fail=false) -> 1:(w0'=0);
+  endmodule
+  
+  module w1
+    w1 : [0..12] init 0;
+  
+    [] (w1=12) & (fail=false) -> 1:(fail'=true);
+    [w2_w1] (w1=0) & (fail=false) -> 1:(w1'=1);
+    [w2_w1_req_unit] (w1=1) & (fail=false) -> 1:(w1'=2);
+    [w1_w0] (w1=2) & (fail=false) -> 0:(w1'=12) + 1:(w1'=3);
+    [w1_w0_req_unit] (w1=3) & (fail=false) -> 1:(w1'=4);
+    [w0_w1] (w1=4) & (fail=false) -> 1:(w1'=5);
+    [w0_w1_res_int] (w1=5) & (fail=false) -> 1:(w1'=6);
+    [w0_w1_err_unit] (w1=5) & (fail=false) -> 1:(w1'=9);
+    [w1_w2] (w1=6) & (fail=false) -> 0.2:(w1'=12) + 0.5:(w1'=7) + 0.3:(w1'=8);
+    [w1_w2_res_int] (w1=7) & (fail=false) -> 1:(w1'=0);
+    [w1_w2_err_unit] (w1=8) & (fail=false) -> 1:(w1'=0);
+    [w1_w2] (w1=9) & (fail=false) -> 0:(w1'=12) + 1:(w1'=10);
+    [w1_w2_err_unit] (w1=10) & (fail=false) -> 1:(w1'=0);
+  endmodule
+  
+  module w2
+    w2 : [0..12] init 0;
+  
+    [] (w2=12) & (fail=false) -> 1:(fail'=true);
+    [w3_w2] (w2=0) & (fail=false) -> 1:(w2'=1);
+    [w3_w2_req_unit] (w2=1) & (fail=false) -> 1:(w2'=2);
+    [w2_w1] (w2=2) & (fail=false) -> 0:(w2'=12) + 1:(w2'=3);
+    [w2_w1_req_unit] (w2=3) & (fail=false) -> 1:(w2'=4);
+    [w1_w2] (w2=4) & (fail=false) -> 1:(w2'=5);
+    [w1_w2_res_int] (w2=5) & (fail=false) -> 1:(w2'=6);
+    [w1_w2_err_unit] (w2=5) & (fail=false) -> 1:(w2'=9);
+    [w2_w3] (w2=6) & (fail=false) -> 0.2:(w2'=12) + 0.5:(w2'=7) + 0.3:(w2'=8);
+    [w2_w3_res_int] (w2=7) & (fail=false) -> 1:(w2'=0);
+    [w2_w3_err_unit] (w2=8) & (fail=false) -> 1:(w2'=0);
+    [w2_w3] (w2=9) & (fail=false) -> 0:(w2'=12) + 1:(w2'=10);
+    [w2_w3_err_unit] (w2=10) & (fail=false) -> 1:(w2'=0);
+  endmodule
+  
+  module w3
+    w3 : [0..12] init 0;
+  
+    [] (w3=12) & (fail=false) -> 1:(fail'=true);
+    [w4_w3] (w3=0) & (fail=false) -> 1:(w3'=1);
+    [w4_w3_req_unit] (w3=1) & (fail=false) -> 1:(w3'=2);
+    [w3_w2] (w3=2) & (fail=false) -> 0:(w3'=12) + 1:(w3'=3);
+    [w3_w2_req_unit] (w3=3) & (fail=false) -> 1:(w3'=4);
+    [w2_w3] (w3=4) & (fail=false) -> 1:(w3'=5);
+    [w2_w3_res_int] (w3=5) & (fail=false) -> 1:(w3'=6);
+    [w2_w3_err_unit] (w3=5) & (fail=false) -> 1:(w3'=9);
+    [w3_w4] (w3=6) & (fail=false) -> 0.2:(w3'=12) + 0.5:(w3'=7) + 0.3:(w3'=8);
+    [w3_w4_res_int] (w3=7) & (fail=false) -> 1:(w3'=0);
+    [w3_w4_err_unit] (w3=8) & (fail=false) -> 1:(w3'=0);
+    [w3_w4] (w3=9) & (fail=false) -> 0:(w3'=12) + 1:(w3'=10);
+    [w3_w4_err_unit] (w3=10) & (fail=false) -> 1:(w3'=0);
+  endmodule
+  
+  module w4
+    w4 : [0..12] init 0;
+  
+    [] (w4=12) & (fail=false) -> 1:(fail'=true);
+    [w5_w4] (w4=0) & (fail=false) -> 1:(w4'=1);
+    [w5_w4_req_unit] (w4=1) & (fail=false) -> 1:(w4'=2);
+    [w4_w3] (w4=2) & (fail=false) -> 0:(w4'=12) + 1:(w4'=3);
+    [w4_w3_req_unit] (w4=3) & (fail=false) -> 1:(w4'=4);
+    [w3_w4] (w4=4) & (fail=false) -> 1:(w4'=5);
+    [w3_w4_res_int] (w4=5) & (fail=false) -> 1:(w4'=6);
+    [w3_w4_err_unit] (w4=5) & (fail=false) -> 1:(w4'=9);
+    [w4_w5] (w4=6) & (fail=false) -> 0.2:(w4'=12) + 0.5:(w4'=7) + 0.3:(w4'=8);
+    [w4_w5_res_int] (w4=7) & (fail=false) -> 1:(w4'=0);
+    [w4_w5_err_unit] (w4=8) & (fail=false) -> 1:(w4'=0);
+    [w4_w5] (w4=9) & (fail=false) -> 0:(w4'=12) + 1:(w4'=10);
+    [w4_w5_err_unit] (w4=10) & (fail=false) -> 1:(w4'=0);
+  endmodule
+  
+  module w5
+    w5 : [0..12] init 0;
+  
+    [] (w5=12) & (fail=false) -> 1:(fail'=true);
+    [w6_w5] (w5=0) & (fail=false) -> 1:(w5'=1);
+    [w6_w5_req_unit] (w5=1) & (fail=false) -> 1:(w5'=2);
+    [w5_w4] (w5=2) & (fail=false) -> 0:(w5'=12) + 1:(w5'=3);
+    [w5_w4_req_unit] (w5=3) & (fail=false) -> 1:(w5'=4);
+    [w4_w5] (w5=4) & (fail=false) -> 1:(w5'=5);
+    [w4_w5_res_int] (w5=5) & (fail=false) -> 1:(w5'=6);
+    [w4_w5_err_unit] (w5=5) & (fail=false) -> 1:(w5'=9);
+    [w5_w6] (w5=6) & (fail=false) -> 0.2:(w5'=12) + 0.5:(w5'=7) + 0.3:(w5'=8);
+    [w5_w6_res_int] (w5=7) & (fail=false) -> 1:(w5'=0);
+    [w5_w6_err_unit] (w5=8) & (fail=false) -> 1:(w5'=0);
+    [w5_w6] (w5=9) & (fail=false) -> 0:(w5'=12) + 1:(w5'=10);
+    [w5_w6_err_unit] (w5=10) & (fail=false) -> 1:(w5'=0);
+  endmodule
+  
+  module w6
+    w6 : [0..12] init 0;
+  
+    [] (w6=12) & (fail=false) -> 1:(fail'=true);
+    [w7_w6] (w6=0) & (fail=false) -> 1:(w6'=1);
+    [w7_w6_req_unit] (w6=1) & (fail=false) -> 1:(w6'=2);
+    [w6_w5] (w6=2) & (fail=false) -> 0:(w6'=12) + 1:(w6'=3);
+    [w6_w5_req_unit] (w6=3) & (fail=false) -> 1:(w6'=4);
+    [w5_w6] (w6=4) & (fail=false) -> 1:(w6'=5);
+    [w5_w6_res_int] (w6=5) & (fail=false) -> 1:(w6'=6);
+    [w5_w6_err_unit] (w6=5) & (fail=false) -> 1:(w6'=9);
+    [w6_w7] (w6=6) & (fail=false) -> 0.2:(w6'=12) + 0.5:(w6'=7) + 0.3:(w6'=8);
+    [w6_w7_res_int] (w6=7) & (fail=false) -> 1:(w6'=0);
+    [w6_w7_err_unit] (w6=8) & (fail=false) -> 1:(w6'=0);
+    [w6_w7] (w6=9) & (fail=false) -> 0:(w6'=12) + 1:(w6'=10);
+    [w6_w7_err_unit] (w6=10) & (fail=false) -> 1:(w6'=0);
+  endmodule
+  
+  module w7
+    w7 : [0..12] init 0;
+  
+    [] (w7=12) & (fail=false) -> 1:(fail'=true);
+    [w8_w7] (w7=0) & (fail=false) -> 1:(w7'=1);
+    [w8_w7_req_unit] (w7=1) & (fail=false) -> 1:(w7'=2);
+    [w7_w6] (w7=2) & (fail=false) -> 0:(w7'=12) + 1:(w7'=3);
+    [w7_w6_req_unit] (w7=3) & (fail=false) -> 1:(w7'=4);
+    [w6_w7] (w7=4) & (fail=false) -> 1:(w7'=5);
+    [w6_w7_res_int] (w7=5) & (fail=false) -> 1:(w7'=6);
+    [w6_w7_err_unit] (w7=5) & (fail=false) -> 1:(w7'=9);
+    [w7_w8] (w7=6) & (fail=false) -> 0.2:(w7'=12) + 0.5:(w7'=7) + 0.3:(w7'=8);
+    [w7_w8_res_int] (w7=7) & (fail=false) -> 1:(w7'=0);
+    [w7_w8_err_unit] (w7=8) & (fail=false) -> 1:(w7'=0);
+    [w7_w8] (w7=9) & (fail=false) -> 0:(w7'=12) + 1:(w7'=10);
+    [w7_w8_err_unit] (w7=10) & (fail=false) -> 1:(w7'=0);
+  endmodule
+  
+  module w8
+    w8 : [0..12] init 0;
+  
+    [] (w8=12) & (fail=false) -> 1:(fail'=true);
+    [w9_w8] (w8=0) & (fail=false) -> 1:(w8'=1);
+    [w9_w8_req_unit] (w8=1) & (fail=false) -> 1:(w8'=2);
+    [w8_w7] (w8=2) & (fail=false) -> 0:(w8'=12) + 1:(w8'=3);
+    [w8_w7_req_unit] (w8=3) & (fail=false) -> 1:(w8'=4);
+    [w7_w8] (w8=4) & (fail=false) -> 1:(w8'=5);
+    [w7_w8_res_int] (w8=5) & (fail=false) -> 1:(w8'=6);
+    [w7_w8_err_unit] (w8=5) & (fail=false) -> 1:(w8'=9);
+    [w8_w9] (w8=6) & (fail=false) -> 0.2:(w8'=12) + 0.5:(w8'=7) + 0.3:(w8'=8);
+    [w8_w9_res_int] (w8=7) & (fail=false) -> 1:(w8'=0);
+    [w8_w9_err_unit] (w8=8) & (fail=false) -> 1:(w8'=0);
+    [w8_w9] (w8=9) & (fail=false) -> 0:(w8'=12) + 1:(w8'=10);
+    [w8_w9_err_unit] (w8=10) & (fail=false) -> 1:(w8'=0);
+  endmodule
+  
+  module w9
+    w9 : [0..12] init 0;
+  
+    [] (w9=12) & (fail=false) -> 1:(fail'=true);
+    [w10_w9] (w9=0) & (fail=false) -> 1:(w9'=1);
+    [w10_w9_req_unit] (w9=1) & (fail=false) -> 1:(w9'=2);
+    [w9_w8] (w9=2) & (fail=false) -> 0:(w9'=12) + 1:(w9'=3);
+    [w9_w8_req_unit] (w9=3) & (fail=false) -> 1:(w9'=4);
+    [w8_w9] (w9=4) & (fail=false) -> 1:(w9'=5);
+    [w8_w9_res_int] (w9=5) & (fail=false) -> 1:(w9'=6);
+    [w8_w9_err_unit] (w9=5) & (fail=false) -> 1:(w9'=9);
+    [w9_w10] (w9=6) & (fail=false) -> 0.2:(w9'=12) + 0.5:(w9'=7) + 0.3:(w9'=8);
+    [w9_w10_res_int] (w9=7) & (fail=false) -> 1:(w9'=0);
+    [w9_w10_err_unit] (w9=8) & (fail=false) -> 1:(w9'=0);
+    [w9_w10] (w9=9) & (fail=false) -> 0:(w9'=12) + 1:(w9'=10);
+    [w9_w10_err_unit] (w9=10) & (fail=false) -> 1:(w9'=0);
+  endmodule
+  
+  module w10
+    w10 : [0..12] init 0;
+  
+    [] (w10=12) & (fail=false) -> 1:(fail'=true);
+    [w11_w10] (w10=0) & (fail=false) -> 1:(w10'=1);
+    [w11_w10_req_unit] (w10=1) & (fail=false) -> 1:(w10'=2);
+    [w10_w9] (w10=2) & (fail=false) -> 0:(w10'=12) + 1:(w10'=3);
+    [w10_w9_req_unit] (w10=3) & (fail=false) -> 1:(w10'=4);
+    [w9_w10] (w10=4) & (fail=false) -> 1:(w10'=5);
+    [w9_w10_res_int] (w10=5) & (fail=false) -> 1:(w10'=6);
+    [w9_w10_err_unit] (w10=5) & (fail=false) -> 1:(w10'=9);
+    [w10_w11] (w10=6) & (fail=false) -> 0.2:(w10'=12) + 0.5:(w10'=7) + 0.3:(w10'=8);
+    [w10_w11_res_int] (w10=7) & (fail=false) -> 1:(w10'=0);
+    [w10_w11_err_unit] (w10=8) & (fail=false) -> 1:(w10'=0);
+    [w10_w11] (w10=9) & (fail=false) -> 0:(w10'=12) + 1:(w10'=10);
+    [w10_w11_err_unit] (w10=10) & (fail=false) -> 1:(w10'=0);
+  endmodule
+  
+  module w11
+    w11 : [0..7] init 0;
+  
+    [] (w11=7) & (fail=false) -> 1:(fail'=true);
+    [w11_w10] (w11=0) & (fail=false) -> 0:(w11'=7) + 1:(w11'=1);
+    [w11_w10_req_unit] (w11=1) & (fail=false) -> 1:(w11'=2);
+    [w10_w11] (w11=2) & (fail=false) -> 1:(w11'=3);
+    [w10_w11_res_int] (w11=3) & (fail=false) -> 1:(w11'=4);
+    [w10_w11_err_unit] (w11=3) & (fail=false) -> 1:(w11'=6);
+    [w11_dummy] (w11=4) & (fail=false) -> 0:(w11'=7) + 1:(w11'=5);
+    [w11_dummy_done_unit] (w11=5) & (fail=false) -> 1:(w11'=4);
+  endmodule
+  
+  module dummy
+    dummy : [0..3] init 0;
+  
+    [] (dummy=3) & (fail=false) -> 1:(fail'=true);
+    [w11_dummy] (dummy=0) & (fail=false) -> 1:(dummy'=1);
+    [w11_dummy_done_unit] (dummy=1) & (fail=false) -> 1:(dummy'=0);
+  endmodule
+  
+  label "end" = (w0=5) & (w1=11) & (w2=11) & (w3=11) & (w4=11) & (w5=11) & (w6=11) & (w7=11) & (w8=11) & (w9=11) & (w10=11) & (w11=6) & (dummy=2);
+  label "cando_w0_w1_err_unit" = w0=2;
+  label "cando_w0_w1_err_unit_branch" = w1=4;
+  label "cando_w0_w1_res_int" = w0=2;
+  label "cando_w0_w1_res_int_branch" = w1=4;
+  label "cando_w1_w0_req_unit" = w1=2;
+  label "cando_w1_w0_req_unit_branch" = w0=0;
+  label "cando_w1_w2_err_unit" = (w1=6) | (w1=9);
+  label "cando_w1_w2_err_unit_branch" = w2=4;
+  label "cando_w1_w2_res_int" = w1=6;
+  label "cando_w1_w2_res_int_branch" = w2=4;
+  label "cando_w10_w11_err_unit" = (w10=6) | (w10=9);
+  label "cando_w10_w11_err_unit_branch" = w11=2;
+  label "cando_w10_w11_res_int" = w10=6;
+  label "cando_w10_w11_res_int_branch" = w11=2;
+  label "cando_w10_w9_req_unit" = w10=2;
+  label "cando_w10_w9_req_unit_branch" = w9=0;
+  label "cando_w11_dummy_done_unit" = w11=4;
+  label "cando_w11_dummy_done_unit_branch" = dummy=0;
+  label "cando_w11_w10_req_unit" = w11=0;
+  label "cando_w11_w10_req_unit_branch" = w10=0;
+  label "cando_w2_w1_req_unit" = w2=2;
+  label "cando_w2_w1_req_unit_branch" = w1=0;
+  label "cando_w2_w3_err_unit" = (w2=6) | (w2=9);
+  label "cando_w2_w3_err_unit_branch" = w3=4;
+  label "cando_w2_w3_res_int" = w2=6;
+  label "cando_w2_w3_res_int_branch" = w3=4;
+  label "cando_w3_w2_req_unit" = w3=2;
+  label "cando_w3_w2_req_unit_branch" = w2=0;
+  label "cando_w3_w4_err_unit" = (w3=6) | (w3=9);
+  label "cando_w3_w4_err_unit_branch" = w4=4;
+  label "cando_w3_w4_res_int" = w3=6;
+  label "cando_w3_w4_res_int_branch" = w4=4;
+  label "cando_w4_w3_req_unit" = w4=2;
+  label "cando_w4_w3_req_unit_branch" = w3=0;
+  label "cando_w4_w5_err_unit" = (w4=6) | (w4=9);
+  label "cando_w4_w5_err_unit_branch" = w5=4;
+  label "cando_w4_w5_res_int" = w4=6;
+  label "cando_w4_w5_res_int_branch" = w5=4;
+  label "cando_w5_w4_req_unit" = w5=2;
+  label "cando_w5_w4_req_unit_branch" = w4=0;
+  label "cando_w5_w6_err_unit" = (w5=6) | (w5=9);
+  label "cando_w5_w6_err_unit_branch" = w6=4;
+  label "cando_w5_w6_res_int" = w5=6;
+  label "cando_w5_w6_res_int_branch" = w6=4;
+  label "cando_w6_w5_req_unit" = w6=2;
+  label "cando_w6_w5_req_unit_branch" = w5=0;
+  label "cando_w6_w7_err_unit" = (w6=6) | (w6=9);
+  label "cando_w6_w7_err_unit_branch" = w7=4;
+  label "cando_w6_w7_res_int" = w6=6;
+  label "cando_w6_w7_res_int_branch" = w7=4;
+  label "cando_w7_w6_req_unit" = w7=2;
+  label "cando_w7_w6_req_unit_branch" = w6=0;
+  label "cando_w7_w8_err_unit" = (w7=6) | (w7=9);
+  label "cando_w7_w8_err_unit_branch" = w8=4;
+  label "cando_w7_w8_res_int" = w7=6;
+  label "cando_w7_w8_res_int_branch" = w8=4;
+  label "cando_w8_w7_req_unit" = w8=2;
+  label "cando_w8_w7_req_unit_branch" = w7=0;
+  label "cando_w8_w9_err_unit" = (w8=6) | (w8=9);
+  label "cando_w8_w9_err_unit_branch" = w9=4;
+  label "cando_w8_w9_res_int" = w8=6;
+  label "cando_w8_w9_res_int_branch" = w9=4;
+  label "cando_w9_w10_err_unit" = (w9=6) | (w9=9);
+  label "cando_w9_w10_err_unit_branch" = w10=4;
+  label "cando_w9_w10_res_int" = w9=6;
+  label "cando_w9_w10_res_int_branch" = w10=4;
+  label "cando_w9_w8_req_unit" = w9=2;
+  label "cando_w9_w8_req_unit_branch" = w8=0;
+  label "cando_w0_w1_branch" = w1=4;
+  label "cando_w1_w0_branch" = w0=0;
+  label "cando_w1_w2_branch" = w2=4;
+  label "cando_w10_w11_branch" = w11=2;
+  label "cando_w10_w9_branch" = w9=0;
+  label "cando_w11_dummy_branch" = dummy=0;
+  label "cando_w11_w10_branch" = w10=0;
+  label "cando_w2_w1_branch" = w1=0;
+  label "cando_w2_w3_branch" = w3=4;
+  label "cando_w3_w2_branch" = w2=0;
+  label "cando_w3_w4_branch" = w4=4;
+  label "cando_w4_w3_branch" = w3=0;
+  label "cando_w4_w5_branch" = w5=4;
+  label "cando_w5_w4_branch" = w4=0;
+  label "cando_w5_w6_branch" = w6=4;
+  label "cando_w6_w5_branch" = w5=0;
+  label "cando_w6_w7_branch" = w7=4;
+  label "cando_w7_w6_branch" = w6=0;
+  label "cando_w7_w8_branch" = w8=4;
+  label "cando_w8_w7_branch" = w7=0;
+  label "cando_w8_w9_branch" = w9=4;
+  label "cando_w9_w10_branch" = w10=4;
+  label "cando_w9_w8_branch" = w8=0;
+  
+  // Type safety
+  P>=1 [ (G ((("cando_w0_w1_err_unit" & "cando_w0_w1_branch") => "cando_w0_w1_err_unit_branch") & ((("cando_w0_w1_res_int" & "cando_w0_w1_branch") => "cando_w0_w1_res_int_branch") & ((("cando_w1_w0_req_unit" & "cando_w1_w0_branch") => "cando_w1_w0_req_unit_branch") & ((("cando_w1_w2_err_unit" & "cando_w1_w2_branch") => "cando_w1_w2_err_unit_branch") & ((("cando_w1_w2_res_int" & "cando_w1_w2_branch") => "cando_w1_w2_res_int_branch") & ((("cando_w10_w11_err_unit" & "cando_w10_w11_branch") => "cando_w10_w11_err_unit_branch") & ((("cando_w10_w11_res_int" & "cando_w10_w11_branch") => "cando_w10_w11_res_int_branch") & ((("cando_w10_w9_req_unit" & "cando_w10_w9_branch") => "cando_w10_w9_req_unit_branch") & ((("cando_w11_dummy_done_unit" & "cando_w11_dummy_branch") => "cando_w11_dummy_done_unit_branch") & ((("cando_w11_w10_req_unit" & "cando_w11_w10_branch") => "cando_w11_w10_req_unit_branch") & ((("cando_w2_w1_req_unit" & "cando_w2_w1_branch") => "cando_w2_w1_req_unit_branch") & ((("cando_w2_w3_err_unit" & "cando_w2_w3_branch") => "cando_w2_w3_err_unit_branch") & ((("cando_w2_w3_res_int" & "cando_w2_w3_branch") => "cando_w2_w3_res_int_branch") & ((("cando_w3_w2_req_unit" & "cando_w3_w2_branch") => "cando_w3_w2_req_unit_branch") & ((("cando_w3_w4_err_unit" & "cando_w3_w4_branch") => "cando_w3_w4_err_unit_branch") & ((("cando_w3_w4_res_int" & "cando_w3_w4_branch") => "cando_w3_w4_res_int_branch") & ((("cando_w4_w3_req_unit" & "cando_w4_w3_branch") => "cando_w4_w3_req_unit_branch") & ((("cando_w4_w5_err_unit" & "cando_w4_w5_branch") => "cando_w4_w5_err_unit_branch") & ((("cando_w4_w5_res_int" & "cando_w4_w5_branch") => "cando_w4_w5_res_int_branch") & ((("cando_w5_w4_req_unit" & "cando_w5_w4_branch") => "cando_w5_w4_req_unit_branch") & ((("cando_w5_w6_err_unit" & "cando_w5_w6_branch") => "cando_w5_w6_err_unit_branch") & ((("cando_w5_w6_res_int" & "cando_w5_w6_branch") => "cando_w5_w6_res_int_branch") & ((("cando_w6_w5_req_unit" & "cando_w6_w5_branch") => "cando_w6_w5_req_unit_branch") & ((("cando_w6_w7_err_unit" & "cando_w6_w7_branch") => "cando_w6_w7_err_unit_branch") & ((("cando_w6_w7_res_int" & "cando_w6_w7_branch") => "cando_w6_w7_res_int_branch") & ((("cando_w7_w6_req_unit" & "cando_w7_w6_branch") => "cando_w7_w6_req_unit_branch") & ((("cando_w7_w8_err_unit" & "cando_w7_w8_branch") => "cando_w7_w8_err_unit_branch") & ((("cando_w7_w8_res_int" & "cando_w7_w8_branch") => "cando_w7_w8_res_int_branch") & ((("cando_w8_w7_req_unit" & "cando_w8_w7_branch") => "cando_w8_w7_req_unit_branch") & ((("cando_w8_w9_err_unit" & "cando_w8_w9_branch") => "cando_w8_w9_err_unit_branch") & ((("cando_w8_w9_res_int" & "cando_w8_w9_branch") => "cando_w8_w9_res_int_branch") & ((("cando_w9_w10_err_unit" & "cando_w9_w10_branch") => "cando_w9_w10_err_unit_branch") & ((("cando_w9_w10_res_int" & "cando_w9_w10_branch") => "cando_w9_w10_res_int_branch") & (("cando_w9_w8_req_unit" & "cando_w9_w8_branch") => "cando_w9_w8_req_unit_branch"))))))))))))))))))))))))))))))))))) ]
+  
+  // Probabilistic deadlock freedom
+  Pmin=? [ (G ("deadlock" => "end")) ]
+  
+  // Normalised probabilistic deadlock freedom
+  (Pmin=? [ (G ("deadlock" => "end")) ] / Pmin=? [ (G (!fail)) ])
+  
+  // Probabilistic termination
+  Pmin=? [ (F ("deadlock" & (!fail))) ]
+  
+  // Normalised probabilistic termination
+  (Pmin=? [ (F ("deadlock" & (!fail))) ] / Pmin=? [ (G (!fail)) ])
+  
+   ======= Property checking =======
+  
+  Type safety
+  Result: true
+  
+  Probabilistic deadlock freedom
+  Result: 6.835937500000444E-4 (exact floating point)
+  
+  Normalised probabilistic deadlock freedom
+  Result: 9.490753294647832E-4
+  
+  Probabilistic termination
+  Result: 0.7195898437499999 (exact floating point)
+  
+  Normalised probabilistic termination
+  Result: 0.9990509246705352
+  
+  
+  
+  
+   ======= TEST ../examples/fact_12.ctx =======
+  
+  w0 : mu t .
+       w1 & req . w1 (+) { 0.7 : res(Int) . t, 0.3 : err . t }
+  
+  w1 : mu t . w2 & req .
+              w0 (+) req .
+              w0 & {
+                 res(Int) . w2 (+) { 0.5 : res(Int) . t, 0.3 : err . t },
+                 err . w2 (+) err . t
+              }
+  
+  w2 : mu t . w3 & req .
+              w1 (+) req .
+              w1 & {
+                 res(Int) . w3 (+) { 0.5 : res(Int) . t, 0.3 : err . t },
+                 err . w3 (+) err . t
+              }
+  
+  w3 : mu t . w4 & req .
+              w2 (+) req .
+              w2 & {
+                 res(Int) . w4 (+) { 0.5 : res(Int) . t, 0.3 : err . t },
+                 err . w4 (+) err . t
+              }
+  
+  w4 : mu t . w5 & req .
+              w3 (+) req .
+              w3 & {
+                 res(Int) . w5 (+) { 0.5 : res(Int) . t, 0.3 : err . t },
+                 err . w5 (+) err . t
+              }
+  
+  w5 : mu t . w6 & req .
+              w4 (+) req .
+              w4 & {
+                 res(Int) . w6 (+) { 0.5 : res(Int) . t, 0.3 : err . t },
+                 err . w6 (+) err . t
+              }
+  
+  w6 : mu t . w7 & req .
+              w5 (+) req .
+              w5 & {
+                 res(Int) . w7 (+) { 0.5 : res(Int) . t, 0.3 : err . t },
+                 err . w7 (+) err . t
+              }
+  
+  w7 : mu t . w8 & req .
+              w6 (+) req .
+              w6 & {
+                 res(Int) . w8 (+) { 0.5 : res(Int) . t, 0.3 : err . t },
+                 err . w8 (+) err . t
+              }
+  
+  w8 : mu t . w9 & req .
+              w7 (+) req .
+              w7 & {
+                 res(Int) . w9 (+) { 0.5 : res(Int) . t, 0.3 : err . t },
+                 err . w9 (+) err . t
+              }
+  
+  w9 : mu t . w10 & req .
+              w8 (+) req .
+              w8 & {
+                 res(Int) . w10 (+) { 0.5 : res(Int) . t, 0.3 : err . t },
+                 err . w10 (+) err . t
+              }
+  
+  w10 : mu t . w11 & req .
+              w9 (+) req .
+              w9 & {
+                 res(Int) . w11 (+) { 0.5 : res(Int) . t, 0.3 : err . t },
+                 err . w11 (+) err . t
+              }
+  
+  w11 : mu t . w12 & req .
+              w10 (+) req .
+              w10 & {
+                 res(Int) . w12 (+) { 0.5 : res(Int) . t, 0.3 : err . t },
+                 err . w12 (+) err . t
+              }
+  
+  w12 : w11 (+) req .
+       w11 & {
+          res(Int) . mu t . dummy (+) done . t,
+          err . end
+       }
+  
+  dummy : mu t . w12 & done . t
+  
+   ======= PRISM output ========
+  
+  global fail : bool init false;
+  
+  module closure
+    closure : bool init false;
+  
+  endmodule
+  
+  module w0
+    w0 : [0..6] init 0;
+  
+    [] (w0=6) & (fail=false) -> 1:(fail'=true);
+    [w1_w0] (w0=0) & (fail=false) -> 1:(w0'=1);
+    [w1_w0_req_unit] (w0=1) & (fail=false) -> 1:(w0'=2);
+    [w0_w1] (w0=2) & (fail=false) -> 0:(w0'=6) + 0.7:(w0'=3) + 0.3:(w0'=4);
+    [w0_w1_res_int] (w0=3) & (fail=false) -> 1:(w0'=0);
+    [w0_w1_err_unit] (w0=4) & (fail=false) -> 1:(w0'=0);
+  endmodule
+  
+  module w1
+    w1 : [0..12] init 0;
+  
+    [] (w1=12) & (fail=false) -> 1:(fail'=true);
+    [w2_w1] (w1=0) & (fail=false) -> 1:(w1'=1);
+    [w2_w1_req_unit] (w1=1) & (fail=false) -> 1:(w1'=2);
+    [w1_w0] (w1=2) & (fail=false) -> 0:(w1'=12) + 1:(w1'=3);
+    [w1_w0_req_unit] (w1=3) & (fail=false) -> 1:(w1'=4);
+    [w0_w1] (w1=4) & (fail=false) -> 1:(w1'=5);
+    [w0_w1_res_int] (w1=5) & (fail=false) -> 1:(w1'=6);
+    [w0_w1_err_unit] (w1=5) & (fail=false) -> 1:(w1'=9);
+    [w1_w2] (w1=6) & (fail=false) -> 0.2:(w1'=12) + 0.5:(w1'=7) + 0.3:(w1'=8);
+    [w1_w2_res_int] (w1=7) & (fail=false) -> 1:(w1'=0);
+    [w1_w2_err_unit] (w1=8) & (fail=false) -> 1:(w1'=0);
+    [w1_w2] (w1=9) & (fail=false) -> 0:(w1'=12) + 1:(w1'=10);
+    [w1_w2_err_unit] (w1=10) & (fail=false) -> 1:(w1'=0);
+  endmodule
+  
+  module w2
+    w2 : [0..12] init 0;
+  
+    [] (w2=12) & (fail=false) -> 1:(fail'=true);
+    [w3_w2] (w2=0) & (fail=false) -> 1:(w2'=1);
+    [w3_w2_req_unit] (w2=1) & (fail=false) -> 1:(w2'=2);
+    [w2_w1] (w2=2) & (fail=false) -> 0:(w2'=12) + 1:(w2'=3);
+    [w2_w1_req_unit] (w2=3) & (fail=false) -> 1:(w2'=4);
+    [w1_w2] (w2=4) & (fail=false) -> 1:(w2'=5);
+    [w1_w2_res_int] (w2=5) & (fail=false) -> 1:(w2'=6);
+    [w1_w2_err_unit] (w2=5) & (fail=false) -> 1:(w2'=9);
+    [w2_w3] (w2=6) & (fail=false) -> 0.2:(w2'=12) + 0.5:(w2'=7) + 0.3:(w2'=8);
+    [w2_w3_res_int] (w2=7) & (fail=false) -> 1:(w2'=0);
+    [w2_w3_err_unit] (w2=8) & (fail=false) -> 1:(w2'=0);
+    [w2_w3] (w2=9) & (fail=false) -> 0:(w2'=12) + 1:(w2'=10);
+    [w2_w3_err_unit] (w2=10) & (fail=false) -> 1:(w2'=0);
+  endmodule
+  
+  module w3
+    w3 : [0..12] init 0;
+  
+    [] (w3=12) & (fail=false) -> 1:(fail'=true);
+    [w4_w3] (w3=0) & (fail=false) -> 1:(w3'=1);
+    [w4_w3_req_unit] (w3=1) & (fail=false) -> 1:(w3'=2);
+    [w3_w2] (w3=2) & (fail=false) -> 0:(w3'=12) + 1:(w3'=3);
+    [w3_w2_req_unit] (w3=3) & (fail=false) -> 1:(w3'=4);
+    [w2_w3] (w3=4) & (fail=false) -> 1:(w3'=5);
+    [w2_w3_res_int] (w3=5) & (fail=false) -> 1:(w3'=6);
+    [w2_w3_err_unit] (w3=5) & (fail=false) -> 1:(w3'=9);
+    [w3_w4] (w3=6) & (fail=false) -> 0.2:(w3'=12) + 0.5:(w3'=7) + 0.3:(w3'=8);
+    [w3_w4_res_int] (w3=7) & (fail=false) -> 1:(w3'=0);
+    [w3_w4_err_unit] (w3=8) & (fail=false) -> 1:(w3'=0);
+    [w3_w4] (w3=9) & (fail=false) -> 0:(w3'=12) + 1:(w3'=10);
+    [w3_w4_err_unit] (w3=10) & (fail=false) -> 1:(w3'=0);
+  endmodule
+  
+  module w4
+    w4 : [0..12] init 0;
+  
+    [] (w4=12) & (fail=false) -> 1:(fail'=true);
+    [w5_w4] (w4=0) & (fail=false) -> 1:(w4'=1);
+    [w5_w4_req_unit] (w4=1) & (fail=false) -> 1:(w4'=2);
+    [w4_w3] (w4=2) & (fail=false) -> 0:(w4'=12) + 1:(w4'=3);
+    [w4_w3_req_unit] (w4=3) & (fail=false) -> 1:(w4'=4);
+    [w3_w4] (w4=4) & (fail=false) -> 1:(w4'=5);
+    [w3_w4_res_int] (w4=5) & (fail=false) -> 1:(w4'=6);
+    [w3_w4_err_unit] (w4=5) & (fail=false) -> 1:(w4'=9);
+    [w4_w5] (w4=6) & (fail=false) -> 0.2:(w4'=12) + 0.5:(w4'=7) + 0.3:(w4'=8);
+    [w4_w5_res_int] (w4=7) & (fail=false) -> 1:(w4'=0);
+    [w4_w5_err_unit] (w4=8) & (fail=false) -> 1:(w4'=0);
+    [w4_w5] (w4=9) & (fail=false) -> 0:(w4'=12) + 1:(w4'=10);
+    [w4_w5_err_unit] (w4=10) & (fail=false) -> 1:(w4'=0);
+  endmodule
+  
+  module w5
+    w5 : [0..12] init 0;
+  
+    [] (w5=12) & (fail=false) -> 1:(fail'=true);
+    [w6_w5] (w5=0) & (fail=false) -> 1:(w5'=1);
+    [w6_w5_req_unit] (w5=1) & (fail=false) -> 1:(w5'=2);
+    [w5_w4] (w5=2) & (fail=false) -> 0:(w5'=12) + 1:(w5'=3);
+    [w5_w4_req_unit] (w5=3) & (fail=false) -> 1:(w5'=4);
+    [w4_w5] (w5=4) & (fail=false) -> 1:(w5'=5);
+    [w4_w5_res_int] (w5=5) & (fail=false) -> 1:(w5'=6);
+    [w4_w5_err_unit] (w5=5) & (fail=false) -> 1:(w5'=9);
+    [w5_w6] (w5=6) & (fail=false) -> 0.2:(w5'=12) + 0.5:(w5'=7) + 0.3:(w5'=8);
+    [w5_w6_res_int] (w5=7) & (fail=false) -> 1:(w5'=0);
+    [w5_w6_err_unit] (w5=8) & (fail=false) -> 1:(w5'=0);
+    [w5_w6] (w5=9) & (fail=false) -> 0:(w5'=12) + 1:(w5'=10);
+    [w5_w6_err_unit] (w5=10) & (fail=false) -> 1:(w5'=0);
+  endmodule
+  
+  module w6
+    w6 : [0..12] init 0;
+  
+    [] (w6=12) & (fail=false) -> 1:(fail'=true);
+    [w7_w6] (w6=0) & (fail=false) -> 1:(w6'=1);
+    [w7_w6_req_unit] (w6=1) & (fail=false) -> 1:(w6'=2);
+    [w6_w5] (w6=2) & (fail=false) -> 0:(w6'=12) + 1:(w6'=3);
+    [w6_w5_req_unit] (w6=3) & (fail=false) -> 1:(w6'=4);
+    [w5_w6] (w6=4) & (fail=false) -> 1:(w6'=5);
+    [w5_w6_res_int] (w6=5) & (fail=false) -> 1:(w6'=6);
+    [w5_w6_err_unit] (w6=5) & (fail=false) -> 1:(w6'=9);
+    [w6_w7] (w6=6) & (fail=false) -> 0.2:(w6'=12) + 0.5:(w6'=7) + 0.3:(w6'=8);
+    [w6_w7_res_int] (w6=7) & (fail=false) -> 1:(w6'=0);
+    [w6_w7_err_unit] (w6=8) & (fail=false) -> 1:(w6'=0);
+    [w6_w7] (w6=9) & (fail=false) -> 0:(w6'=12) + 1:(w6'=10);
+    [w6_w7_err_unit] (w6=10) & (fail=false) -> 1:(w6'=0);
+  endmodule
+  
+  module w7
+    w7 : [0..12] init 0;
+  
+    [] (w7=12) & (fail=false) -> 1:(fail'=true);
+    [w8_w7] (w7=0) & (fail=false) -> 1:(w7'=1);
+    [w8_w7_req_unit] (w7=1) & (fail=false) -> 1:(w7'=2);
+    [w7_w6] (w7=2) & (fail=false) -> 0:(w7'=12) + 1:(w7'=3);
+    [w7_w6_req_unit] (w7=3) & (fail=false) -> 1:(w7'=4);
+    [w6_w7] (w7=4) & (fail=false) -> 1:(w7'=5);
+    [w6_w7_res_int] (w7=5) & (fail=false) -> 1:(w7'=6);
+    [w6_w7_err_unit] (w7=5) & (fail=false) -> 1:(w7'=9);
+    [w7_w8] (w7=6) & (fail=false) -> 0.2:(w7'=12) + 0.5:(w7'=7) + 0.3:(w7'=8);
+    [w7_w8_res_int] (w7=7) & (fail=false) -> 1:(w7'=0);
+    [w7_w8_err_unit] (w7=8) & (fail=false) -> 1:(w7'=0);
+    [w7_w8] (w7=9) & (fail=false) -> 0:(w7'=12) + 1:(w7'=10);
+    [w7_w8_err_unit] (w7=10) & (fail=false) -> 1:(w7'=0);
+  endmodule
+  
+  module w8
+    w8 : [0..12] init 0;
+  
+    [] (w8=12) & (fail=false) -> 1:(fail'=true);
+    [w9_w8] (w8=0) & (fail=false) -> 1:(w8'=1);
+    [w9_w8_req_unit] (w8=1) & (fail=false) -> 1:(w8'=2);
+    [w8_w7] (w8=2) & (fail=false) -> 0:(w8'=12) + 1:(w8'=3);
+    [w8_w7_req_unit] (w8=3) & (fail=false) -> 1:(w8'=4);
+    [w7_w8] (w8=4) & (fail=false) -> 1:(w8'=5);
+    [w7_w8_res_int] (w8=5) & (fail=false) -> 1:(w8'=6);
+    [w7_w8_err_unit] (w8=5) & (fail=false) -> 1:(w8'=9);
+    [w8_w9] (w8=6) & (fail=false) -> 0.2:(w8'=12) + 0.5:(w8'=7) + 0.3:(w8'=8);
+    [w8_w9_res_int] (w8=7) & (fail=false) -> 1:(w8'=0);
+    [w8_w9_err_unit] (w8=8) & (fail=false) -> 1:(w8'=0);
+    [w8_w9] (w8=9) & (fail=false) -> 0:(w8'=12) + 1:(w8'=10);
+    [w8_w9_err_unit] (w8=10) & (fail=false) -> 1:(w8'=0);
+  endmodule
+  
+  module w9
+    w9 : [0..12] init 0;
+  
+    [] (w9=12) & (fail=false) -> 1:(fail'=true);
+    [w10_w9] (w9=0) & (fail=false) -> 1:(w9'=1);
+    [w10_w9_req_unit] (w9=1) & (fail=false) -> 1:(w9'=2);
+    [w9_w8] (w9=2) & (fail=false) -> 0:(w9'=12) + 1:(w9'=3);
+    [w9_w8_req_unit] (w9=3) & (fail=false) -> 1:(w9'=4);
+    [w8_w9] (w9=4) & (fail=false) -> 1:(w9'=5);
+    [w8_w9_res_int] (w9=5) & (fail=false) -> 1:(w9'=6);
+    [w8_w9_err_unit] (w9=5) & (fail=false) -> 1:(w9'=9);
+    [w9_w10] (w9=6) & (fail=false) -> 0.2:(w9'=12) + 0.5:(w9'=7) + 0.3:(w9'=8);
+    [w9_w10_res_int] (w9=7) & (fail=false) -> 1:(w9'=0);
+    [w9_w10_err_unit] (w9=8) & (fail=false) -> 1:(w9'=0);
+    [w9_w10] (w9=9) & (fail=false) -> 0:(w9'=12) + 1:(w9'=10);
+    [w9_w10_err_unit] (w9=10) & (fail=false) -> 1:(w9'=0);
+  endmodule
+  
+  module w10
+    w10 : [0..12] init 0;
+  
+    [] (w10=12) & (fail=false) -> 1:(fail'=true);
+    [w11_w10] (w10=0) & (fail=false) -> 1:(w10'=1);
+    [w11_w10_req_unit] (w10=1) & (fail=false) -> 1:(w10'=2);
+    [w10_w9] (w10=2) & (fail=false) -> 0:(w10'=12) + 1:(w10'=3);
+    [w10_w9_req_unit] (w10=3) & (fail=false) -> 1:(w10'=4);
+    [w9_w10] (w10=4) & (fail=false) -> 1:(w10'=5);
+    [w9_w10_res_int] (w10=5) & (fail=false) -> 1:(w10'=6);
+    [w9_w10_err_unit] (w10=5) & (fail=false) -> 1:(w10'=9);
+    [w10_w11] (w10=6) & (fail=false) -> 0.2:(w10'=12) + 0.5:(w10'=7) + 0.3:(w10'=8);
+    [w10_w11_res_int] (w10=7) & (fail=false) -> 1:(w10'=0);
+    [w10_w11_err_unit] (w10=8) & (fail=false) -> 1:(w10'=0);
+    [w10_w11] (w10=9) & (fail=false) -> 0:(w10'=12) + 1:(w10'=10);
+    [w10_w11_err_unit] (w10=10) & (fail=false) -> 1:(w10'=0);
+  endmodule
+  
+  module w11
+    w11 : [0..12] init 0;
+  
+    [] (w11=12) & (fail=false) -> 1:(fail'=true);
+    [w12_w11] (w11=0) & (fail=false) -> 1:(w11'=1);
+    [w12_w11_req_unit] (w11=1) & (fail=false) -> 1:(w11'=2);
+    [w11_w10] (w11=2) & (fail=false) -> 0:(w11'=12) + 1:(w11'=3);
+    [w11_w10_req_unit] (w11=3) & (fail=false) -> 1:(w11'=4);
+    [w10_w11] (w11=4) & (fail=false) -> 1:(w11'=5);
+    [w10_w11_res_int] (w11=5) & (fail=false) -> 1:(w11'=6);
+    [w10_w11_err_unit] (w11=5) & (fail=false) -> 1:(w11'=9);
+    [w11_w12] (w11=6) & (fail=false) -> 0.2:(w11'=12) + 0.5:(w11'=7) + 0.3:(w11'=8);
+    [w11_w12_res_int] (w11=7) & (fail=false) -> 1:(w11'=0);
+    [w11_w12_err_unit] (w11=8) & (fail=false) -> 1:(w11'=0);
+    [w11_w12] (w11=9) & (fail=false) -> 0:(w11'=12) + 1:(w11'=10);
+    [w11_w12_err_unit] (w11=10) & (fail=false) -> 1:(w11'=0);
+  endmodule
+  
+  module w12
+    w12 : [0..7] init 0;
+  
+    [] (w12=7) & (fail=false) -> 1:(fail'=true);
+    [w12_w11] (w12=0) & (fail=false) -> 0:(w12'=7) + 1:(w12'=1);
+    [w12_w11_req_unit] (w12=1) & (fail=false) -> 1:(w12'=2);
+    [w11_w12] (w12=2) & (fail=false) -> 1:(w12'=3);
+    [w11_w12_res_int] (w12=3) & (fail=false) -> 1:(w12'=4);
+    [w11_w12_err_unit] (w12=3) & (fail=false) -> 1:(w12'=6);
+    [w12_dummy] (w12=4) & (fail=false) -> 0:(w12'=7) + 1:(w12'=5);
+    [w12_dummy_done_unit] (w12=5) & (fail=false) -> 1:(w12'=4);
+  endmodule
+  
+  module dummy
+    dummy : [0..3] init 0;
+  
+    [] (dummy=3) & (fail=false) -> 1:(fail'=true);
+    [w12_dummy] (dummy=0) & (fail=false) -> 1:(dummy'=1);
+    [w12_dummy_done_unit] (dummy=1) & (fail=false) -> 1:(dummy'=0);
+  endmodule
+  
+  label "end" = (w0=5) & (w1=11) & (w2=11) & (w3=11) & (w4=11) & (w5=11) & (w6=11) & (w7=11) & (w8=11) & (w9=11) & (w10=11) & (w11=11) & (w12=6) & (dummy=2);
+  label "cando_w0_w1_err_unit" = w0=2;
+  label "cando_w0_w1_err_unit_branch" = w1=4;
+  label "cando_w0_w1_res_int" = w0=2;
+  label "cando_w0_w1_res_int_branch" = w1=4;
+  label "cando_w1_w0_req_unit" = w1=2;
+  label "cando_w1_w0_req_unit_branch" = w0=0;
+  label "cando_w1_w2_err_unit" = (w1=6) | (w1=9);
+  label "cando_w1_w2_err_unit_branch" = w2=4;
+  label "cando_w1_w2_res_int" = w1=6;
+  label "cando_w1_w2_res_int_branch" = w2=4;
+  label "cando_w10_w11_err_unit" = (w10=6) | (w10=9);
+  label "cando_w10_w11_err_unit_branch" = w11=4;
+  label "cando_w10_w11_res_int" = w10=6;
+  label "cando_w10_w11_res_int_branch" = w11=4;
+  label "cando_w10_w9_req_unit" = w10=2;
+  label "cando_w10_w9_req_unit_branch" = w9=0;
+  label "cando_w11_w10_req_unit" = w11=2;
+  label "cando_w11_w10_req_unit_branch" = w10=0;
+  label "cando_w11_w12_err_unit" = (w11=6) | (w11=9);
+  label "cando_w11_w12_err_unit_branch" = w12=2;
+  label "cando_w11_w12_res_int" = w11=6;
+  label "cando_w11_w12_res_int_branch" = w12=2;
+  label "cando_w12_dummy_done_unit" = w12=4;
+  label "cando_w12_dummy_done_unit_branch" = dummy=0;
+  label "cando_w12_w11_req_unit" = w12=0;
+  label "cando_w12_w11_req_unit_branch" = w11=0;
+  label "cando_w2_w1_req_unit" = w2=2;
+  label "cando_w2_w1_req_unit_branch" = w1=0;
+  label "cando_w2_w3_err_unit" = (w2=6) | (w2=9);
+  label "cando_w2_w3_err_unit_branch" = w3=4;
+  label "cando_w2_w3_res_int" = w2=6;
+  label "cando_w2_w3_res_int_branch" = w3=4;
+  label "cando_w3_w2_req_unit" = w3=2;
+  label "cando_w3_w2_req_unit_branch" = w2=0;
+  label "cando_w3_w4_err_unit" = (w3=6) | (w3=9);
+  label "cando_w3_w4_err_unit_branch" = w4=4;
+  label "cando_w3_w4_res_int" = w3=6;
+  label "cando_w3_w4_res_int_branch" = w4=4;
+  label "cando_w4_w3_req_unit" = w4=2;
+  label "cando_w4_w3_req_unit_branch" = w3=0;
+  label "cando_w4_w5_err_unit" = (w4=6) | (w4=9);
+  label "cando_w4_w5_err_unit_branch" = w5=4;
+  label "cando_w4_w5_res_int" = w4=6;
+  label "cando_w4_w5_res_int_branch" = w5=4;
+  label "cando_w5_w4_req_unit" = w5=2;
+  label "cando_w5_w4_req_unit_branch" = w4=0;
+  label "cando_w5_w6_err_unit" = (w5=6) | (w5=9);
+  label "cando_w5_w6_err_unit_branch" = w6=4;
+  label "cando_w5_w6_res_int" = w5=6;
+  label "cando_w5_w6_res_int_branch" = w6=4;
+  label "cando_w6_w5_req_unit" = w6=2;
+  label "cando_w6_w5_req_unit_branch" = w5=0;
+  label "cando_w6_w7_err_unit" = (w6=6) | (w6=9);
+  label "cando_w6_w7_err_unit_branch" = w7=4;
+  label "cando_w6_w7_res_int" = w6=6;
+  label "cando_w6_w7_res_int_branch" = w7=4;
+  label "cando_w7_w6_req_unit" = w7=2;
+  label "cando_w7_w6_req_unit_branch" = w6=0;
+  label "cando_w7_w8_err_unit" = (w7=6) | (w7=9);
+  label "cando_w7_w8_err_unit_branch" = w8=4;
+  label "cando_w7_w8_res_int" = w7=6;
+  label "cando_w7_w8_res_int_branch" = w8=4;
+  label "cando_w8_w7_req_unit" = w8=2;
+  label "cando_w8_w7_req_unit_branch" = w7=0;
+  label "cando_w8_w9_err_unit" = (w8=6) | (w8=9);
+  label "cando_w8_w9_err_unit_branch" = w9=4;
+  label "cando_w8_w9_res_int" = w8=6;
+  label "cando_w8_w9_res_int_branch" = w9=4;
+  label "cando_w9_w10_err_unit" = (w9=6) | (w9=9);
+  label "cando_w9_w10_err_unit_branch" = w10=4;
+  label "cando_w9_w10_res_int" = w9=6;
+  label "cando_w9_w10_res_int_branch" = w10=4;
+  label "cando_w9_w8_req_unit" = w9=2;
+  label "cando_w9_w8_req_unit_branch" = w8=0;
+  label "cando_w0_w1_branch" = w1=4;
+  label "cando_w1_w0_branch" = w0=0;
+  label "cando_w1_w2_branch" = w2=4;
+  label "cando_w10_w11_branch" = w11=4;
+  label "cando_w10_w9_branch" = w9=0;
+  label "cando_w11_w10_branch" = w10=0;
+  label "cando_w11_w12_branch" = w12=2;
+  label "cando_w12_dummy_branch" = dummy=0;
+  label "cando_w12_w11_branch" = w11=0;
+  label "cando_w2_w1_branch" = w1=0;
+  label "cando_w2_w3_branch" = w3=4;
+  label "cando_w3_w2_branch" = w2=0;
+  label "cando_w3_w4_branch" = w4=4;
+  label "cando_w4_w3_branch" = w3=0;
+  label "cando_w4_w5_branch" = w5=4;
+  label "cando_w5_w4_branch" = w4=0;
+  label "cando_w5_w6_branch" = w6=4;
+  label "cando_w6_w5_branch" = w5=0;
+  label "cando_w6_w7_branch" = w7=4;
+  label "cando_w7_w6_branch" = w6=0;
+  label "cando_w7_w8_branch" = w8=4;
+  label "cando_w8_w7_branch" = w7=0;
+  label "cando_w8_w9_branch" = w9=4;
+  label "cando_w9_w10_branch" = w10=4;
+  label "cando_w9_w8_branch" = w8=0;
+  
+  // Type safety
+  P>=1 [ (G ((("cando_w0_w1_err_unit" & "cando_w0_w1_branch") => "cando_w0_w1_err_unit_branch") & ((("cando_w0_w1_res_int" & "cando_w0_w1_branch") => "cando_w0_w1_res_int_branch") & ((("cando_w1_w0_req_unit" & "cando_w1_w0_branch") => "cando_w1_w0_req_unit_branch") & ((("cando_w1_w2_err_unit" & "cando_w1_w2_branch") => "cando_w1_w2_err_unit_branch") & ((("cando_w1_w2_res_int" & "cando_w1_w2_branch") => "cando_w1_w2_res_int_branch") & ((("cando_w10_w11_err_unit" & "cando_w10_w11_branch") => "cando_w10_w11_err_unit_branch") & ((("cando_w10_w11_res_int" & "cando_w10_w11_branch") => "cando_w10_w11_res_int_branch") & ((("cando_w10_w9_req_unit" & "cando_w10_w9_branch") => "cando_w10_w9_req_unit_branch") & ((("cando_w11_w10_req_unit" & "cando_w11_w10_branch") => "cando_w11_w10_req_unit_branch") & ((("cando_w11_w12_err_unit" & "cando_w11_w12_branch") => "cando_w11_w12_err_unit_branch") & ((("cando_w11_w12_res_int" & "cando_w11_w12_branch") => "cando_w11_w12_res_int_branch") & ((("cando_w12_dummy_done_unit" & "cando_w12_dummy_branch") => "cando_w12_dummy_done_unit_branch") & ((("cando_w12_w11_req_unit" & "cando_w12_w11_branch") => "cando_w12_w11_req_unit_branch") & ((("cando_w2_w1_req_unit" & "cando_w2_w1_branch") => "cando_w2_w1_req_unit_branch") & ((("cando_w2_w3_err_unit" & "cando_w2_w3_branch") => "cando_w2_w3_err_unit_branch") & ((("cando_w2_w3_res_int" & "cando_w2_w3_branch") => "cando_w2_w3_res_int_branch") & ((("cando_w3_w2_req_unit" & "cando_w3_w2_branch") => "cando_w3_w2_req_unit_branch") & ((("cando_w3_w4_err_unit" & "cando_w3_w4_branch") => "cando_w3_w4_err_unit_branch") & ((("cando_w3_w4_res_int" & "cando_w3_w4_branch") => "cando_w3_w4_res_int_branch") & ((("cando_w4_w3_req_unit" & "cando_w4_w3_branch") => "cando_w4_w3_req_unit_branch") & ((("cando_w4_w5_err_unit" & "cando_w4_w5_branch") => "cando_w4_w5_err_unit_branch") & ((("cando_w4_w5_res_int" & "cando_w4_w5_branch") => "cando_w4_w5_res_int_branch") & ((("cando_w5_w4_req_unit" & "cando_w5_w4_branch") => "cando_w5_w4_req_unit_branch") & ((("cando_w5_w6_err_unit" & "cando_w5_w6_branch") => "cando_w5_w6_err_unit_branch") & ((("cando_w5_w6_res_int" & "cando_w5_w6_branch") => "cando_w5_w6_res_int_branch") & ((("cando_w6_w5_req_unit" & "cando_w6_w5_branch") => "cando_w6_w5_req_unit_branch") & ((("cando_w6_w7_err_unit" & "cando_w6_w7_branch") => "cando_w6_w7_err_unit_branch") & ((("cando_w6_w7_res_int" & "cando_w6_w7_branch") => "cando_w6_w7_res_int_branch") & ((("cando_w7_w6_req_unit" & "cando_w7_w6_branch") => "cando_w7_w6_req_unit_branch") & ((("cando_w7_w8_err_unit" & "cando_w7_w8_branch") => "cando_w7_w8_err_unit_branch") & ((("cando_w7_w8_res_int" & "cando_w7_w8_branch") => "cando_w7_w8_res_int_branch") & ((("cando_w8_w7_req_unit" & "cando_w8_w7_branch") => "cando_w8_w7_req_unit_branch") & ((("cando_w8_w9_err_unit" & "cando_w8_w9_branch") => "cando_w8_w9_err_unit_branch") & ((("cando_w8_w9_res_int" & "cando_w8_w9_branch") => "cando_w8_w9_res_int_branch") & ((("cando_w9_w10_err_unit" & "cando_w9_w10_branch") => "cando_w9_w10_err_unit_branch") & ((("cando_w9_w10_res_int" & "cando_w9_w10_branch") => "cando_w9_w10_res_int_branch") & (("cando_w9_w8_req_unit" & "cando_w9_w8_branch") => "cando_w9_w8_req_unit_branch")))))))))))))))))))))))))))))))))))))) ]
+  
+  // Probabilistic deadlock freedom
+  Pmin=? [ (G ("deadlock" => "end")) ]
+  
+  // Normalised probabilistic deadlock freedom
+  (Pmin=? [ (G ("deadlock" => "end")) ] / Pmin=? [ (G (!fail)) ])
+  
+  // Probabilistic termination
+  Pmin=? [ (F ("deadlock" & (!fail))) ]
+  
+  // Normalised probabilistic termination
+  (Pmin=? [ (F ("deadlock" & (!fail))) ] / Pmin=? [ (G (!fail)) ])
+  
+   ======= Property checking =======
+  
+  Type safety
+  Result: true
+  
+  Probabilistic deadlock freedom
+  Result: 3.417968750001332E-4 (exact floating point)
+  
+  Normalised probabilistic deadlock freedom
+  Result: 4.7462775623136934E-4
+  
+  Probabilistic termination
+  Result: 0.7197949218749999 (exact floating point)
+  
+  Normalised probabilistic termination
+  Result: 0.9995253722437686
+  
+  
+  
+  
+   ======= TEST ../examples/fact_13.ctx =======
+  
+  w0 : mu t .
+       w1 & req . w1 (+) { 0.7 : res(Int) . t, 0.3 : err . t }
+  
+  w1 : mu t . w2 & req .
+              w0 (+) req .
+              w0 & {
+                 res(Int) . w2 (+) { 0.5 : res(Int) . t, 0.3 : err . t },
+                 err . w2 (+) err . t
+              }
+  
+  w2 : mu t . w3 & req .
+              w1 (+) req .
+              w1 & {
+                 res(Int) . w3 (+) { 0.5 : res(Int) . t, 0.3 : err . t },
+                 err . w3 (+) err . t
+              }
+  
+  w3 : mu t . w4 & req .
+              w2 (+) req .
+              w2 & {
+                 res(Int) . w4 (+) { 0.5 : res(Int) . t, 0.3 : err . t },
+                 err . w4 (+) err . t
+              }
+  
+  w4 : mu t . w5 & req .
+              w3 (+) req .
+              w3 & {
+                 res(Int) . w5 (+) { 0.5 : res(Int) . t, 0.3 : err . t },
+                 err . w5 (+) err . t
+              }
+  
+  w5 : mu t . w6 & req .
+              w4 (+) req .
+              w4 & {
+                 res(Int) . w6 (+) { 0.5 : res(Int) . t, 0.3 : err . t },
+                 err . w6 (+) err . t
+              }
+  
+  w6 : mu t . w7 & req .
+              w5 (+) req .
+              w5 & {
+                 res(Int) . w7 (+) { 0.5 : res(Int) . t, 0.3 : err . t },
+                 err . w7 (+) err . t
+              }
+  
+  w7 : mu t . w8 & req .
+              w6 (+) req .
+              w6 & {
+                 res(Int) . w8 (+) { 0.5 : res(Int) . t, 0.3 : err . t },
+                 err . w8 (+) err . t
+              }
+  
+  w8 : mu t . w9 & req .
+              w7 (+) req .
+              w7 & {
+                 res(Int) . w9 (+) { 0.5 : res(Int) . t, 0.3 : err . t },
+                 err . w9 (+) err . t
+              }
+  
+  w9 : mu t . w10 & req .
+              w8 (+) req .
+              w8 & {
+                 res(Int) . w10 (+) { 0.5 : res(Int) . t, 0.3 : err . t },
+                 err . w10 (+) err . t
+              }
+  
+  w10 : mu t . w11 & req .
+              w9 (+) req .
+              w9 & {
+                 res(Int) . w11 (+) { 0.5 : res(Int) . t, 0.3 : err . t },
+                 err . w11 (+) err . t
+              }
+  
+  w11 : mu t . w12 & req .
+              w10 (+) req .
+              w10 & {
+                 res(Int) . w12 (+) { 0.5 : res(Int) . t, 0.3 : err . t },
+                 err . w12 (+) err . t
+              }
+  
+  w12 : mu t . w13 & req .
+              w11 (+) req .
+              w11 & {
+                 res(Int) . w13 (+) { 0.5 : res(Int) . t, 0.3 : err . t },
+                 err . w13 (+) err . t
+              }
+  
+  w13 : w12 (+) req .
+       w12 & {
+          res(Int) . mu t . dummy (+) done . t,
+          err . end
+       }
+  
+  dummy : mu t . w13 & done . t
+  
+   ======= PRISM output ========
+  
+  global fail : bool init false;
+  
+  module closure
+    closure : bool init false;
+  
+  endmodule
+  
+  module w0
+    w0 : [0..6] init 0;
+  
+    [] (w0=6) & (fail=false) -> 1:(fail'=true);
+    [w1_w0] (w0=0) & (fail=false) -> 1:(w0'=1);
+    [w1_w0_req_unit] (w0=1) & (fail=false) -> 1:(w0'=2);
+    [w0_w1] (w0=2) & (fail=false) -> 0:(w0'=6) + 0.7:(w0'=3) + 0.3:(w0'=4);
+    [w0_w1_res_int] (w0=3) & (fail=false) -> 1:(w0'=0);
+    [w0_w1_err_unit] (w0=4) & (fail=false) -> 1:(w0'=0);
+  endmodule
+  
+  module w1
+    w1 : [0..12] init 0;
+  
+    [] (w1=12) & (fail=false) -> 1:(fail'=true);
+    [w2_w1] (w1=0) & (fail=false) -> 1:(w1'=1);
+    [w2_w1_req_unit] (w1=1) & (fail=false) -> 1:(w1'=2);
+    [w1_w0] (w1=2) & (fail=false) -> 0:(w1'=12) + 1:(w1'=3);
+    [w1_w0_req_unit] (w1=3) & (fail=false) -> 1:(w1'=4);
+    [w0_w1] (w1=4) & (fail=false) -> 1:(w1'=5);
+    [w0_w1_res_int] (w1=5) & (fail=false) -> 1:(w1'=6);
+    [w0_w1_err_unit] (w1=5) & (fail=false) -> 1:(w1'=9);
+    [w1_w2] (w1=6) & (fail=false) -> 0.2:(w1'=12) + 0.5:(w1'=7) + 0.3:(w1'=8);
+    [w1_w2_res_int] (w1=7) & (fail=false) -> 1:(w1'=0);
+    [w1_w2_err_unit] (w1=8) & (fail=false) -> 1:(w1'=0);
+    [w1_w2] (w1=9) & (fail=false) -> 0:(w1'=12) + 1:(w1'=10);
+    [w1_w2_err_unit] (w1=10) & (fail=false) -> 1:(w1'=0);
+  endmodule
+  
+  module w2
+    w2 : [0..12] init 0;
+  
+    [] (w2=12) & (fail=false) -> 1:(fail'=true);
+    [w3_w2] (w2=0) & (fail=false) -> 1:(w2'=1);
+    [w3_w2_req_unit] (w2=1) & (fail=false) -> 1:(w2'=2);
+    [w2_w1] (w2=2) & (fail=false) -> 0:(w2'=12) + 1:(w2'=3);
+    [w2_w1_req_unit] (w2=3) & (fail=false) -> 1:(w2'=4);
+    [w1_w2] (w2=4) & (fail=false) -> 1:(w2'=5);
+    [w1_w2_res_int] (w2=5) & (fail=false) -> 1:(w2'=6);
+    [w1_w2_err_unit] (w2=5) & (fail=false) -> 1:(w2'=9);
+    [w2_w3] (w2=6) & (fail=false) -> 0.2:(w2'=12) + 0.5:(w2'=7) + 0.3:(w2'=8);
+    [w2_w3_res_int] (w2=7) & (fail=false) -> 1:(w2'=0);
+    [w2_w3_err_unit] (w2=8) & (fail=false) -> 1:(w2'=0);
+    [w2_w3] (w2=9) & (fail=false) -> 0:(w2'=12) + 1:(w2'=10);
+    [w2_w3_err_unit] (w2=10) & (fail=false) -> 1:(w2'=0);
+  endmodule
+  
+  module w3
+    w3 : [0..12] init 0;
+  
+    [] (w3=12) & (fail=false) -> 1:(fail'=true);
+    [w4_w3] (w3=0) & (fail=false) -> 1:(w3'=1);
+    [w4_w3_req_unit] (w3=1) & (fail=false) -> 1:(w3'=2);
+    [w3_w2] (w3=2) & (fail=false) -> 0:(w3'=12) + 1:(w3'=3);
+    [w3_w2_req_unit] (w3=3) & (fail=false) -> 1:(w3'=4);
+    [w2_w3] (w3=4) & (fail=false) -> 1:(w3'=5);
+    [w2_w3_res_int] (w3=5) & (fail=false) -> 1:(w3'=6);
+    [w2_w3_err_unit] (w3=5) & (fail=false) -> 1:(w3'=9);
+    [w3_w4] (w3=6) & (fail=false) -> 0.2:(w3'=12) + 0.5:(w3'=7) + 0.3:(w3'=8);
+    [w3_w4_res_int] (w3=7) & (fail=false) -> 1:(w3'=0);
+    [w3_w4_err_unit] (w3=8) & (fail=false) -> 1:(w3'=0);
+    [w3_w4] (w3=9) & (fail=false) -> 0:(w3'=12) + 1:(w3'=10);
+    [w3_w4_err_unit] (w3=10) & (fail=false) -> 1:(w3'=0);
+  endmodule
+  
+  module w4
+    w4 : [0..12] init 0;
+  
+    [] (w4=12) & (fail=false) -> 1:(fail'=true);
+    [w5_w4] (w4=0) & (fail=false) -> 1:(w4'=1);
+    [w5_w4_req_unit] (w4=1) & (fail=false) -> 1:(w4'=2);
+    [w4_w3] (w4=2) & (fail=false) -> 0:(w4'=12) + 1:(w4'=3);
+    [w4_w3_req_unit] (w4=3) & (fail=false) -> 1:(w4'=4);
+    [w3_w4] (w4=4) & (fail=false) -> 1:(w4'=5);
+    [w3_w4_res_int] (w4=5) & (fail=false) -> 1:(w4'=6);
+    [w3_w4_err_unit] (w4=5) & (fail=false) -> 1:(w4'=9);
+    [w4_w5] (w4=6) & (fail=false) -> 0.2:(w4'=12) + 0.5:(w4'=7) + 0.3:(w4'=8);
+    [w4_w5_res_int] (w4=7) & (fail=false) -> 1:(w4'=0);
+    [w4_w5_err_unit] (w4=8) & (fail=false) -> 1:(w4'=0);
+    [w4_w5] (w4=9) & (fail=false) -> 0:(w4'=12) + 1:(w4'=10);
+    [w4_w5_err_unit] (w4=10) & (fail=false) -> 1:(w4'=0);
+  endmodule
+  
+  module w5
+    w5 : [0..12] init 0;
+  
+    [] (w5=12) & (fail=false) -> 1:(fail'=true);
+    [w6_w5] (w5=0) & (fail=false) -> 1:(w5'=1);
+    [w6_w5_req_unit] (w5=1) & (fail=false) -> 1:(w5'=2);
+    [w5_w4] (w5=2) & (fail=false) -> 0:(w5'=12) + 1:(w5'=3);
+    [w5_w4_req_unit] (w5=3) & (fail=false) -> 1:(w5'=4);
+    [w4_w5] (w5=4) & (fail=false) -> 1:(w5'=5);
+    [w4_w5_res_int] (w5=5) & (fail=false) -> 1:(w5'=6);
+    [w4_w5_err_unit] (w5=5) & (fail=false) -> 1:(w5'=9);
+    [w5_w6] (w5=6) & (fail=false) -> 0.2:(w5'=12) + 0.5:(w5'=7) + 0.3:(w5'=8);
+    [w5_w6_res_int] (w5=7) & (fail=false) -> 1:(w5'=0);
+    [w5_w6_err_unit] (w5=8) & (fail=false) -> 1:(w5'=0);
+    [w5_w6] (w5=9) & (fail=false) -> 0:(w5'=12) + 1:(w5'=10);
+    [w5_w6_err_unit] (w5=10) & (fail=false) -> 1:(w5'=0);
+  endmodule
+  
+  module w6
+    w6 : [0..12] init 0;
+  
+    [] (w6=12) & (fail=false) -> 1:(fail'=true);
+    [w7_w6] (w6=0) & (fail=false) -> 1:(w6'=1);
+    [w7_w6_req_unit] (w6=1) & (fail=false) -> 1:(w6'=2);
+    [w6_w5] (w6=2) & (fail=false) -> 0:(w6'=12) + 1:(w6'=3);
+    [w6_w5_req_unit] (w6=3) & (fail=false) -> 1:(w6'=4);
+    [w5_w6] (w6=4) & (fail=false) -> 1:(w6'=5);
+    [w5_w6_res_int] (w6=5) & (fail=false) -> 1:(w6'=6);
+    [w5_w6_err_unit] (w6=5) & (fail=false) -> 1:(w6'=9);
+    [w6_w7] (w6=6) & (fail=false) -> 0.2:(w6'=12) + 0.5:(w6'=7) + 0.3:(w6'=8);
+    [w6_w7_res_int] (w6=7) & (fail=false) -> 1:(w6'=0);
+    [w6_w7_err_unit] (w6=8) & (fail=false) -> 1:(w6'=0);
+    [w6_w7] (w6=9) & (fail=false) -> 0:(w6'=12) + 1:(w6'=10);
+    [w6_w7_err_unit] (w6=10) & (fail=false) -> 1:(w6'=0);
+  endmodule
+  
+  module w7
+    w7 : [0..12] init 0;
+  
+    [] (w7=12) & (fail=false) -> 1:(fail'=true);
+    [w8_w7] (w7=0) & (fail=false) -> 1:(w7'=1);
+    [w8_w7_req_unit] (w7=1) & (fail=false) -> 1:(w7'=2);
+    [w7_w6] (w7=2) & (fail=false) -> 0:(w7'=12) + 1:(w7'=3);
+    [w7_w6_req_unit] (w7=3) & (fail=false) -> 1:(w7'=4);
+    [w6_w7] (w7=4) & (fail=false) -> 1:(w7'=5);
+    [w6_w7_res_int] (w7=5) & (fail=false) -> 1:(w7'=6);
+    [w6_w7_err_unit] (w7=5) & (fail=false) -> 1:(w7'=9);
+    [w7_w8] (w7=6) & (fail=false) -> 0.2:(w7'=12) + 0.5:(w7'=7) + 0.3:(w7'=8);
+    [w7_w8_res_int] (w7=7) & (fail=false) -> 1:(w7'=0);
+    [w7_w8_err_unit] (w7=8) & (fail=false) -> 1:(w7'=0);
+    [w7_w8] (w7=9) & (fail=false) -> 0:(w7'=12) + 1:(w7'=10);
+    [w7_w8_err_unit] (w7=10) & (fail=false) -> 1:(w7'=0);
+  endmodule
+  
+  module w8
+    w8 : [0..12] init 0;
+  
+    [] (w8=12) & (fail=false) -> 1:(fail'=true);
+    [w9_w8] (w8=0) & (fail=false) -> 1:(w8'=1);
+    [w9_w8_req_unit] (w8=1) & (fail=false) -> 1:(w8'=2);
+    [w8_w7] (w8=2) & (fail=false) -> 0:(w8'=12) + 1:(w8'=3);
+    [w8_w7_req_unit] (w8=3) & (fail=false) -> 1:(w8'=4);
+    [w7_w8] (w8=4) & (fail=false) -> 1:(w8'=5);
+    [w7_w8_res_int] (w8=5) & (fail=false) -> 1:(w8'=6);
+    [w7_w8_err_unit] (w8=5) & (fail=false) -> 1:(w8'=9);
+    [w8_w9] (w8=6) & (fail=false) -> 0.2:(w8'=12) + 0.5:(w8'=7) + 0.3:(w8'=8);
+    [w8_w9_res_int] (w8=7) & (fail=false) -> 1:(w8'=0);
+    [w8_w9_err_unit] (w8=8) & (fail=false) -> 1:(w8'=0);
+    [w8_w9] (w8=9) & (fail=false) -> 0:(w8'=12) + 1:(w8'=10);
+    [w8_w9_err_unit] (w8=10) & (fail=false) -> 1:(w8'=0);
+  endmodule
+  
+  module w9
+    w9 : [0..12] init 0;
+  
+    [] (w9=12) & (fail=false) -> 1:(fail'=true);
+    [w10_w9] (w9=0) & (fail=false) -> 1:(w9'=1);
+    [w10_w9_req_unit] (w9=1) & (fail=false) -> 1:(w9'=2);
+    [w9_w8] (w9=2) & (fail=false) -> 0:(w9'=12) + 1:(w9'=3);
+    [w9_w8_req_unit] (w9=3) & (fail=false) -> 1:(w9'=4);
+    [w8_w9] (w9=4) & (fail=false) -> 1:(w9'=5);
+    [w8_w9_res_int] (w9=5) & (fail=false) -> 1:(w9'=6);
+    [w8_w9_err_unit] (w9=5) & (fail=false) -> 1:(w9'=9);
+    [w9_w10] (w9=6) & (fail=false) -> 0.2:(w9'=12) + 0.5:(w9'=7) + 0.3:(w9'=8);
+    [w9_w10_res_int] (w9=7) & (fail=false) -> 1:(w9'=0);
+    [w9_w10_err_unit] (w9=8) & (fail=false) -> 1:(w9'=0);
+    [w9_w10] (w9=9) & (fail=false) -> 0:(w9'=12) + 1:(w9'=10);
+    [w9_w10_err_unit] (w9=10) & (fail=false) -> 1:(w9'=0);
+  endmodule
+  
+  module w10
+    w10 : [0..12] init 0;
+  
+    [] (w10=12) & (fail=false) -> 1:(fail'=true);
+    [w11_w10] (w10=0) & (fail=false) -> 1:(w10'=1);
+    [w11_w10_req_unit] (w10=1) & (fail=false) -> 1:(w10'=2);
+    [w10_w9] (w10=2) & (fail=false) -> 0:(w10'=12) + 1:(w10'=3);
+    [w10_w9_req_unit] (w10=3) & (fail=false) -> 1:(w10'=4);
+    [w9_w10] (w10=4) & (fail=false) -> 1:(w10'=5);
+    [w9_w10_res_int] (w10=5) & (fail=false) -> 1:(w10'=6);
+    [w9_w10_err_unit] (w10=5) & (fail=false) -> 1:(w10'=9);
+    [w10_w11] (w10=6) & (fail=false) -> 0.2:(w10'=12) + 0.5:(w10'=7) + 0.3:(w10'=8);
+    [w10_w11_res_int] (w10=7) & (fail=false) -> 1:(w10'=0);
+    [w10_w11_err_unit] (w10=8) & (fail=false) -> 1:(w10'=0);
+    [w10_w11] (w10=9) & (fail=false) -> 0:(w10'=12) + 1:(w10'=10);
+    [w10_w11_err_unit] (w10=10) & (fail=false) -> 1:(w10'=0);
+  endmodule
+  
+  module w11
+    w11 : [0..12] init 0;
+  
+    [] (w11=12) & (fail=false) -> 1:(fail'=true);
+    [w12_w11] (w11=0) & (fail=false) -> 1:(w11'=1);
+    [w12_w11_req_unit] (w11=1) & (fail=false) -> 1:(w11'=2);
+    [w11_w10] (w11=2) & (fail=false) -> 0:(w11'=12) + 1:(w11'=3);
+    [w11_w10_req_unit] (w11=3) & (fail=false) -> 1:(w11'=4);
+    [w10_w11] (w11=4) & (fail=false) -> 1:(w11'=5);
+    [w10_w11_res_int] (w11=5) & (fail=false) -> 1:(w11'=6);
+    [w10_w11_err_unit] (w11=5) & (fail=false) -> 1:(w11'=9);
+    [w11_w12] (w11=6) & (fail=false) -> 0.2:(w11'=12) + 0.5:(w11'=7) + 0.3:(w11'=8);
+    [w11_w12_res_int] (w11=7) & (fail=false) -> 1:(w11'=0);
+    [w11_w12_err_unit] (w11=8) & (fail=false) -> 1:(w11'=0);
+    [w11_w12] (w11=9) & (fail=false) -> 0:(w11'=12) + 1:(w11'=10);
+    [w11_w12_err_unit] (w11=10) & (fail=false) -> 1:(w11'=0);
+  endmodule
+  
+  module w12
+    w12 : [0..12] init 0;
+  
+    [] (w12=12) & (fail=false) -> 1:(fail'=true);
+    [w13_w12] (w12=0) & (fail=false) -> 1:(w12'=1);
+    [w13_w12_req_unit] (w12=1) & (fail=false) -> 1:(w12'=2);
+    [w12_w11] (w12=2) & (fail=false) -> 0:(w12'=12) + 1:(w12'=3);
+    [w12_w11_req_unit] (w12=3) & (fail=false) -> 1:(w12'=4);
+    [w11_w12] (w12=4) & (fail=false) -> 1:(w12'=5);
+    [w11_w12_res_int] (w12=5) & (fail=false) -> 1:(w12'=6);
+    [w11_w12_err_unit] (w12=5) & (fail=false) -> 1:(w12'=9);
+    [w12_w13] (w12=6) & (fail=false) -> 0.2:(w12'=12) + 0.5:(w12'=7) + 0.3:(w12'=8);
+    [w12_w13_res_int] (w12=7) & (fail=false) -> 1:(w12'=0);
+    [w12_w13_err_unit] (w12=8) & (fail=false) -> 1:(w12'=0);
+    [w12_w13] (w12=9) & (fail=false) -> 0:(w12'=12) + 1:(w12'=10);
+    [w12_w13_err_unit] (w12=10) & (fail=false) -> 1:(w12'=0);
+  endmodule
+  
+  module w13
+    w13 : [0..7] init 0;
+  
+    [] (w13=7) & (fail=false) -> 1:(fail'=true);
+    [w13_w12] (w13=0) & (fail=false) -> 0:(w13'=7) + 1:(w13'=1);
+    [w13_w12_req_unit] (w13=1) & (fail=false) -> 1:(w13'=2);
+    [w12_w13] (w13=2) & (fail=false) -> 1:(w13'=3);
+    [w12_w13_res_int] (w13=3) & (fail=false) -> 1:(w13'=4);
+    [w12_w13_err_unit] (w13=3) & (fail=false) -> 1:(w13'=6);
+    [w13_dummy] (w13=4) & (fail=false) -> 0:(w13'=7) + 1:(w13'=5);
+    [w13_dummy_done_unit] (w13=5) & (fail=false) -> 1:(w13'=4);
+  endmodule
+  
+  module dummy
+    dummy : [0..3] init 0;
+  
+    [] (dummy=3) & (fail=false) -> 1:(fail'=true);
+    [w13_dummy] (dummy=0) & (fail=false) -> 1:(dummy'=1);
+    [w13_dummy_done_unit] (dummy=1) & (fail=false) -> 1:(dummy'=0);
+  endmodule
+  
+  label "end" = (w0=5) & (w1=11) & (w2=11) & (w3=11) & (w4=11) & (w5=11) & (w6=11) & (w7=11) & (w8=11) & (w9=11) & (w10=11) & (w11=11) & (w12=11) & (w13=6) & (dummy=2);
+  label "cando_w0_w1_err_unit" = w0=2;
+  label "cando_w0_w1_err_unit_branch" = w1=4;
+  label "cando_w0_w1_res_int" = w0=2;
+  label "cando_w0_w1_res_int_branch" = w1=4;
+  label "cando_w1_w0_req_unit" = w1=2;
+  label "cando_w1_w0_req_unit_branch" = w0=0;
+  label "cando_w1_w2_err_unit" = (w1=6) | (w1=9);
+  label "cando_w1_w2_err_unit_branch" = w2=4;
+  label "cando_w1_w2_res_int" = w1=6;
+  label "cando_w1_w2_res_int_branch" = w2=4;
+  label "cando_w10_w11_err_unit" = (w10=6) | (w10=9);
+  label "cando_w10_w11_err_unit_branch" = w11=4;
+  label "cando_w10_w11_res_int" = w10=6;
+  label "cando_w10_w11_res_int_branch" = w11=4;
+  label "cando_w10_w9_req_unit" = w10=2;
+  label "cando_w10_w9_req_unit_branch" = w9=0;
+  label "cando_w11_w10_req_unit" = w11=2;
+  label "cando_w11_w10_req_unit_branch" = w10=0;
+  label "cando_w11_w12_err_unit" = (w11=6) | (w11=9);
+  label "cando_w11_w12_err_unit_branch" = w12=4;
+  label "cando_w11_w12_res_int" = w11=6;
+  label "cando_w11_w12_res_int_branch" = w12=4;
+  label "cando_w12_w11_req_unit" = w12=2;
+  label "cando_w12_w11_req_unit_branch" = w11=0;
+  label "cando_w12_w13_err_unit" = (w12=6) | (w12=9);
+  label "cando_w12_w13_err_unit_branch" = w13=2;
+  label "cando_w12_w13_res_int" = w12=6;
+  label "cando_w12_w13_res_int_branch" = w13=2;
+  label "cando_w13_dummy_done_unit" = w13=4;
+  label "cando_w13_dummy_done_unit_branch" = dummy=0;
+  label "cando_w13_w12_req_unit" = w13=0;
+  label "cando_w13_w12_req_unit_branch" = w12=0;
+  label "cando_w2_w1_req_unit" = w2=2;
+  label "cando_w2_w1_req_unit_branch" = w1=0;
+  label "cando_w2_w3_err_unit" = (w2=6) | (w2=9);
+  label "cando_w2_w3_err_unit_branch" = w3=4;
+  label "cando_w2_w3_res_int" = w2=6;
+  label "cando_w2_w3_res_int_branch" = w3=4;
+  label "cando_w3_w2_req_unit" = w3=2;
+  label "cando_w3_w2_req_unit_branch" = w2=0;
+  label "cando_w3_w4_err_unit" = (w3=6) | (w3=9);
+  label "cando_w3_w4_err_unit_branch" = w4=4;
+  label "cando_w3_w4_res_int" = w3=6;
+  label "cando_w3_w4_res_int_branch" = w4=4;
+  label "cando_w4_w3_req_unit" = w4=2;
+  label "cando_w4_w3_req_unit_branch" = w3=0;
+  label "cando_w4_w5_err_unit" = (w4=6) | (w4=9);
+  label "cando_w4_w5_err_unit_branch" = w5=4;
+  label "cando_w4_w5_res_int" = w4=6;
+  label "cando_w4_w5_res_int_branch" = w5=4;
+  label "cando_w5_w4_req_unit" = w5=2;
+  label "cando_w5_w4_req_unit_branch" = w4=0;
+  label "cando_w5_w6_err_unit" = (w5=6) | (w5=9);
+  label "cando_w5_w6_err_unit_branch" = w6=4;
+  label "cando_w5_w6_res_int" = w5=6;
+  label "cando_w5_w6_res_int_branch" = w6=4;
+  label "cando_w6_w5_req_unit" = w6=2;
+  label "cando_w6_w5_req_unit_branch" = w5=0;
+  label "cando_w6_w7_err_unit" = (w6=6) | (w6=9);
+  label "cando_w6_w7_err_unit_branch" = w7=4;
+  label "cando_w6_w7_res_int" = w6=6;
+  label "cando_w6_w7_res_int_branch" = w7=4;
+  label "cando_w7_w6_req_unit" = w7=2;
+  label "cando_w7_w6_req_unit_branch" = w6=0;
+  label "cando_w7_w8_err_unit" = (w7=6) | (w7=9);
+  label "cando_w7_w8_err_unit_branch" = w8=4;
+  label "cando_w7_w8_res_int" = w7=6;
+  label "cando_w7_w8_res_int_branch" = w8=4;
+  label "cando_w8_w7_req_unit" = w8=2;
+  label "cando_w8_w7_req_unit_branch" = w7=0;
+  label "cando_w8_w9_err_unit" = (w8=6) | (w8=9);
+  label "cando_w8_w9_err_unit_branch" = w9=4;
+  label "cando_w8_w9_res_int" = w8=6;
+  label "cando_w8_w9_res_int_branch" = w9=4;
+  label "cando_w9_w10_err_unit" = (w9=6) | (w9=9);
+  label "cando_w9_w10_err_unit_branch" = w10=4;
+  label "cando_w9_w10_res_int" = w9=6;
+  label "cando_w9_w10_res_int_branch" = w10=4;
+  label "cando_w9_w8_req_unit" = w9=2;
+  label "cando_w9_w8_req_unit_branch" = w8=0;
+  label "cando_w0_w1_branch" = w1=4;
+  label "cando_w1_w0_branch" = w0=0;
+  label "cando_w1_w2_branch" = w2=4;
+  label "cando_w10_w11_branch" = w11=4;
+  label "cando_w10_w9_branch" = w9=0;
+  label "cando_w11_w10_branch" = w10=0;
+  label "cando_w11_w12_branch" = w12=4;
+  label "cando_w12_w11_branch" = w11=0;
+  label "cando_w12_w13_branch" = w13=2;
+  label "cando_w13_dummy_branch" = dummy=0;
+  label "cando_w13_w12_branch" = w12=0;
+  label "cando_w2_w1_branch" = w1=0;
+  label "cando_w2_w3_branch" = w3=4;
+  label "cando_w3_w2_branch" = w2=0;
+  label "cando_w3_w4_branch" = w4=4;
+  label "cando_w4_w3_branch" = w3=0;
+  label "cando_w4_w5_branch" = w5=4;
+  label "cando_w5_w4_branch" = w4=0;
+  label "cando_w5_w6_branch" = w6=4;
+  label "cando_w6_w5_branch" = w5=0;
+  label "cando_w6_w7_branch" = w7=4;
+  label "cando_w7_w6_branch" = w6=0;
+  label "cando_w7_w8_branch" = w8=4;
+  label "cando_w8_w7_branch" = w7=0;
+  label "cando_w8_w9_branch" = w9=4;
+  label "cando_w9_w10_branch" = w10=4;
+  label "cando_w9_w8_branch" = w8=0;
+  
+  // Type safety
+  P>=1 [ (G ((("cando_w0_w1_err_unit" & "cando_w0_w1_branch") => "cando_w0_w1_err_unit_branch") & ((("cando_w0_w1_res_int" & "cando_w0_w1_branch") => "cando_w0_w1_res_int_branch") & ((("cando_w1_w0_req_unit" & "cando_w1_w0_branch") => "cando_w1_w0_req_unit_branch") & ((("cando_w1_w2_err_unit" & "cando_w1_w2_branch") => "cando_w1_w2_err_unit_branch") & ((("cando_w1_w2_res_int" & "cando_w1_w2_branch") => "cando_w1_w2_res_int_branch") & ((("cando_w10_w11_err_unit" & "cando_w10_w11_branch") => "cando_w10_w11_err_unit_branch") & ((("cando_w10_w11_res_int" & "cando_w10_w11_branch") => "cando_w10_w11_res_int_branch") & ((("cando_w10_w9_req_unit" & "cando_w10_w9_branch") => "cando_w10_w9_req_unit_branch") & ((("cando_w11_w10_req_unit" & "cando_w11_w10_branch") => "cando_w11_w10_req_unit_branch") & ((("cando_w11_w12_err_unit" & "cando_w11_w12_branch") => "cando_w11_w12_err_unit_branch") & ((("cando_w11_w12_res_int" & "cando_w11_w12_branch") => "cando_w11_w12_res_int_branch") & ((("cando_w12_w11_req_unit" & "cando_w12_w11_branch") => "cando_w12_w11_req_unit_branch") & ((("cando_w12_w13_err_unit" & "cando_w12_w13_branch") => "cando_w12_w13_err_unit_branch") & ((("cando_w12_w13_res_int" & "cando_w12_w13_branch") => "cando_w12_w13_res_int_branch") & ((("cando_w13_dummy_done_unit" & "cando_w13_dummy_branch") => "cando_w13_dummy_done_unit_branch") & ((("cando_w13_w12_req_unit" & "cando_w13_w12_branch") => "cando_w13_w12_req_unit_branch") & ((("cando_w2_w1_req_unit" & "cando_w2_w1_branch") => "cando_w2_w1_req_unit_branch") & ((("cando_w2_w3_err_unit" & "cando_w2_w3_branch") => "cando_w2_w3_err_unit_branch") & ((("cando_w2_w3_res_int" & "cando_w2_w3_branch") => "cando_w2_w3_res_int_branch") & ((("cando_w3_w2_req_unit" & "cando_w3_w2_branch") => "cando_w3_w2_req_unit_branch") & ((("cando_w3_w4_err_unit" & "cando_w3_w4_branch") => "cando_w3_w4_err_unit_branch") & ((("cando_w3_w4_res_int" & "cando_w3_w4_branch") => "cando_w3_w4_res_int_branch") & ((("cando_w4_w3_req_unit" & "cando_w4_w3_branch") => "cando_w4_w3_req_unit_branch") & ((("cando_w4_w5_err_unit" & "cando_w4_w5_branch") => "cando_w4_w5_err_unit_branch") & ((("cando_w4_w5_res_int" & "cando_w4_w5_branch") => "cando_w4_w5_res_int_branch") & ((("cando_w5_w4_req_unit" & "cando_w5_w4_branch") => "cando_w5_w4_req_unit_branch") & ((("cando_w5_w6_err_unit" & "cando_w5_w6_branch") => "cando_w5_w6_err_unit_branch") & ((("cando_w5_w6_res_int" & "cando_w5_w6_branch") => "cando_w5_w6_res_int_branch") & ((("cando_w6_w5_req_unit" & "cando_w6_w5_branch") => "cando_w6_w5_req_unit_branch") & ((("cando_w6_w7_err_unit" & "cando_w6_w7_branch") => "cando_w6_w7_err_unit_branch") & ((("cando_w6_w7_res_int" & "cando_w6_w7_branch") => "cando_w6_w7_res_int_branch") & ((("cando_w7_w6_req_unit" & "cando_w7_w6_branch") => "cando_w7_w6_req_unit_branch") & ((("cando_w7_w8_err_unit" & "cando_w7_w8_branch") => "cando_w7_w8_err_unit_branch") & ((("cando_w7_w8_res_int" & "cando_w7_w8_branch") => "cando_w7_w8_res_int_branch") & ((("cando_w8_w7_req_unit" & "cando_w8_w7_branch") => "cando_w8_w7_req_unit_branch") & ((("cando_w8_w9_err_unit" & "cando_w8_w9_branch") => "cando_w8_w9_err_unit_branch") & ((("cando_w8_w9_res_int" & "cando_w8_w9_branch") => "cando_w8_w9_res_int_branch") & ((("cando_w9_w10_err_unit" & "cando_w9_w10_branch") => "cando_w9_w10_err_unit_branch") & ((("cando_w9_w10_res_int" & "cando_w9_w10_branch") => "cando_w9_w10_res_int_branch") & (("cando_w9_w8_req_unit" & "cando_w9_w8_branch") => "cando_w9_w8_req_unit_branch"))))))))))))))))))))))))))))))))))))))))) ]
+  
+  // Probabilistic deadlock freedom
+  Pmin=? [ (G ("deadlock" => "end")) ]
+  
+  // Normalised probabilistic deadlock freedom
+  (Pmin=? [ (G ("deadlock" => "end")) ] / Pmin=? [ (G (!fail)) ])
+  
+  // Probabilistic termination
+  Pmin=? [ (F ("deadlock" & (!fail))) ]
+  
+  // Normalised probabilistic termination
+  (Pmin=? [ (F ("deadlock" & (!fail))) ] / Pmin=? [ (G (!fail)) ])
+  
+   ======= Property checking =======
+  
+  Type safety
+  Result: true
+  
+  Probabilistic deadlock freedom
+  Result: 1.708984374999556E-4 (exact floating point)
+  
+  Normalised probabilistic deadlock freedom
+  Result: 2.3733640740483423E-4
+  
+  Probabilistic termination
+  Result: 0.7198974609375 (exact floating point)
+  
+  Normalised probabilistic termination
+  Result: 0.999762663592595
+  
+  
+  
+  
+   ======= TEST ../examples/fact_14.ctx =======
+  
+  w0 : mu t .
+       w1 & req . w1 (+) { 0.7 : res(Int) . t, 0.3 : err . t }
+  
+  w1 : mu t . w2 & req .
+              w0 (+) req .
+              w0 & {
+                 res(Int) . w2 (+) { 0.5 : res(Int) . t, 0.3 : err . t },
+                 err . w2 (+) err . t
+              }
+  
+  w2 : mu t . w3 & req .
+              w1 (+) req .
+              w1 & {
+                 res(Int) . w3 (+) { 0.5 : res(Int) . t, 0.3 : err . t },
+                 err . w3 (+) err . t
+              }
+  
+  w3 : mu t . w4 & req .
+              w2 (+) req .
+              w2 & {
+                 res(Int) . w4 (+) { 0.5 : res(Int) . t, 0.3 : err . t },
+                 err . w4 (+) err . t
+              }
+  
+  w4 : mu t . w5 & req .
+              w3 (+) req .
+              w3 & {
+                 res(Int) . w5 (+) { 0.5 : res(Int) . t, 0.3 : err . t },
+                 err . w5 (+) err . t
+              }
+  
+  w5 : mu t . w6 & req .
+              w4 (+) req .
+              w4 & {
+                 res(Int) . w6 (+) { 0.5 : res(Int) . t, 0.3 : err . t },
+                 err . w6 (+) err . t
+              }
+  
+  w6 : mu t . w7 & req .
+              w5 (+) req .
+              w5 & {
+                 res(Int) . w7 (+) { 0.5 : res(Int) . t, 0.3 : err . t },
+                 err . w7 (+) err . t
+              }
+  
+  w7 : mu t . w8 & req .
+              w6 (+) req .
+              w6 & {
+                 res(Int) . w8 (+) { 0.5 : res(Int) . t, 0.3 : err . t },
+                 err . w8 (+) err . t
+              }
+  
+  w8 : mu t . w9 & req .
+              w7 (+) req .
+              w7 & {
+                 res(Int) . w9 (+) { 0.5 : res(Int) . t, 0.3 : err . t },
+                 err . w9 (+) err . t
+              }
+  
+  w9 : mu t . w10 & req .
+              w8 (+) req .
+              w8 & {
+                 res(Int) . w10 (+) { 0.5 : res(Int) . t, 0.3 : err . t },
+                 err . w10 (+) err . t
+              }
+  
+  w10 : mu t . w11 & req .
+              w9 (+) req .
+              w9 & {
+                 res(Int) . w11 (+) { 0.5 : res(Int) . t, 0.3 : err . t },
+                 err . w11 (+) err . t
+              }
+  
+  w11 : mu t . w12 & req .
+              w10 (+) req .
+              w10 & {
+                 res(Int) . w12 (+) { 0.5 : res(Int) . t, 0.3 : err . t },
+                 err . w12 (+) err . t
+              }
+  
+  w12 : mu t . w13 & req .
+              w11 (+) req .
+              w11 & {
+                 res(Int) . w13 (+) { 0.5 : res(Int) . t, 0.3 : err . t },
+                 err . w13 (+) err . t
+              }
+  
+  w13 : mu t . w14 & req .
+              w12 (+) req .
+              w12 & {
+                 res(Int) . w14 (+) { 0.5 : res(Int) . t, 0.3 : err . t },
+                 err . w14 (+) err . t
+              }
+  
+  w14 : w13 (+) req .
+       w13 & {
+          res(Int) . mu t . dummy (+) done . t,
+          err . end
+       }
+  
+  dummy : mu t . w14 & done . t
+  
+   ======= PRISM output ========
+  
+  global fail : bool init false;
+  
+  module closure
+    closure : bool init false;
+  
+  endmodule
+  
+  module w0
+    w0 : [0..6] init 0;
+  
+    [] (w0=6) & (fail=false) -> 1:(fail'=true);
+    [w1_w0] (w0=0) & (fail=false) -> 1:(w0'=1);
+    [w1_w0_req_unit] (w0=1) & (fail=false) -> 1:(w0'=2);
+    [w0_w1] (w0=2) & (fail=false) -> 0:(w0'=6) + 0.7:(w0'=3) + 0.3:(w0'=4);
+    [w0_w1_res_int] (w0=3) & (fail=false) -> 1:(w0'=0);
+    [w0_w1_err_unit] (w0=4) & (fail=false) -> 1:(w0'=0);
+  endmodule
+  
+  module w1
+    w1 : [0..12] init 0;
+  
+    [] (w1=12) & (fail=false) -> 1:(fail'=true);
+    [w2_w1] (w1=0) & (fail=false) -> 1:(w1'=1);
+    [w2_w1_req_unit] (w1=1) & (fail=false) -> 1:(w1'=2);
+    [w1_w0] (w1=2) & (fail=false) -> 0:(w1'=12) + 1:(w1'=3);
+    [w1_w0_req_unit] (w1=3) & (fail=false) -> 1:(w1'=4);
+    [w0_w1] (w1=4) & (fail=false) -> 1:(w1'=5);
+    [w0_w1_res_int] (w1=5) & (fail=false) -> 1:(w1'=6);
+    [w0_w1_err_unit] (w1=5) & (fail=false) -> 1:(w1'=9);
+    [w1_w2] (w1=6) & (fail=false) -> 0.2:(w1'=12) + 0.5:(w1'=7) + 0.3:(w1'=8);
+    [w1_w2_res_int] (w1=7) & (fail=false) -> 1:(w1'=0);
+    [w1_w2_err_unit] (w1=8) & (fail=false) -> 1:(w1'=0);
+    [w1_w2] (w1=9) & (fail=false) -> 0:(w1'=12) + 1:(w1'=10);
+    [w1_w2_err_unit] (w1=10) & (fail=false) -> 1:(w1'=0);
+  endmodule
+  
+  module w2
+    w2 : [0..12] init 0;
+  
+    [] (w2=12) & (fail=false) -> 1:(fail'=true);
+    [w3_w2] (w2=0) & (fail=false) -> 1:(w2'=1);
+    [w3_w2_req_unit] (w2=1) & (fail=false) -> 1:(w2'=2);
+    [w2_w1] (w2=2) & (fail=false) -> 0:(w2'=12) + 1:(w2'=3);
+    [w2_w1_req_unit] (w2=3) & (fail=false) -> 1:(w2'=4);
+    [w1_w2] (w2=4) & (fail=false) -> 1:(w2'=5);
+    [w1_w2_res_int] (w2=5) & (fail=false) -> 1:(w2'=6);
+    [w1_w2_err_unit] (w2=5) & (fail=false) -> 1:(w2'=9);
+    [w2_w3] (w2=6) & (fail=false) -> 0.2:(w2'=12) + 0.5:(w2'=7) + 0.3:(w2'=8);
+    [w2_w3_res_int] (w2=7) & (fail=false) -> 1:(w2'=0);
+    [w2_w3_err_unit] (w2=8) & (fail=false) -> 1:(w2'=0);
+    [w2_w3] (w2=9) & (fail=false) -> 0:(w2'=12) + 1:(w2'=10);
+    [w2_w3_err_unit] (w2=10) & (fail=false) -> 1:(w2'=0);
+  endmodule
+  
+  module w3
+    w3 : [0..12] init 0;
+  
+    [] (w3=12) & (fail=false) -> 1:(fail'=true);
+    [w4_w3] (w3=0) & (fail=false) -> 1:(w3'=1);
+    [w4_w3_req_unit] (w3=1) & (fail=false) -> 1:(w3'=2);
+    [w3_w2] (w3=2) & (fail=false) -> 0:(w3'=12) + 1:(w3'=3);
+    [w3_w2_req_unit] (w3=3) & (fail=false) -> 1:(w3'=4);
+    [w2_w3] (w3=4) & (fail=false) -> 1:(w3'=5);
+    [w2_w3_res_int] (w3=5) & (fail=false) -> 1:(w3'=6);
+    [w2_w3_err_unit] (w3=5) & (fail=false) -> 1:(w3'=9);
+    [w3_w4] (w3=6) & (fail=false) -> 0.2:(w3'=12) + 0.5:(w3'=7) + 0.3:(w3'=8);
+    [w3_w4_res_int] (w3=7) & (fail=false) -> 1:(w3'=0);
+    [w3_w4_err_unit] (w3=8) & (fail=false) -> 1:(w3'=0);
+    [w3_w4] (w3=9) & (fail=false) -> 0:(w3'=12) + 1:(w3'=10);
+    [w3_w4_err_unit] (w3=10) & (fail=false) -> 1:(w3'=0);
+  endmodule
+  
+  module w4
+    w4 : [0..12] init 0;
+  
+    [] (w4=12) & (fail=false) -> 1:(fail'=true);
+    [w5_w4] (w4=0) & (fail=false) -> 1:(w4'=1);
+    [w5_w4_req_unit] (w4=1) & (fail=false) -> 1:(w4'=2);
+    [w4_w3] (w4=2) & (fail=false) -> 0:(w4'=12) + 1:(w4'=3);
+    [w4_w3_req_unit] (w4=3) & (fail=false) -> 1:(w4'=4);
+    [w3_w4] (w4=4) & (fail=false) -> 1:(w4'=5);
+    [w3_w4_res_int] (w4=5) & (fail=false) -> 1:(w4'=6);
+    [w3_w4_err_unit] (w4=5) & (fail=false) -> 1:(w4'=9);
+    [w4_w5] (w4=6) & (fail=false) -> 0.2:(w4'=12) + 0.5:(w4'=7) + 0.3:(w4'=8);
+    [w4_w5_res_int] (w4=7) & (fail=false) -> 1:(w4'=0);
+    [w4_w5_err_unit] (w4=8) & (fail=false) -> 1:(w4'=0);
+    [w4_w5] (w4=9) & (fail=false) -> 0:(w4'=12) + 1:(w4'=10);
+    [w4_w5_err_unit] (w4=10) & (fail=false) -> 1:(w4'=0);
+  endmodule
+  
+  module w5
+    w5 : [0..12] init 0;
+  
+    [] (w5=12) & (fail=false) -> 1:(fail'=true);
+    [w6_w5] (w5=0) & (fail=false) -> 1:(w5'=1);
+    [w6_w5_req_unit] (w5=1) & (fail=false) -> 1:(w5'=2);
+    [w5_w4] (w5=2) & (fail=false) -> 0:(w5'=12) + 1:(w5'=3);
+    [w5_w4_req_unit] (w5=3) & (fail=false) -> 1:(w5'=4);
+    [w4_w5] (w5=4) & (fail=false) -> 1:(w5'=5);
+    [w4_w5_res_int] (w5=5) & (fail=false) -> 1:(w5'=6);
+    [w4_w5_err_unit] (w5=5) & (fail=false) -> 1:(w5'=9);
+    [w5_w6] (w5=6) & (fail=false) -> 0.2:(w5'=12) + 0.5:(w5'=7) + 0.3:(w5'=8);
+    [w5_w6_res_int] (w5=7) & (fail=false) -> 1:(w5'=0);
+    [w5_w6_err_unit] (w5=8) & (fail=false) -> 1:(w5'=0);
+    [w5_w6] (w5=9) & (fail=false) -> 0:(w5'=12) + 1:(w5'=10);
+    [w5_w6_err_unit] (w5=10) & (fail=false) -> 1:(w5'=0);
+  endmodule
+  
+  module w6
+    w6 : [0..12] init 0;
+  
+    [] (w6=12) & (fail=false) -> 1:(fail'=true);
+    [w7_w6] (w6=0) & (fail=false) -> 1:(w6'=1);
+    [w7_w6_req_unit] (w6=1) & (fail=false) -> 1:(w6'=2);
+    [w6_w5] (w6=2) & (fail=false) -> 0:(w6'=12) + 1:(w6'=3);
+    [w6_w5_req_unit] (w6=3) & (fail=false) -> 1:(w6'=4);
+    [w5_w6] (w6=4) & (fail=false) -> 1:(w6'=5);
+    [w5_w6_res_int] (w6=5) & (fail=false) -> 1:(w6'=6);
+    [w5_w6_err_unit] (w6=5) & (fail=false) -> 1:(w6'=9);
+    [w6_w7] (w6=6) & (fail=false) -> 0.2:(w6'=12) + 0.5:(w6'=7) + 0.3:(w6'=8);
+    [w6_w7_res_int] (w6=7) & (fail=false) -> 1:(w6'=0);
+    [w6_w7_err_unit] (w6=8) & (fail=false) -> 1:(w6'=0);
+    [w6_w7] (w6=9) & (fail=false) -> 0:(w6'=12) + 1:(w6'=10);
+    [w6_w7_err_unit] (w6=10) & (fail=false) -> 1:(w6'=0);
+  endmodule
+  
+  module w7
+    w7 : [0..12] init 0;
+  
+    [] (w7=12) & (fail=false) -> 1:(fail'=true);
+    [w8_w7] (w7=0) & (fail=false) -> 1:(w7'=1);
+    [w8_w7_req_unit] (w7=1) & (fail=false) -> 1:(w7'=2);
+    [w7_w6] (w7=2) & (fail=false) -> 0:(w7'=12) + 1:(w7'=3);
+    [w7_w6_req_unit] (w7=3) & (fail=false) -> 1:(w7'=4);
+    [w6_w7] (w7=4) & (fail=false) -> 1:(w7'=5);
+    [w6_w7_res_int] (w7=5) & (fail=false) -> 1:(w7'=6);
+    [w6_w7_err_unit] (w7=5) & (fail=false) -> 1:(w7'=9);
+    [w7_w8] (w7=6) & (fail=false) -> 0.2:(w7'=12) + 0.5:(w7'=7) + 0.3:(w7'=8);
+    [w7_w8_res_int] (w7=7) & (fail=false) -> 1:(w7'=0);
+    [w7_w8_err_unit] (w7=8) & (fail=false) -> 1:(w7'=0);
+    [w7_w8] (w7=9) & (fail=false) -> 0:(w7'=12) + 1:(w7'=10);
+    [w7_w8_err_unit] (w7=10) & (fail=false) -> 1:(w7'=0);
+  endmodule
+  
+  module w8
+    w8 : [0..12] init 0;
+  
+    [] (w8=12) & (fail=false) -> 1:(fail'=true);
+    [w9_w8] (w8=0) & (fail=false) -> 1:(w8'=1);
+    [w9_w8_req_unit] (w8=1) & (fail=false) -> 1:(w8'=2);
+    [w8_w7] (w8=2) & (fail=false) -> 0:(w8'=12) + 1:(w8'=3);
+    [w8_w7_req_unit] (w8=3) & (fail=false) -> 1:(w8'=4);
+    [w7_w8] (w8=4) & (fail=false) -> 1:(w8'=5);
+    [w7_w8_res_int] (w8=5) & (fail=false) -> 1:(w8'=6);
+    [w7_w8_err_unit] (w8=5) & (fail=false) -> 1:(w8'=9);
+    [w8_w9] (w8=6) & (fail=false) -> 0.2:(w8'=12) + 0.5:(w8'=7) + 0.3:(w8'=8);
+    [w8_w9_res_int] (w8=7) & (fail=false) -> 1:(w8'=0);
+    [w8_w9_err_unit] (w8=8) & (fail=false) -> 1:(w8'=0);
+    [w8_w9] (w8=9) & (fail=false) -> 0:(w8'=12) + 1:(w8'=10);
+    [w8_w9_err_unit] (w8=10) & (fail=false) -> 1:(w8'=0);
+  endmodule
+  
+  module w9
+    w9 : [0..12] init 0;
+  
+    [] (w9=12) & (fail=false) -> 1:(fail'=true);
+    [w10_w9] (w9=0) & (fail=false) -> 1:(w9'=1);
+    [w10_w9_req_unit] (w9=1) & (fail=false) -> 1:(w9'=2);
+    [w9_w8] (w9=2) & (fail=false) -> 0:(w9'=12) + 1:(w9'=3);
+    [w9_w8_req_unit] (w9=3) & (fail=false) -> 1:(w9'=4);
+    [w8_w9] (w9=4) & (fail=false) -> 1:(w9'=5);
+    [w8_w9_res_int] (w9=5) & (fail=false) -> 1:(w9'=6);
+    [w8_w9_err_unit] (w9=5) & (fail=false) -> 1:(w9'=9);
+    [w9_w10] (w9=6) & (fail=false) -> 0.2:(w9'=12) + 0.5:(w9'=7) + 0.3:(w9'=8);
+    [w9_w10_res_int] (w9=7) & (fail=false) -> 1:(w9'=0);
+    [w9_w10_err_unit] (w9=8) & (fail=false) -> 1:(w9'=0);
+    [w9_w10] (w9=9) & (fail=false) -> 0:(w9'=12) + 1:(w9'=10);
+    [w9_w10_err_unit] (w9=10) & (fail=false) -> 1:(w9'=0);
+  endmodule
+  
+  module w10
+    w10 : [0..12] init 0;
+  
+    [] (w10=12) & (fail=false) -> 1:(fail'=true);
+    [w11_w10] (w10=0) & (fail=false) -> 1:(w10'=1);
+    [w11_w10_req_unit] (w10=1) & (fail=false) -> 1:(w10'=2);
+    [w10_w9] (w10=2) & (fail=false) -> 0:(w10'=12) + 1:(w10'=3);
+    [w10_w9_req_unit] (w10=3) & (fail=false) -> 1:(w10'=4);
+    [w9_w10] (w10=4) & (fail=false) -> 1:(w10'=5);
+    [w9_w10_res_int] (w10=5) & (fail=false) -> 1:(w10'=6);
+    [w9_w10_err_unit] (w10=5) & (fail=false) -> 1:(w10'=9);
+    [w10_w11] (w10=6) & (fail=false) -> 0.2:(w10'=12) + 0.5:(w10'=7) + 0.3:(w10'=8);
+    [w10_w11_res_int] (w10=7) & (fail=false) -> 1:(w10'=0);
+    [w10_w11_err_unit] (w10=8) & (fail=false) -> 1:(w10'=0);
+    [w10_w11] (w10=9) & (fail=false) -> 0:(w10'=12) + 1:(w10'=10);
+    [w10_w11_err_unit] (w10=10) & (fail=false) -> 1:(w10'=0);
+  endmodule
+  
+  module w11
+    w11 : [0..12] init 0;
+  
+    [] (w11=12) & (fail=false) -> 1:(fail'=true);
+    [w12_w11] (w11=0) & (fail=false) -> 1:(w11'=1);
+    [w12_w11_req_unit] (w11=1) & (fail=false) -> 1:(w11'=2);
+    [w11_w10] (w11=2) & (fail=false) -> 0:(w11'=12) + 1:(w11'=3);
+    [w11_w10_req_unit] (w11=3) & (fail=false) -> 1:(w11'=4);
+    [w10_w11] (w11=4) & (fail=false) -> 1:(w11'=5);
+    [w10_w11_res_int] (w11=5) & (fail=false) -> 1:(w11'=6);
+    [w10_w11_err_unit] (w11=5) & (fail=false) -> 1:(w11'=9);
+    [w11_w12] (w11=6) & (fail=false) -> 0.2:(w11'=12) + 0.5:(w11'=7) + 0.3:(w11'=8);
+    [w11_w12_res_int] (w11=7) & (fail=false) -> 1:(w11'=0);
+    [w11_w12_err_unit] (w11=8) & (fail=false) -> 1:(w11'=0);
+    [w11_w12] (w11=9) & (fail=false) -> 0:(w11'=12) + 1:(w11'=10);
+    [w11_w12_err_unit] (w11=10) & (fail=false) -> 1:(w11'=0);
+  endmodule
+  
+  module w12
+    w12 : [0..12] init 0;
+  
+    [] (w12=12) & (fail=false) -> 1:(fail'=true);
+    [w13_w12] (w12=0) & (fail=false) -> 1:(w12'=1);
+    [w13_w12_req_unit] (w12=1) & (fail=false) -> 1:(w12'=2);
+    [w12_w11] (w12=2) & (fail=false) -> 0:(w12'=12) + 1:(w12'=3);
+    [w12_w11_req_unit] (w12=3) & (fail=false) -> 1:(w12'=4);
+    [w11_w12] (w12=4) & (fail=false) -> 1:(w12'=5);
+    [w11_w12_res_int] (w12=5) & (fail=false) -> 1:(w12'=6);
+    [w11_w12_err_unit] (w12=5) & (fail=false) -> 1:(w12'=9);
+    [w12_w13] (w12=6) & (fail=false) -> 0.2:(w12'=12) + 0.5:(w12'=7) + 0.3:(w12'=8);
+    [w12_w13_res_int] (w12=7) & (fail=false) -> 1:(w12'=0);
+    [w12_w13_err_unit] (w12=8) & (fail=false) -> 1:(w12'=0);
+    [w12_w13] (w12=9) & (fail=false) -> 0:(w12'=12) + 1:(w12'=10);
+    [w12_w13_err_unit] (w12=10) & (fail=false) -> 1:(w12'=0);
+  endmodule
+  
+  module w13
+    w13 : [0..12] init 0;
+  
+    [] (w13=12) & (fail=false) -> 1:(fail'=true);
+    [w14_w13] (w13=0) & (fail=false) -> 1:(w13'=1);
+    [w14_w13_req_unit] (w13=1) & (fail=false) -> 1:(w13'=2);
+    [w13_w12] (w13=2) & (fail=false) -> 0:(w13'=12) + 1:(w13'=3);
+    [w13_w12_req_unit] (w13=3) & (fail=false) -> 1:(w13'=4);
+    [w12_w13] (w13=4) & (fail=false) -> 1:(w13'=5);
+    [w12_w13_res_int] (w13=5) & (fail=false) -> 1:(w13'=6);
+    [w12_w13_err_unit] (w13=5) & (fail=false) -> 1:(w13'=9);
+    [w13_w14] (w13=6) & (fail=false) -> 0.2:(w13'=12) + 0.5:(w13'=7) + 0.3:(w13'=8);
+    [w13_w14_res_int] (w13=7) & (fail=false) -> 1:(w13'=0);
+    [w13_w14_err_unit] (w13=8) & (fail=false) -> 1:(w13'=0);
+    [w13_w14] (w13=9) & (fail=false) -> 0:(w13'=12) + 1:(w13'=10);
+    [w13_w14_err_unit] (w13=10) & (fail=false) -> 1:(w13'=0);
+  endmodule
+  
+  module w14
+    w14 : [0..7] init 0;
+  
+    [] (w14=7) & (fail=false) -> 1:(fail'=true);
+    [w14_w13] (w14=0) & (fail=false) -> 0:(w14'=7) + 1:(w14'=1);
+    [w14_w13_req_unit] (w14=1) & (fail=false) -> 1:(w14'=2);
+    [w13_w14] (w14=2) & (fail=false) -> 1:(w14'=3);
+    [w13_w14_res_int] (w14=3) & (fail=false) -> 1:(w14'=4);
+    [w13_w14_err_unit] (w14=3) & (fail=false) -> 1:(w14'=6);
+    [w14_dummy] (w14=4) & (fail=false) -> 0:(w14'=7) + 1:(w14'=5);
+    [w14_dummy_done_unit] (w14=5) & (fail=false) -> 1:(w14'=4);
+  endmodule
+  
+  module dummy
+    dummy : [0..3] init 0;
+  
+    [] (dummy=3) & (fail=false) -> 1:(fail'=true);
+    [w14_dummy] (dummy=0) & (fail=false) -> 1:(dummy'=1);
+    [w14_dummy_done_unit] (dummy=1) & (fail=false) -> 1:(dummy'=0);
+  endmodule
+  
+  label "end" = (w0=5) & (w1=11) & (w2=11) & (w3=11) & (w4=11) & (w5=11) & (w6=11) & (w7=11) & (w8=11) & (w9=11) & (w10=11) & (w11=11) & (w12=11) & (w13=11) & (w14=6) & (dummy=2);
+  label "cando_w0_w1_err_unit" = w0=2;
+  label "cando_w0_w1_err_unit_branch" = w1=4;
+  label "cando_w0_w1_res_int" = w0=2;
+  label "cando_w0_w1_res_int_branch" = w1=4;
+  label "cando_w1_w0_req_unit" = w1=2;
+  label "cando_w1_w0_req_unit_branch" = w0=0;
+  label "cando_w1_w2_err_unit" = (w1=6) | (w1=9);
+  label "cando_w1_w2_err_unit_branch" = w2=4;
+  label "cando_w1_w2_res_int" = w1=6;
+  label "cando_w1_w2_res_int_branch" = w2=4;
+  label "cando_w10_w11_err_unit" = (w10=6) | (w10=9);
+  label "cando_w10_w11_err_unit_branch" = w11=4;
+  label "cando_w10_w11_res_int" = w10=6;
+  label "cando_w10_w11_res_int_branch" = w11=4;
+  label "cando_w10_w9_req_unit" = w10=2;
+  label "cando_w10_w9_req_unit_branch" = w9=0;
+  label "cando_w11_w10_req_unit" = w11=2;
+  label "cando_w11_w10_req_unit_branch" = w10=0;
+  label "cando_w11_w12_err_unit" = (w11=6) | (w11=9);
+  label "cando_w11_w12_err_unit_branch" = w12=4;
+  label "cando_w11_w12_res_int" = w11=6;
+  label "cando_w11_w12_res_int_branch" = w12=4;
+  label "cando_w12_w11_req_unit" = w12=2;
+  label "cando_w12_w11_req_unit_branch" = w11=0;
+  label "cando_w12_w13_err_unit" = (w12=6) | (w12=9);
+  label "cando_w12_w13_err_unit_branch" = w13=4;
+  label "cando_w12_w13_res_int" = w12=6;
+  label "cando_w12_w13_res_int_branch" = w13=4;
+  label "cando_w13_w12_req_unit" = w13=2;
+  label "cando_w13_w12_req_unit_branch" = w12=0;
+  label "cando_w13_w14_err_unit" = (w13=6) | (w13=9);
+  label "cando_w13_w14_err_unit_branch" = w14=2;
+  label "cando_w13_w14_res_int" = w13=6;
+  label "cando_w13_w14_res_int_branch" = w14=2;
+  label "cando_w14_dummy_done_unit" = w14=4;
+  label "cando_w14_dummy_done_unit_branch" = dummy=0;
+  label "cando_w14_w13_req_unit" = w14=0;
+  label "cando_w14_w13_req_unit_branch" = w13=0;
+  label "cando_w2_w1_req_unit" = w2=2;
+  label "cando_w2_w1_req_unit_branch" = w1=0;
+  label "cando_w2_w3_err_unit" = (w2=6) | (w2=9);
+  label "cando_w2_w3_err_unit_branch" = w3=4;
+  label "cando_w2_w3_res_int" = w2=6;
+  label "cando_w2_w3_res_int_branch" = w3=4;
+  label "cando_w3_w2_req_unit" = w3=2;
+  label "cando_w3_w2_req_unit_branch" = w2=0;
+  label "cando_w3_w4_err_unit" = (w3=6) | (w3=9);
+  label "cando_w3_w4_err_unit_branch" = w4=4;
+  label "cando_w3_w4_res_int" = w3=6;
+  label "cando_w3_w4_res_int_branch" = w4=4;
+  label "cando_w4_w3_req_unit" = w4=2;
+  label "cando_w4_w3_req_unit_branch" = w3=0;
+  label "cando_w4_w5_err_unit" = (w4=6) | (w4=9);
+  label "cando_w4_w5_err_unit_branch" = w5=4;
+  label "cando_w4_w5_res_int" = w4=6;
+  label "cando_w4_w5_res_int_branch" = w5=4;
+  label "cando_w5_w4_req_unit" = w5=2;
+  label "cando_w5_w4_req_unit_branch" = w4=0;
+  label "cando_w5_w6_err_unit" = (w5=6) | (w5=9);
+  label "cando_w5_w6_err_unit_branch" = w6=4;
+  label "cando_w5_w6_res_int" = w5=6;
+  label "cando_w5_w6_res_int_branch" = w6=4;
+  label "cando_w6_w5_req_unit" = w6=2;
+  label "cando_w6_w5_req_unit_branch" = w5=0;
+  label "cando_w6_w7_err_unit" = (w6=6) | (w6=9);
+  label "cando_w6_w7_err_unit_branch" = w7=4;
+  label "cando_w6_w7_res_int" = w6=6;
+  label "cando_w6_w7_res_int_branch" = w7=4;
+  label "cando_w7_w6_req_unit" = w7=2;
+  label "cando_w7_w6_req_unit_branch" = w6=0;
+  label "cando_w7_w8_err_unit" = (w7=6) | (w7=9);
+  label "cando_w7_w8_err_unit_branch" = w8=4;
+  label "cando_w7_w8_res_int" = w7=6;
+  label "cando_w7_w8_res_int_branch" = w8=4;
+  label "cando_w8_w7_req_unit" = w8=2;
+  label "cando_w8_w7_req_unit_branch" = w7=0;
+  label "cando_w8_w9_err_unit" = (w8=6) | (w8=9);
+  label "cando_w8_w9_err_unit_branch" = w9=4;
+  label "cando_w8_w9_res_int" = w8=6;
+  label "cando_w8_w9_res_int_branch" = w9=4;
+  label "cando_w9_w10_err_unit" = (w9=6) | (w9=9);
+  label "cando_w9_w10_err_unit_branch" = w10=4;
+  label "cando_w9_w10_res_int" = w9=6;
+  label "cando_w9_w10_res_int_branch" = w10=4;
+  label "cando_w9_w8_req_unit" = w9=2;
+  label "cando_w9_w8_req_unit_branch" = w8=0;
+  label "cando_w0_w1_branch" = w1=4;
+  label "cando_w1_w0_branch" = w0=0;
+  label "cando_w1_w2_branch" = w2=4;
+  label "cando_w10_w11_branch" = w11=4;
+  label "cando_w10_w9_branch" = w9=0;
+  label "cando_w11_w10_branch" = w10=0;
+  label "cando_w11_w12_branch" = w12=4;
+  label "cando_w12_w11_branch" = w11=0;
+  label "cando_w12_w13_branch" = w13=4;
+  label "cando_w13_w12_branch" = w12=0;
+  label "cando_w13_w14_branch" = w14=2;
+  label "cando_w14_dummy_branch" = dummy=0;
+  label "cando_w14_w13_branch" = w13=0;
+  label "cando_w2_w1_branch" = w1=0;
+  label "cando_w2_w3_branch" = w3=4;
+  label "cando_w3_w2_branch" = w2=0;
+  label "cando_w3_w4_branch" = w4=4;
+  label "cando_w4_w3_branch" = w3=0;
+  label "cando_w4_w5_branch" = w5=4;
+  label "cando_w5_w4_branch" = w4=0;
+  label "cando_w5_w6_branch" = w6=4;
+  label "cando_w6_w5_branch" = w5=0;
+  label "cando_w6_w7_branch" = w7=4;
+  label "cando_w7_w6_branch" = w6=0;
+  label "cando_w7_w8_branch" = w8=4;
+  label "cando_w8_w7_branch" = w7=0;
+  label "cando_w8_w9_branch" = w9=4;
+  label "cando_w9_w10_branch" = w10=4;
+  label "cando_w9_w8_branch" = w8=0;
+  
+  // Type safety
+  P>=1 [ (G ((("cando_w0_w1_err_unit" & "cando_w0_w1_branch") => "cando_w0_w1_err_unit_branch") & ((("cando_w0_w1_res_int" & "cando_w0_w1_branch") => "cando_w0_w1_res_int_branch") & ((("cando_w1_w0_req_unit" & "cando_w1_w0_branch") => "cando_w1_w0_req_unit_branch") & ((("cando_w1_w2_err_unit" & "cando_w1_w2_branch") => "cando_w1_w2_err_unit_branch") & ((("cando_w1_w2_res_int" & "cando_w1_w2_branch") => "cando_w1_w2_res_int_branch") & ((("cando_w10_w11_err_unit" & "cando_w10_w11_branch") => "cando_w10_w11_err_unit_branch") & ((("cando_w10_w11_res_int" & "cando_w10_w11_branch") => "cando_w10_w11_res_int_branch") & ((("cando_w10_w9_req_unit" & "cando_w10_w9_branch") => "cando_w10_w9_req_unit_branch") & ((("cando_w11_w10_req_unit" & "cando_w11_w10_branch") => "cando_w11_w10_req_unit_branch") & ((("cando_w11_w12_err_unit" & "cando_w11_w12_branch") => "cando_w11_w12_err_unit_branch") & ((("cando_w11_w12_res_int" & "cando_w11_w12_branch") => "cando_w11_w12_res_int_branch") & ((("cando_w12_w11_req_unit" & "cando_w12_w11_branch") => "cando_w12_w11_req_unit_branch") & ((("cando_w12_w13_err_unit" & "cando_w12_w13_branch") => "cando_w12_w13_err_unit_branch") & ((("cando_w12_w13_res_int" & "cando_w12_w13_branch") => "cando_w12_w13_res_int_branch") & ((("cando_w13_w12_req_unit" & "cando_w13_w12_branch") => "cando_w13_w12_req_unit_branch") & ((("cando_w13_w14_err_unit" & "cando_w13_w14_branch") => "cando_w13_w14_err_unit_branch") & ((("cando_w13_w14_res_int" & "cando_w13_w14_branch") => "cando_w13_w14_res_int_branch") & ((("cando_w14_dummy_done_unit" & "cando_w14_dummy_branch") => "cando_w14_dummy_done_unit_branch") & ((("cando_w14_w13_req_unit" & "cando_w14_w13_branch") => "cando_w14_w13_req_unit_branch") & ((("cando_w2_w1_req_unit" & "cando_w2_w1_branch") => "cando_w2_w1_req_unit_branch") & ((("cando_w2_w3_err_unit" & "cando_w2_w3_branch") => "cando_w2_w3_err_unit_branch") & ((("cando_w2_w3_res_int" & "cando_w2_w3_branch") => "cando_w2_w3_res_int_branch") & ((("cando_w3_w2_req_unit" & "cando_w3_w2_branch") => "cando_w3_w2_req_unit_branch") & ((("cando_w3_w4_err_unit" & "cando_w3_w4_branch") => "cando_w3_w4_err_unit_branch") & ((("cando_w3_w4_res_int" & "cando_w3_w4_branch") => "cando_w3_w4_res_int_branch") & ((("cando_w4_w3_req_unit" & "cando_w4_w3_branch") => "cando_w4_w3_req_unit_branch") & ((("cando_w4_w5_err_unit" & "cando_w4_w5_branch") => "cando_w4_w5_err_unit_branch") & ((("cando_w4_w5_res_int" & "cando_w4_w5_branch") => "cando_w4_w5_res_int_branch") & ((("cando_w5_w4_req_unit" & "cando_w5_w4_branch") => "cando_w5_w4_req_unit_branch") & ((("cando_w5_w6_err_unit" & "cando_w5_w6_branch") => "cando_w5_w6_err_unit_branch") & ((("cando_w5_w6_res_int" & "cando_w5_w6_branch") => "cando_w5_w6_res_int_branch") & ((("cando_w6_w5_req_unit" & "cando_w6_w5_branch") => "cando_w6_w5_req_unit_branch") & ((("cando_w6_w7_err_unit" & "cando_w6_w7_branch") => "cando_w6_w7_err_unit_branch") & ((("cando_w6_w7_res_int" & "cando_w6_w7_branch") => "cando_w6_w7_res_int_branch") & ((("cando_w7_w6_req_unit" & "cando_w7_w6_branch") => "cando_w7_w6_req_unit_branch") & ((("cando_w7_w8_err_unit" & "cando_w7_w8_branch") => "cando_w7_w8_err_unit_branch") & ((("cando_w7_w8_res_int" & "cando_w7_w8_branch") => "cando_w7_w8_res_int_branch") & ((("cando_w8_w7_req_unit" & "cando_w8_w7_branch") => "cando_w8_w7_req_unit_branch") & ((("cando_w8_w9_err_unit" & "cando_w8_w9_branch") => "cando_w8_w9_err_unit_branch") & ((("cando_w8_w9_res_int" & "cando_w8_w9_branch") => "cando_w8_w9_res_int_branch") & ((("cando_w9_w10_err_unit" & "cando_w9_w10_branch") => "cando_w9_w10_err_unit_branch") & ((("cando_w9_w10_res_int" & "cando_w9_w10_branch") => "cando_w9_w10_res_int_branch") & (("cando_w9_w8_req_unit" & "cando_w9_w8_branch") => "cando_w9_w8_req_unit_branch")))))))))))))))))))))))))))))))))))))))))))) ]
+  
+  // Probabilistic deadlock freedom
+  Pmin=? [ (G ("deadlock" => "end")) ]
+  
+  // Normalised probabilistic deadlock freedom
+  (Pmin=? [ (G ("deadlock" => "end")) ] / Pmin=? [ (G (!fail)) ])
+  
+  // Probabilistic termination
+  Pmin=? [ (F ("deadlock" & (!fail))) ]
+  
+  // Normalised probabilistic termination
+  (Pmin=? [ (F ("deadlock" & (!fail))) ] / Pmin=? [ (G (!fail)) ])
+  
+   ======= Property checking =======
+  
+  Type safety
+  Result: true
+  
+  Probabilistic deadlock freedom
+  Result: 8.544921875008882E-5 (exact floating point)
+  
+  Normalised probabilistic deadlock freedom
+  Result: 1.186738368269884E-4
+  
+  Probabilistic termination
+  Result: 0.71994873046875 (exact floating point)
+  
+  Normalised probabilistic termination
+  Result: 0.999881326163173
+  
+  
+  
+  
    ======= TEST ../examples/mdp.ctx =======
   
   a : b (+) { 0.3 : l1 . end, 0.4 : l2 . mu t . b (+) { 0.9 : l2 . t } }
