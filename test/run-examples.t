@@ -3502,7 +3502,7 @@ For each context file in this directory, run [prose output] to check the model a
   
   workerC1 : mu t .
                workerB1 & {
-                 datum(Int) . workerA1 (+) result . t,
+                 datum(Int) . workerA1 (+) result(Int) . t,
                  stop . end
                }
   
@@ -3522,7 +3522,7 @@ For each context file in this directory, run [prose output] to check the model a
   
   workerC2 : mu t .
                workerB2 & {
-                 datum(Int) . workerA2 (+) result . t,
+                 datum(Int) . workerA2 (+) result(Int) . t,
                  stop . end
                }
   
@@ -3542,7 +3542,7 @@ For each context file in this directory, run [prose output] to check the model a
   
   workerC3 : mu t .
                workerB3 & {
-                 datum(Int) . workerA3 (+) result . t,
+                 datum(Int) . workerA3 (+) result(Int) . t,
                  stop . end
                }
   
@@ -3554,12 +3554,6 @@ For each context file in this directory, run [prose output] to check the model a
   module closure
     closure : bool init false;
   
-    [workerC1_workerA1_result_int] false -> 1:(closure'=false);
-    [workerC1_workerA1_result_unit] false -> 1:(closure'=false);
-    [workerC2_workerA2_result_int] false -> 1:(closure'=false);
-    [workerC2_workerA2_result_unit] false -> 1:(closure'=false);
-    [workerC3_workerA3_result_int] false -> 1:(closure'=false);
-    [workerC3_workerA3_result_unit] false -> 1:(closure'=false);
   endmodule
   
   module starter
@@ -3608,7 +3602,7 @@ For each context file in this directory, run [prose output] to check the model a
     [workerB1_workerC1_datum_int] (workerC1=1) & (fail=false) -> 1:(workerC1'=2);
     [workerB1_workerC1_stop_unit] (workerC1=1) & (fail=false) -> 1:(workerC1'=4);
     [workerC1_workerA1] (workerC1=2) & (fail=false) -> 0:(workerC1'=5) + 1:(workerC1'=3);
-    [workerC1_workerA1_result_unit] (workerC1=3) & (fail=false) -> 1:(workerC1'=0);
+    [workerC1_workerA1_result_int] (workerC1=3) & (fail=false) -> 1:(workerC1'=0);
   endmodule
   
   module workerA2
@@ -3645,7 +3639,7 @@ For each context file in this directory, run [prose output] to check the model a
     [workerB2_workerC2_datum_int] (workerC2=1) & (fail=false) -> 1:(workerC2'=2);
     [workerB2_workerC2_stop_unit] (workerC2=1) & (fail=false) -> 1:(workerC2'=4);
     [workerC2_workerA2] (workerC2=2) & (fail=false) -> 0:(workerC2'=5) + 1:(workerC2'=3);
-    [workerC2_workerA2_result_unit] (workerC2=3) & (fail=false) -> 1:(workerC2'=0);
+    [workerC2_workerA2_result_int] (workerC2=3) & (fail=false) -> 1:(workerC2'=0);
   endmodule
   
   module workerA3
@@ -3682,7 +3676,7 @@ For each context file in this directory, run [prose output] to check the model a
     [workerB3_workerC3_datum_int] (workerC3=1) & (fail=false) -> 1:(workerC3'=2);
     [workerB3_workerC3_stop_unit] (workerC3=1) & (fail=false) -> 1:(workerC3'=4);
     [workerC3_workerA3] (workerC3=2) & (fail=false) -> 0:(workerC3'=5) + 1:(workerC3'=3);
-    [workerC3_workerA3_result_unit] (workerC3=3) & (fail=false) -> 1:(workerC3'=0);
+    [workerC3_workerA3_result_int] (workerC3=3) & (fail=false) -> 1:(workerC3'=0);
   endmodule
   
   label "end" = (starter=6) & (workerA1=7) & (workerB1=6) & (workerC1=4) & (workerA2=7) & (workerB2=6) & (workerC2=4) & (workerA3=7) & (workerB3=6) & (workerC3=4);
@@ -3716,18 +3710,12 @@ For each context file in this directory, run [prose output] to check the model a
   label "cando_workerB3_workerC3_datum_int_branch" = workerC3=0;
   label "cando_workerB3_workerC3_stop_unit" = workerB3=2;
   label "cando_workerB3_workerC3_stop_unit_branch" = workerC3=0;
-  label "cando_workerC1_workerA1_result_int" = false;
+  label "cando_workerC1_workerA1_result_int" = workerC1=2;
   label "cando_workerC1_workerA1_result_int_branch" = workerA1=5;
-  label "cando_workerC1_workerA1_result_unit" = workerC1=2;
-  label "cando_workerC1_workerA1_result_unit_branch" = false;
-  label "cando_workerC2_workerA2_result_int" = false;
+  label "cando_workerC2_workerA2_result_int" = workerC2=2;
   label "cando_workerC2_workerA2_result_int_branch" = workerA2=5;
-  label "cando_workerC2_workerA2_result_unit" = workerC2=2;
-  label "cando_workerC2_workerA2_result_unit_branch" = false;
-  label "cando_workerC3_workerA3_result_int" = false;
+  label "cando_workerC3_workerA3_result_int" = workerC3=2;
   label "cando_workerC3_workerA3_result_int_branch" = workerA3=5;
-  label "cando_workerC3_workerA3_result_unit" = workerC3=2;
-  label "cando_workerC3_workerA3_result_unit_branch" = false;
   label "cando_starter_workerA1_branch" = workerA1=0;
   label "cando_starter_workerA2_branch" = workerA2=0;
   label "cando_starter_workerA3_branch" = workerA3=0;
@@ -3742,7 +3730,7 @@ For each context file in this directory, run [prose output] to check the model a
   label "cando_workerC3_workerA3_branch" = workerA3=5;
   
   // Type safety
-  P>=1 [ (G ((("cando_starter_workerA1_datum_int" & "cando_starter_workerA1_branch") => "cando_starter_workerA1_datum_int_branch") & ((("cando_starter_workerA2_datum_int" & "cando_starter_workerA2_branch") => "cando_starter_workerA2_datum_int_branch") & ((("cando_starter_workerA3_datum_int" & "cando_starter_workerA3_branch") => "cando_starter_workerA3_datum_int_branch") & ((("cando_workerA1_workerB1_datum_int" & "cando_workerA1_workerB1_branch") => "cando_workerA1_workerB1_datum_int_branch") & ((("cando_workerA1_workerB1_stop_unit" & "cando_workerA1_workerB1_branch") => "cando_workerA1_workerB1_stop_unit_branch") & ((("cando_workerA2_workerB2_datum_int" & "cando_workerA2_workerB2_branch") => "cando_workerA2_workerB2_datum_int_branch") & ((("cando_workerA2_workerB2_stop_unit" & "cando_workerA2_workerB2_branch") => "cando_workerA2_workerB2_stop_unit_branch") & ((("cando_workerA3_workerB3_datum_int" & "cando_workerA3_workerB3_branch") => "cando_workerA3_workerB3_datum_int_branch") & ((("cando_workerA3_workerB3_stop_unit" & "cando_workerA3_workerB3_branch") => "cando_workerA3_workerB3_stop_unit_branch") & ((("cando_workerB1_workerC1_datum_int" & "cando_workerB1_workerC1_branch") => "cando_workerB1_workerC1_datum_int_branch") & ((("cando_workerB1_workerC1_stop_unit" & "cando_workerB1_workerC1_branch") => "cando_workerB1_workerC1_stop_unit_branch") & ((("cando_workerB2_workerC2_datum_int" & "cando_workerB2_workerC2_branch") => "cando_workerB2_workerC2_datum_int_branch") & ((("cando_workerB2_workerC2_stop_unit" & "cando_workerB2_workerC2_branch") => "cando_workerB2_workerC2_stop_unit_branch") & ((("cando_workerB3_workerC3_datum_int" & "cando_workerB3_workerC3_branch") => "cando_workerB3_workerC3_datum_int_branch") & ((("cando_workerB3_workerC3_stop_unit" & "cando_workerB3_workerC3_branch") => "cando_workerB3_workerC3_stop_unit_branch") & ((("cando_workerC1_workerA1_result_int" & "cando_workerC1_workerA1_branch") => "cando_workerC1_workerA1_result_int_branch") & ((("cando_workerC1_workerA1_result_unit" & "cando_workerC1_workerA1_branch") => "cando_workerC1_workerA1_result_unit_branch") & ((("cando_workerC2_workerA2_result_int" & "cando_workerC2_workerA2_branch") => "cando_workerC2_workerA2_result_int_branch") & ((("cando_workerC2_workerA2_result_unit" & "cando_workerC2_workerA2_branch") => "cando_workerC2_workerA2_result_unit_branch") & ((("cando_workerC3_workerA3_result_int" & "cando_workerC3_workerA3_branch") => "cando_workerC3_workerA3_result_int_branch") & (("cando_workerC3_workerA3_result_unit" & "cando_workerC3_workerA3_branch") => "cando_workerC3_workerA3_result_unit_branch")))))))))))))))))))))) ]
+  P>=1 [ (G ((("cando_starter_workerA1_datum_int" & "cando_starter_workerA1_branch") => "cando_starter_workerA1_datum_int_branch") & ((("cando_starter_workerA2_datum_int" & "cando_starter_workerA2_branch") => "cando_starter_workerA2_datum_int_branch") & ((("cando_starter_workerA3_datum_int" & "cando_starter_workerA3_branch") => "cando_starter_workerA3_datum_int_branch") & ((("cando_workerA1_workerB1_datum_int" & "cando_workerA1_workerB1_branch") => "cando_workerA1_workerB1_datum_int_branch") & ((("cando_workerA1_workerB1_stop_unit" & "cando_workerA1_workerB1_branch") => "cando_workerA1_workerB1_stop_unit_branch") & ((("cando_workerA2_workerB2_datum_int" & "cando_workerA2_workerB2_branch") => "cando_workerA2_workerB2_datum_int_branch") & ((("cando_workerA2_workerB2_stop_unit" & "cando_workerA2_workerB2_branch") => "cando_workerA2_workerB2_stop_unit_branch") & ((("cando_workerA3_workerB3_datum_int" & "cando_workerA3_workerB3_branch") => "cando_workerA3_workerB3_datum_int_branch") & ((("cando_workerA3_workerB3_stop_unit" & "cando_workerA3_workerB3_branch") => "cando_workerA3_workerB3_stop_unit_branch") & ((("cando_workerB1_workerC1_datum_int" & "cando_workerB1_workerC1_branch") => "cando_workerB1_workerC1_datum_int_branch") & ((("cando_workerB1_workerC1_stop_unit" & "cando_workerB1_workerC1_branch") => "cando_workerB1_workerC1_stop_unit_branch") & ((("cando_workerB2_workerC2_datum_int" & "cando_workerB2_workerC2_branch") => "cando_workerB2_workerC2_datum_int_branch") & ((("cando_workerB2_workerC2_stop_unit" & "cando_workerB2_workerC2_branch") => "cando_workerB2_workerC2_stop_unit_branch") & ((("cando_workerB3_workerC3_datum_int" & "cando_workerB3_workerC3_branch") => "cando_workerB3_workerC3_datum_int_branch") & ((("cando_workerB3_workerC3_stop_unit" & "cando_workerB3_workerC3_branch") => "cando_workerB3_workerC3_stop_unit_branch") & ((("cando_workerC1_workerA1_result_int" & "cando_workerC1_workerA1_branch") => "cando_workerC1_workerA1_result_int_branch") & ((("cando_workerC2_workerA2_result_int" & "cando_workerC2_workerA2_branch") => "cando_workerC2_workerA2_result_int_branch") & (("cando_workerC3_workerA3_result_int" & "cando_workerC3_workerA3_branch") => "cando_workerC3_workerA3_result_int_branch"))))))))))))))))))) ]
   
   // Probabilistic deadlock freedom
   Pmin=? [ (G ("deadlock" => "end")) ]
@@ -3759,13 +3747,13 @@ For each context file in this directory, run [prose output] to check the model a
    ======= Property checking =======
   
   Type safety
-  Result: false
+  Result: true
   
   Probabilistic deadlock freedom
-  Result: 0.125 (exact floating point)
+  Result: 1.0 (exact floating point)
   
   Normalised probabilistic deadlock freedom
-  Result: 0.125
+  Result: 1.0
   
   Probabilistic termination
   Result: 1.0 (exact floating point)

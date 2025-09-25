@@ -18,7 +18,7 @@ workerB1 : mu t .
 
 workerC1 : mu t .
              workerB1 & {
-               datum(Int) . workerA1 (+) result . t,
+               datum(Int) . workerA1 (+) result(Int) . t,
                stop . end
              }
 
@@ -38,7 +38,7 @@ workerB2 : mu t .
 
 workerC2 : mu t .
              workerB2 & {
-               datum(Int) . workerA2 (+) result . t,
+               datum(Int) . workerA2 (+) result(Int) . t,
                stop . end
              }
 
@@ -58,7 +58,7 @@ workerB3 : mu t .
 
 workerC3 : mu t .
              workerB3 & {
-               datum(Int) . workerA3 (+) result . t,
+               datum(Int) . workerA3 (+) result(Int) . t,
                stop . end
              }
 
