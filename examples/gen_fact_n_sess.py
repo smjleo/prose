@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 import sys
 
-def generate_fibonacci_session(n):
+def generate_factorial_session(n):
     if n < 1:
         return ""
 
@@ -11,7 +11,7 @@ def generate_fibonacci_session(n):
     lines.append("w0 <- mu X . { w1?req() . flip (0.7) { H => w1!res(1) . X | T => w1!err(0) . X } }")
     lines.append("")
 
-    # Middle workers (w1 to w(n-1)) - compute fibonacci numbers
+    # Middle workers (w1 to w(n-1)) - compute factorial numbers
     for i in range(1, n):
         prev_worker = f"w{i-1}"
         curr_worker = f"w{i}"
@@ -27,7 +27,7 @@ def generate_fibonacci_session(n):
         lines.append(f"             + {prev_worker}?err(x) . {next_worker}!err(0) . X }}")
         lines.append("")
 
-    # Last worker - queries the (n-1)th fibonacci number
+    # Last worker - queries the (n-1)th factorial number
     last_worker = f"w{n}"
     prev_worker = f"w{n-1}"
 
@@ -48,6 +48,6 @@ if __name__ == "__main__":
 
     try:
         n = int(sys.argv[1])
-        print(generate_fibonacci_session(n), end='')
+        print(generate_factorial_session(n), end='')
     except ValueError:
         sys.exit(1)
