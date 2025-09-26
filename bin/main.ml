@@ -65,18 +65,6 @@ let output_command =
        ~balance)
 ;;
 
-let verify_command =
-  Command.basic
-    ~summary:
-      "Verify probabilistic properties of the given session type context using PRISM."
-    (let%map_open.Command ctx_file = ctx_file_flag
-     and print_ast = print_ast_flag
-     and print_raw_prism = print_raw_prism_flag
-     and print_translation_time = print_translation_time_flag
-     and balance = balance_flag in
-     Prose.verify ~ctx_file ~print_ast ~print_raw_prism ~print_translation_time ~balance)
-;;
-
 let benchmark_command =
   Command.basic
     ~summary:
@@ -100,6 +88,29 @@ let benchmark_command =
          ~doc:"int Batch size for translation benchmarking measurements (default: 100)"
      and latex = flag "-latex" no_arg ~doc:"bool Output table in LaTeX format" in
      Prose.benchmark ~iterations ~directory ~translation_batch_size ~latex)
+;;
+
+let term_only_flag =
+  let open Command.Param in
+  flag
+    "-term-only"
+    no_arg
+    ~doc:" Only check probabilistic termination and output probability and verification time"
+;;
+
+let verify_command =
+  Command.basic
+    ~summary:
+      "Verify probabilistic properties of the given session type context using PRISM."
+    (let%map_open.Command ctx_file = ctx_file_flag
+     and print_ast = print_ast_flag
+     and print_raw_prism = print_raw_prism_flag
+     and print_translation_time = print_translation_time_flag
+     and balance = balance_flag
+     and term_only = term_only_flag in
+     if term_only
+     then Prose.term_only ~ctx_file
+     else Prose.verify ~ctx_file ~print_ast ~print_raw_prism ~print_translation_time ~balance)
 ;;
 
 let command =

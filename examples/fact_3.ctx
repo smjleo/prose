@@ -1,0 +1,24 @@
+w0 : mu t .
+     w1 & req . w1 (+) { 0.7 : res(Int) . t, 0.3 : err . t }
+
+w1 : mu t . w2 & req .
+            w0 (+) req .
+            w0 & {
+               res(Int) . w2 (+) { 0.5 : res(Int) . t, 0.3 : err . t },
+               err . w2 (+) err . t
+            }
+
+w2 : mu t . w3 & req .
+            w1 (+) req .
+            w1 & {
+               res(Int) . w3 (+) { 0.5 : res(Int) . t, 0.3 : err . t },
+               err . w3 (+) err . t
+            }
+
+w3 : w2 (+) req .
+     w2 & {
+        res(Int) . mu t . dummy (+) done . t,
+        err . end
+     }
+
+dummy : mu t . w3 & done . t

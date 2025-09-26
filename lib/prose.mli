@@ -39,3 +39,8 @@ val benchmark
   -> latex:bool
   -> unit
   -> unit
+
+(** Check only probabilistic termination for the given context file.
+    Outputs only the probability and verification time (space-separated).
+    Uses 10 iterations for microbenchmarking the PRISM invocation time. *)
+val term_only : ctx_file:string -> unit -> unit
