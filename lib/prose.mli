@@ -8,6 +8,7 @@ val output
   -> print_ast:bool
   -> print_translation_time:bool
   -> balance:bool
+  -> upper:bool
   -> ?model_output_file:string
   -> ?prop_output_file:string
   -> unit
@@ -21,6 +22,7 @@ val verify
   -> print_raw_prism:bool
   -> print_translation_time:bool
   -> balance:bool
+  -> upper:bool
   -> unit
   -> unit
 
@@ -43,4 +45,4 @@ val benchmark
 (** Check only probabilistic termination for the given context file.
     Outputs only the probability and verification time (space-separated).
     Uses 10 iterations for microbenchmarking the PRISM invocation time. *)
-val term_only : ctx_file:string -> unit -> unit
+val term_only : ctx_file:string -> upper:bool -> unit -> unit

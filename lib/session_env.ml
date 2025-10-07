@@ -6,14 +6,16 @@ type t =
   ; participant : string
   ; state_var : int Prism.variable
   ; registered_vars : int String.Map.t
+  ; upper : bool
   }
 
-let empty ~participant =
+let empty ~participant ~upper =
   { current_state = 0
   ; proc_vars = String.Map.empty
   ; participant
   ; state_var = StringVar participant
   ; registered_vars = String.Map.empty
+  ; upper
   }
 ;;
 
@@ -37,5 +39,5 @@ let register_action_var t action ~max_value =
   { t with registered_vars = Map.set t.registered_vars ~key:var_name ~data:max_value }
 ;;
 
-let get_registered_variables t =
-  Map.to_alist t.registered_vars
+let get_registered_variables t = Map.to_alist t.registered_vars
+let upper t = t.upper

@@ -16,8 +16,21 @@ let state_utils ~env =
    TODO: eventually this max int should be an option. *)
 let max_int_value = 200
 
+(* How much of each arm to dispense to fail state *)
+let upper_bound_discount = 0.1
+
+let maybe_not_fail ~env guard =
+  let fail_var = StringVar "fail" in
+  match Session_env.upper env with
+  | false -> guard
+  | true ->
+    let not_fail = Neg (Var fail_var) in
+    And (not_fail, guard)
+;;
+
 let rec translate_process ~env process =
   let _state, state_var, at_current_state = state_utils ~env in
+  let fail_var = StringVar "fail" in
   match process with
   | Nil -> [], env
   | Mu (var, process) ->
@@ -25,7 +38,7 @@ let rec translate_process ~env process =
     translate_process ~env process
   | Proc_var var ->
     ( [ { action = Action.blank
-        ; guard = at_current_state
+        ; guard = at_current_state |> maybe_not_fail ~env
         ; updates =
             [ ( Float 1.0
               , [ IntUpdate (state_var, IntConst (Session_env.get_state_for env ~var)) ] )
@@ -44,13 +57,13 @@ let rec translate_process ~env process =
     let if_false, env = translate_process ~env if_false in
     let true_cmd =
       { action = Action.blank
-      ; guard = And (at_current_state, guard)
+      ; guard = And (at_current_state, guard) |> maybe_not_fail ~env
       ; updates = [ Float 1.0, [ IntUpdate (state_var, IntConst true_state) ] ]
       }
     in
     let false_cmd =
       { action = Action.blank
-      ; guard = And (at_current_state, Neg guard)
+      ; guard = And (at_current_state, Neg guard) |> maybe_not_fail ~env
       ; updates = [ Float 1.0, [ IntUpdate (state_var, IntConst false_state) ] ]
       }
     in
@@ -61,14 +74,20 @@ let rec translate_process ~env process =
     let if_heads, env = translate_process ~env heads in
     let tails_state = Session_env.current_state env in
     let if_tails, env = translate_process ~env tails in
+    let updates =
+      let heads = IntUpdate (state_var, IntConst heads_state) in
+      let tails = IntUpdate (state_var, IntConst tails_state) in
+      let fail = BoolUpdate (fail_var, BoolConst true) in
+      match Session_env.upper env with
+      | false -> [ Float p, [ heads ]; Float (1.0 -. p), [ tails ] ]
+      | true ->
+        [ Float (p -. upper_bound_discount), [ heads ]
+        ; Float (1.0 -. p -. upper_bound_discount), [ tails ]
+        ; Float (upper_bound_discount *. 2.0), [ fail ]
+        ]
+    in
     let flip_cmd =
-      { action = Action.blank
-      ; guard = at_current_state
-      ; updates =
-          [ Float p, [ IntUpdate (state_var, IntConst heads_state) ]
-          ; Float (1.0 -. p), [ IntUpdate (state_var, IntConst tails_state) ]
-          ]
-      }
+      { action = Action.blank; guard = at_current_state |> maybe_not_fail ~env; updates }
     in
     flip_cmd :: (if_heads @ if_tails), env
 
@@ -100,7 +119,7 @@ and translate_send ~env { send_part; send_label; send_expr; send_cont } =
   in
   let handshake =
     { action = action_without_tag
-    ; guard = at_current_state
+    ; guard = at_current_state |> maybe_not_fail ~env
     ; updates =
         [ ( Float 1.0
           , [ IntUpdate (state_var, IntConst (state + 1)) ]
@@ -115,7 +134,7 @@ and translate_send ~env { send_part; send_label; send_expr; send_cont } =
   let state, state_var, at_current_state = state_utils ~env in
   let postlude =
     { action = action_with_tag
-    ; guard = at_current_state
+    ; guard = at_current_state |> maybe_not_fail ~env
     ; updates = [ Float 1.0, [ IntUpdate (state_var, IntConst (state + 1)) ] ]
     }
   in
@@ -137,7 +156,7 @@ and translate_recv ~env descs =
   let action_without_tag = Action.communication communication_without_tag in
   let handshake =
     { action = action_without_tag
-    ; guard = at_current_state
+    ; guard = at_current_state |> maybe_not_fail ~env
     ; updates =
         [ Float 1.0, [ IntUpdate (state_var, IntConst (Session_env.current_state env)) ] ]
     }
@@ -166,7 +185,7 @@ and translate_recv ~env descs =
     let action_with_tag = Action.communication communication_with_tag in
     let postlude =
       { action = action_with_tag
-      ; guard = at_handshake_state
+      ; guard = at_handshake_state |> maybe_not_fail ~env
       ; updates =
           [ ( Float 1.0
             , [ IntUpdate (state_var, IntConst (Session_env.current_state env + 1)) ]
@@ -235,9 +254,22 @@ and translate_int_expr ~env expr =
   | Nondeterminism _ -> failwith "unimplemented"
 ;;
 
-let translate_session_item { sess_part; sess_process } =
-  let env = Session_env.empty ~participant:sess_part in
+let translate_session_item { sess_part; sess_process } ~upper =
+  let env = Session_env.empty ~participant:sess_part ~upper in
   let commands, env = translate_process ~env sess_process in
+  let commands =
+    match upper with
+    | false -> commands
+    | true ->
+      let fail_var = StringVar "fail" in
+      let fail_cmd =
+        { action = Action.blank
+        ; guard = Eq (Var fail_var, BoolConst true)
+        ; updates = [ Float 1.0, [ BoolUpdate (fail_var, BoolConst true) ] ]
+        }
+      in
+      fail_cmd :: commands
+  in
   let registered_vars = Session_env.get_registered_variables env in
   let var_locals =
     List.map registered_vars ~f:(fun (var, max_val) -> Int (StringVar var, max_val))
@@ -246,11 +278,16 @@ let translate_session_item { sess_part; sess_process } =
   { locals = state_local :: var_locals; participant = sess_part; commands }
 ;;
 
-let translate session =
-  let modules = List.map ~f:translate_session_item session in
+let translate ~upper session =
+  let modules = List.map ~f:(translate_session_item ~upper) session in
   let open Psl in
   let properties =
     [ Annotation.Probabilisic_termination, P (Exact, F (Label Deadlock)) ]
   in
-  { globals = []; modules; labels = [] }, properties
+  let globals =
+    match upper with
+    | false -> []
+    | true -> [ Bool (StringVar "fail") ]
+  in
+  { globals; modules; labels = [] }, properties
 ;;

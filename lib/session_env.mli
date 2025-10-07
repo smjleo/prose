@@ -2,7 +2,7 @@ open! Core
 
 type t
 
-val empty : participant:string -> t
+val empty : participant:string -> upper:bool -> t
 val current_state : t -> int
 val increment_state : t -> t
 val map_variable : t -> var:string -> t
@@ -12,3 +12,4 @@ val state_var : t -> int Prism.variable
 val register_variable : t -> var:string -> max_value:int -> t
 val register_action_var : t -> Action.t -> max_value:int -> t
 val get_registered_variables : t -> (string * int) list
+val upper : t -> bool

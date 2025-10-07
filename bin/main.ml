@@ -37,6 +37,11 @@ let balance_flag =
        that contain zero-probability transitions."
 ;;
 
+let upper_flag =
+  let open Command.Param in
+  flag "-upper" no_arg ~doc:""
+;;
+
 let output_command =
   Command.basic
     ~summary:
@@ -55,14 +60,16 @@ let output_command =
          ~doc:"string Write PRISM property output to filename (default: print to stdout)"
      and print_ast = print_ast_flag
      and print_translation_time = print_translation_time_flag
-     and balance = balance_flag in
+     and balance = balance_flag
+     and upper = upper_flag in
      Prose.output
        ~ctx_file
        ?model_output_file
        ?prop_output_file
        ~print_ast
        ~print_translation_time
-       ~balance)
+       ~balance
+       ~upper)
 ;;
 
 let benchmark_command =
@@ -107,10 +114,11 @@ let verify_command =
      and print_raw_prism = print_raw_prism_flag
      and print_translation_time = print_translation_time_flag
      and balance = balance_flag
-     and term_only = term_only_flag in
+     and term_only = term_only_flag
+     and upper = upper_flag in
      if term_only
-     then Prose.term_only ~ctx_file
-     else Prose.verify ~ctx_file ~print_ast ~print_raw_prism ~print_translation_time ~balance)
+     then Prose.term_only ~ctx_file ~upper
+     else Prose.verify ~ctx_file ~print_ast ~print_raw_prism ~print_translation_time ~balance ~upper)
 ;;
 
 let command =
