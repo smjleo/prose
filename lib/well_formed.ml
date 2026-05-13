@@ -47,7 +47,13 @@ let rec check_type ~on_error ~on_warning env = function
     (match Set.exists ~f:(String.equal ty) env with
      | false -> well_formed_error ~on_error (Unbound_variable ty)
      | true -> ())
-  | Internal { int_part = _; int_choices } ->
+  | Internal choice_branches ->
+    (* For now, handle single-branch case; TODO: add nondeterminism validation *)
+    let int_choices =
+      match choice_branches with
+      | [ single_branch ] -> single_branch
+      | _ -> failwith "Nondeterminism not yet supported in well_formed"
+    in
     let sum_probabilities =
       List.fold_left int_choices ~init:0.0 ~f:(fun accum (p, _) ->
         if Float.equal p Float.zero then well_formed_warning ~on_warning Zero_probability;
@@ -59,10 +65,10 @@ let rec check_type ~on_error ~on_warning env = function
      | false ->
        List.map int_choices ~f:(fun (_p, c) -> c)
        |> List.iter ~f:(check_choice ~on_error ~on_warning env))
-  | External { ext_part = _; ext_choices } ->
+  | External ext_choices ->
     List.iter ext_choices ~f:(check_choice ~on_error ~on_warning env)
 
-and check_choice ~on_error ~on_warning env { ch_label = _; ch_sort = _; ch_cont } =
+and check_choice ~on_error ~on_warning env { ch_part = _; ch_label = _; ch_sort = _; ch_cont } =
   check_type ~on_error ~on_warning env ch_cont
 
 and check_context_item ~on_error ~on_warning { Ast.ctx_part = _; ctx_type } =

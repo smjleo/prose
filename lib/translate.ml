@@ -23,7 +23,19 @@ let rec translate_type ~id_map ~participant ~state ~state_size ~var_map ty =
       ~var_map:(Map.set var_map ~key:var ~data:state)
       ty
   | Variable _var -> []
-  | Internal { int_part; int_choices } ->
+  | Internal choice_branches ->
+    (* TODO: nondeterminism *)
+    let int_choices =
+      match choice_branches with
+      | [ single_branch ] -> single_branch
+      | _ -> failwith "Nondeterminism not yet supported in translation"
+    in
+    (* TODO: multiple participants *)
+    let int_part =
+      match int_choices with
+      | (_, { Ast.ch_part; _ }) :: _ -> ch_part
+      | [] -> failwith "Empty internal choice"
+    in
     let new_communication label_sort =
       (* Beware, different definition to [new_communication] in [External]! *)
       let tag =
@@ -66,7 +78,7 @@ let rec translate_type ~id_map ~participant ~state ~state_size ~var_map ty =
       List.map int_choices ~f:(fun (_p, c) -> c)
     in
     let choices =
-      List.mapi bald_choices ~f:(fun i { ch_label; ch_sort; ch_cont } ->
+      List.mapi bald_choices ~f:(fun i { ch_part = _; ch_label; ch_sort; ch_cont } ->
         let communication = new_communication (Some (ch_label, ch_sort)) in
         let new_state =
           match ch_cont with
@@ -87,7 +99,7 @@ let rec translate_type ~id_map ~participant ~state ~state_size ~var_map ty =
         })
     in
     let continuations =
-      List.concat_map bald_choices ~f:(fun { ch_cont; ch_label; ch_sort } ->
+      List.concat_map bald_choices ~f:(fun { ch_part = _; ch_cont; ch_label; ch_sort } ->
         let communication = new_communication (Some (ch_label, ch_sort)) in
         let new_state =
           Type_utils.next_state
@@ -101,7 +113,13 @@ let rec translate_type ~id_map ~participant ~state ~state_size ~var_map ty =
         translate_type ch_cont ~id_map ~participant ~state:new_state ~state_size ~var_map)
     in
     List.concat [ [ initial ]; choices; continuations ]
-  | External { ext_part; ext_choices } ->
+  | External ext_choices ->
+    (* TODO: multiple participants *)
+    let ext_part =
+      match ext_choices with
+      | { Ast.ch_part; _ } :: _ -> ch_part
+      | [] -> failwith "Empty external choice"
+    in
     let new_communication label_sort =
       (* Beware, different definition to [new_communication] in [Internal]! *)
       let tag =
@@ -123,11 +141,11 @@ let rec translate_type ~id_map ~participant ~state ~state_size ~var_map ty =
       }
     in
     let communications =
-      List.map ext_choices ~f:(fun { ch_label; ch_sort; _ } ->
+      List.map ext_choices ~f:(fun { ch_part = _; ch_label; ch_sort; _ } ->
         new_communication (Some (ch_label, ch_sort)))
     in
     let choices =
-      List.map ext_choices ~f:(fun { ch_cont; ch_label; ch_sort } ->
+      List.map ext_choices ~f:(fun { ch_part = _; ch_cont; ch_label; ch_sort } ->
         let communication = new_communication (Some (ch_label, ch_sort)) in
         let new_state =
           match ch_cont with
@@ -148,7 +166,7 @@ let rec translate_type ~id_map ~participant ~state ~state_size ~var_map ty =
         })
     in
     let continuations =
-      List.concat_map ext_choices ~f:(fun { ch_cont; ch_label; ch_sort } ->
+      List.concat_map ext_choices ~f:(fun { ch_part = _; ch_cont; ch_label; ch_sort } ->
         let communication = new_communication (Some (ch_label, ch_sort)) in
         let new_state =
           Type_utils.next_state

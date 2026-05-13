@@ -4,14 +4,20 @@ let rec state_space = function
   | Ast.End -> 0
   | Mu (_var, t) -> state_space t
   | Variable _ -> 0
-  | Internal { int_part = _; int_choices } ->
+  | Internal choice_branches ->
+    (* For now, handle single-branch case *)
+    let int_choices =
+      match choice_branches with
+      | [ single_branch ] -> single_branch
+      | _ -> failwith "Nondeterminism not yet supported in state_space"
+    in
     List.fold_left
       ~init:0
       ~f:(fun acc (_prob, { Ast.ch_cont; _ }) -> acc + state_space ch_cont)
       int_choices
     + List.length int_choices
     + 1
-  | External { ext_part = _; ext_choices } ->
+  | External ext_choices ->
     List.fold_left
       ~init:0
       ~f:(fun acc { Ast.ch_cont; _ } -> acc + state_space ch_cont)
@@ -83,12 +89,13 @@ let communicates_exn ~context ~from_participant ~to_participant =
     | Ast.End -> false
     | Mu (_var, ty) -> communicates' ty
     | Variable _var -> false
-    | Internal { int_part; int_choices } ->
-      String.equal int_part to_participant
-      || List.exists int_choices ~f:(fun (_p, { ch_cont; _ }) -> communicates' ch_cont)
-    | External { ext_part; ext_choices } ->
-      String.equal ext_part to_participant
-      || List.exists ext_choices ~f:(fun { ch_cont; _ } -> communicates' ch_cont)
+    | Internal choice_branches ->
+      let all_choices = List.concat choice_branches in
+      List.exists all_choices ~f:(fun (_p, { Ast.ch_part; ch_cont; _ }) ->
+        String.equal ch_part to_participant || communicates' ch_cont)
+    | External ext_choices ->
+      List.exists ext_choices ~f:(fun { Ast.ch_part; ch_cont; _ } ->
+        String.equal ch_part to_participant || communicates' ch_cont)
   in
   communicates' ty
 ;;

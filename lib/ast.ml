@@ -13,26 +13,17 @@ and session_type =
   | End
   | Mu of variable * session_type
   | Variable of variable
-  | Internal of internal_desc
-  | External of external_desc
+  | Internal of (probability * choice) list list
+  | External of choice list
 
 and variable = string
-
-and internal_desc =
-  { int_part : participant
-  ; int_choices : (probability * choice) list
-  }
-
-and external_desc =
-  { ext_part : participant
-  ; ext_choices : choice list
-  }
 
 and probability =
   float (* TODO: probably replace with a custom type later to constrain [0, 1] *)
 
 and choice =
-  { ch_label : label
+  { ch_part : participant
+  ; ch_label : label
   ; ch_sort : sort
   ; ch_cont : session_type
   }
@@ -71,14 +62,14 @@ and process =
 and send_desc =
   { send_part : participant
   ; send_label : label
-  ; send_expr : expr option  (* None for synchronisation-only *)
+  ; send_expr : expr option (* None for synchronisation-only *)
   ; send_cont : process
   }
 
 and recv_desc =
   { recv_part : participant
   ; recv_label : label
-  ; recv_var : variable option  (* None for synchronisation-only *)
+  ; recv_var : variable option (* None for synchronisation-only *)
   ; recv_cont : process
   }
 

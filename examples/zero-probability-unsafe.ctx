@@ -1,4 +1,4 @@
 (* This context has a zero-probability reduction into an unsafe context. *)
 
-p : q (+) { 0.5 : l1 . end, 0 : l2 . q (+) l3 . end }
-q : p & { l1 . end, l2 . p & l2 . end }
+p : (+) { q ! 0.5 : l1 . end, q ! 0 : l2 . (+) { q ! 1.0 : l3 . end } }
+q : & { p ? l1 . end, p ? l2 . & { p ? l2 . end } }

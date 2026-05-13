@@ -1,45 +1,45 @@
 mapper : mu t .
-           worker1 (+) datum(Int) .
-           worker2 (+) datum(Int) .
-           worker3 (+) datum(Int) .
-           reducer & {
-             continue(Int) . t,
-             stop . 
-               worker1 (+) stop .
-               worker2 (+) stop .
-               worker3 (+) stop .
-               end
-           }
+           (+) { worker1 ! 1.0 : datum<Int> .
+           (+) { worker2 ! 1.0 : datum<Int> .
+           (+) { worker3 ! 1.0 : datum<Int> .
+           & {
+             reducer ? continue(Int) . t,
+             reducer ? stop .
+               (+) { worker1 ! 1.0 : stop .
+               (+) { worker2 ! 1.0 : stop .
+               (+) { worker3 ! 1.0 : stop .
+               end } } }
+           } } } }
 
-worker1 : mapper & datum(Int) .
+worker1 : & { mapper ? datum(Int) .
           mu t .
-            reducer (+) result(Int) .
-            mapper & {
-              datum(Int) . t,
-              stop . end
-            }
+            (+) { reducer ! 1.0 : result<Int> .
+            & {
+              mapper ? datum(Int) . t,
+              mapper ? stop . end
+            } } }
 
-worker2 : mapper & datum(Int) .
+worker2 : & { mapper ? datum(Int) .
           mu t .
-            reducer (+) result(Int) .
-            mapper & {
-              datum(Int) . t,
-              stop . end
-            }
+            (+) { reducer ! 1.0 : result<Int> .
+            & {
+              mapper ? datum(Int) . t,
+              mapper ? stop . end
+            } } }
 
-worker3 : mapper & datum(Int) .
+worker3 : & { mapper ? datum(Int) .
           mu t .
-            reducer (+) result(Int) .
-            mapper & {
-              datum(Int) . t,
-              stop . end
-            }
+            (+) { reducer ! 1.0 : result<Int> .
+            & {
+              mapper ? datum(Int) . t,
+              mapper ? stop . end
+            } } }
 
 reducer : mu t .
-            worker1 & result(Int) .
-            worker2 & result(Int) .
-            worker3 & result(Int) .
-            mapper (+) {
-              0.4 : continue(Int) . t,
-              0.6 : stop.end
-            }
+            & { worker1 ? result(Int) .
+            & { worker2 ? result(Int) .
+            & { worker3 ? result(Int) .
+            (+) {
+              mapper ! 0.4 : continue<Int> . t,
+              mapper ! 0.6 : stop.end
+            } } } }

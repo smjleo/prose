@@ -7,27 +7,27 @@ For each context file in this directory, run [prose output] to check the model a
   
   (* Running example from the paper *)
   
-  s : b & {
-        connect . c (+) {
-                   0.3 : login . a & authorise . end,
-                   0.2 : cancel . e (+) stop . end
+  s : & {
+        b ? connect . (+) {
+                   c ! 0.3 : login . & { a ? authorise . end },
+                   c ! 0.2 : cancel . (+) { e ! 1.0 : stop . end }
                  },
-        err . mu t . b & retry . t
+        b ? err . mu t . & { b ? retry . t }
       }
   
-  c : s & {
-        login . a (+) pass . end,
-        cancel . a (+) quit . end
+  c : & {
+        s ? login . (+) { a ! 1.0 : pass . end },
+        s ? cancel . (+) { a ! 1.0 : quit . end }
       }
   
-  a : c & {
-        pass . s (+) authorise . end,
-        quit . end
+  a : & {
+        c ? pass . (+) { s ! 1.0 : authorise . end },
+        c ? quit . end
       }
   
-  b : s (+) {
-        0.6 : connect . end,
-        0.4 : err . mu t . s (+) retry . t
+  b : (+) {
+        s ! 0.6 : connect . end,
+        s ! 0.4 : err . mu t . (+) { s ! 1.0 : retry . t }
       }
   
   
@@ -163,102 +163,103 @@ For each context file in this directory, run [prose output] to check the model a
      choice sending to different participants.
   *)
   
-  p0 : q0 (+) {
-          0.5 : l1 . end,
-          0.5 : l2 . end
+  p0 : (+) {
+          q0 ! 0.5 : l1 . end,
+          q0 ! 0.5 : l2 . end
        }
   
-  q0 : p0 & {
-          l1 . mu t .
-               p1 (+) go . q3 & redo . t,
-          l2 . mu t .
-               p2 (+) go . q6 & redo . t
+  q0 : & {
+          p0 ? l1 . mu t .
+               (+) { p1 ! 1.0 : go . & { q3 ? redo . t } },
+          p0 ? l2 . mu t .
+               (+) { p2 ! 1.0 : go . & { q6 ? redo . t } }
        }
   
   p1 : mu t .
-       q0 & go .
-       q1 (+) {
-          0.5 : l3 . t,
-          0.5 : l4 . t
-       }
+       & { q0 ? go .
+       (+) {
+          q1 ! 0.5 : l3 . t,
+          q1 ! 0.5 : l4 . t
+       } }
   
   q1 : mu t.
-       p1 & {
-          l3 . p3 (+) go . t,
-          l4 . p4 (+) go . t
+       & {
+          p1 ? l3 . (+) { p3 ! 1.0 : go . t },
+          p1 ? l4 . (+) { p4 ! 1.0 : go . t }
        }
   
   p2 : mu t.
-       q0 & go .
-       q2 (+) {
-          0.5 : l5 . t,
-          0.5 : l6 . t
-       }
+       & { q0 ? go .
+       (+) {
+          q2 ! 0.5 : l5 . t,
+          q2 ! 0.5 : l6 . t
+       } }
   
   q2 : mu t .
-       p2 & {
-          l5 . p5 (+) go . t,
-          l6 . p6 (+) go . t
+       & {
+          p2 ? l5 . (+) { p5 ! 1.0 : go . t },
+          p2 ? l6 . (+) { p6 ! 1.0 : go . t }
        }
   
   p3 : mu t .
-       q1 & go .
-       q3 (+) {
-          0.5 : l1 . t,
-          0.5 : d1 . end
-       }
+       & { q1 ? go .
+       (+) {
+          q3 ! 0.5 : l1 . t,
+          q3 ! 0.5 : d1 . end
+       } }
   
   q3 : mu t .
-       p3 & {
-          l1 . q0 (+) redo . t,
-          d1 . dice1 (+) done . end
+       & {
+          p3 ? l1 . (+) { q0 ! 1.0 : redo . t },
+          p3 ? d1 . (+) { dice1 ! 1.0 : done . end }
        }
   
-  p4 : q1 & go .
-       q4 (+) {
-          0.5 : d2 . end,
-          0.5 : d3 . end
+  p4 : & { q1 ? go .
+       (+) {
+          q4 ! 0.5 : d2 . end,
+          q4 ! 0.5 : d3 . end
+       } }
+  
+  q4 : & {
+          p4 ? d2 . (+) { dice2 ! 1.0 : done . end },
+          p4 ? d3 . (+) { dice3 ! 1.0 : done . end }
        }
   
-  q4 : p4 & {
-          d2 . dice2 (+) done . end,
-          d3 . dice3 (+) done . end
-       }
+  p5 : & { q2 ? go .
+       (+) {
+          q5 ! 0.5 : d4 . end,
+          q5 ! 0.5 : d5 . end
+       } }
   
-  p5 : q2 & go .
-       q5 (+) {
-          0.5 : d4 . end,
-          0.5 : d5 . end
-       }
-  
-  q5 : p5 & {
-          d4 . dice4 (+) done . end,
-          d5 . dice5 (+) done . end
+  q5 : & {
+          p5 ? d4 . (+) { dice4 ! 1.0 : done . end },
+          p5 ? d5 . (+) { dice5 ! 1.0 : done . end }
        }
   
   p6 : mu t .
-       q2 & go .
-       q6 (+) {
-          0.5 : d6 . end,
-          0.5 : l2 . end
-       }
+       & { q2 ? go .
+       (+) {
+          q6 ! 0.5 : d6 . end,
+          q6 ! 0.5 : l2 . end
+       } }
   
   q6 : mu t .
-       p6 & {
-          d6 . dice6 (+) done . end,
-          l2 . q0 (+) redo . t
+       & {
+          p6 ? d6 . (+) { dice6 ! 1.0 : done . end },
+          p6 ? l2 . (+) { q0 ! 1.0 : redo . t }
        }
   
   (* Each of these should be of 1/6 probability *)
   
-  dice1 : q3 & done . mu t . dummy (+) repeat . t
-  dice2 : q4 & done . end
-  dice3 : q4 & done . end
-  dice4 : q5 & done . end
-  dice5 : q5 & done . end
-  dice6 : q6 & done . end
+  dice1 : & { q3 ? done . mu t . (+) { dummy ! 1.0 : repeat . t } }
+  dice2 : & { q4 ? done . end }
+  dice3 : & { q4 ? done . end }
+  dice4 : & { q5 ? done . end }
+  dice5 : & { q5 ? done . end }
+  dice6 : & { q6 ? done . end }
   
-  dummy : mu t . dice1 & repeat . t
+  dummy : mu t . & { dice1 ? repeat . t }
+  
    ======= PRISM output ========
   
   global fail : bool init false;
@@ -617,9 +618,10 @@ For each context file in this directory, run [prose output] to check the model a
   
   (* What happens if two participants try to communicate on the same label but different sorts? *)
   
-  p : q (+) l(Int) . end
+  p : (+) { q ! 1.0 : l<Int> . end }
   
-  q : p & l(Bool) . end
+  q : & { p ? l(Bool) . end }
+  
    ======= PRISM output ========
   
   global fail : bool init false;
@@ -692,29 +694,29 @@ For each context file in this directory, run [prose output] to check the model a
    ======= TEST ../examples/fact_3.ctx =======
   
   w0 : mu t .
-       w1 & req . w1 (+) { 0.7 : res(Int) . t, 0.3 : err . t }
+       & { w1 ? req . (+) { w1 ! 0.7 : res<Int> . t, w1 ! 0.3 : err . t } }
   
-  w1 : mu t . w2 & req .
-              w0 (+) req .
-              w0 & {
-                 res(Int) . w2 (+) { 0.5 : res(Int) . t, 0.3 : err . t },
-                 err . w2 (+) err . t
-              }
+  w1 : mu t . & { w2 ? req .
+              (+) { w0 ! 1.0 : req .
+              & {
+                 w0 ? res(Int) . (+) { w2 ! 0.5 : res<Int> . t, w2 ! 0.3 : err . t },
+                 w0 ? err . (+) { w2 ! 1.0 : err . t }
+              } } }
   
-  w2 : mu t . w3 & req .
-              w1 (+) req .
-              w1 & {
-                 res(Int) . w3 (+) { 0.5 : res(Int) . t, 0.3 : err . t },
-                 err . w3 (+) err . t
-              }
+  w2 : mu t . & { w3 ? req .
+              (+) { w1 ! 1.0 : req .
+              & {
+                 w1 ? res(Int) . (+) { w3 ! 0.5 : res<Int> . t, w3 ! 0.3 : err . t },
+                 w1 ? err . (+) { w3 ! 1.0 : err . t }
+              } } }
   
-  w3 : w2 (+) req .
-       w2 & {
-          res(Int) . mu t . dummy (+) done . t,
-          err . end
-       }
+  w3 : (+) { w2 ! 1.0 : req .
+       & {
+          w2 ? res(Int) . mu t . (+) { dummy ! 1.0 : done . t },
+          w2 ? err . end
+       } }
   
-  dummy : mu t . w3 & done . t
+  dummy : mu t . & { w3 ? done . t }
   
    ======= PRISM output ========
   
@@ -859,13 +861,14 @@ For each context file in this directory, run [prose output] to check the model a
   
    ======= TEST ../examples/mdp.ctx =======
   
-  a : b (+) { 0.3 : l1 . end, 0.4 : l2 . mu t . b (+) { 0.9 : l2 . t } }
+  a : (+) { b ! 0.3 : l1 . end, b ! 0.4 : l2 . mu t . (+) { b ! 0.9 : l2 . t } }
   
-  b : a & { l1 . end, l2 . mu t . a & l2 . t }
+  b : & { a ? l1 . end, a ? l2 . mu t . & { a ? l2 . t } }
   
-  c : d (+) l3 . end
+  c : (+) { d ! 1.0 : l3 . end }
   
-  d : c & l3 . end
+  d : & { c ? l3 . end }
+  
    ======= PRISM output ========
   
   global fail : bool init false;
@@ -968,24 +971,24 @@ For each context file in this directory, run [prose output] to check the model a
   
      Compare with [monty-hall-stay.ctx]. *)
   
-  car : host (+) {
-          0.3 : l1 . end,
-          0.3 : l2 . end,
-          0.3 : l3 . end
+  car : (+) {
+          host ! 0.3 : l1 . end,
+          host ! 0.3 : l2 . end,
+          host ! 0.3 : l3 . end
         }
   
-  host : car & {
-           l1 . player (+) {
-             0.5 : l2 . player & l1 . end,
-             0.5 : l3 . player & l1 . end
+  host : & {
+           car ? l1 . (+) {
+             player ! 0.5 : l2 . & { player ? l1 . end },
+             player ! 0.5 : l3 . & { player ? l1 . end }
            },
-           l2 . player (+) l3 . player & l2 . end,
-           l3 . player (+) l2 . player & l3 . end
+           car ? l2 . (+) { player ! 1.0 : l3 . & { player ? l2 . end } },
+           car ? l3 . (+) { player ! 1.0 : l2 . & { player ? l3 . end } }
         }
   
-  player : host & {
-             l2 . host (+) l3 . end,
-             l3 . host (+) l2 . end
+  player : & {
+             host ? l2 . (+) { host ! 1.0 : l3 . end },
+             host ? l3 . (+) { host ! 1.0 : l2 . end }
            }
   
    ======= PRISM output ========
@@ -1110,24 +1113,24 @@ For each context file in this directory, run [prose output] to check the model a
   
      Compare with [monty-hall-change.ctx]. *)
   
-  car : host (+) {
-          0.3 : l1 . end,
-          0.3 : l2 . end,
-          0.3 : l3 . end
+  car : (+) {
+          host ! 0.3 : l1 . end,
+          host ! 0.3 : l2 . end,
+          host ! 0.3 : l3 . end
         }
   
-  host : car & {
-           l1 . player (+) {
-             0.5 : l2 . player & l1 . end,
-             0.5 : l3 . player & l1 . end
+  host : & {
+           car ? l1 . (+) {
+             player ! 0.5 : l2 . & { player ? l1 . end },
+             player ! 0.5 : l3 . & { player ? l1 . end }
            },
-           l2 . player (+) l3 . player & l2 . end,
-           l3 . player (+) l2 . player & l3 . end
+           car ? l2 . (+) { player ! 1.0 : l3 . & { player ? l2 . end } },
+           car ? l3 . (+) { player ! 1.0 : l2 . & { player ? l3 . end } }
         }
   
-  player : host & {
-             l2 . host (+) l1 . end,
-             l3 . host (+) l1 . end
+  player : & {
+             host ? l2 . (+) { host ! 1.0 : l1 . end },
+             host ? l3 . (+) { host ! 1.0 : l1 . end }
            }
   
   
@@ -1248,12 +1251,13 @@ For each context file in this directory, run [prose output] to check the model a
   
    ======= TEST ../examples/more-choices.ctx =======
   
-  p : q (+) l1 . end
+  p : (+) { q ! 1.0 : l1 . end }
   
-  q : mu t . p & {
-               l1 . end,
-               l2 . t
+  q : mu t . & {
+               p ? l1 . end,
+               p ? l2 . t
              }
+  
    ======= PRISM output ========
   
   global fail : bool init false;
@@ -1325,68 +1329,68 @@ For each context file in this directory, run [prose output] to check the model a
   
    ======= TEST ../examples/multiparty-workers.ctx =======
   
-  starter : workerA1 (+) datum(Int) .
-            workerA2 (+) datum(Int) .
-            workerA3 (+) datum(Int) .
-            end
+  starter : (+) { workerA1 ! 1.0 : datum<Int> .
+            (+) { workerA2 ! 1.0 : datum<Int> .
+            (+) { workerA3 ! 1.0 : datum<Int> .
+            end } } }
   
-  workerA1 : starter & datum(Int) .
+  workerA1 : & { starter ? datum(Int) .
              mu t .
-               workerB1 (+) {
-                 0.5 : datum(Int) . workerC1 & result(Int) . t,
-                 0.5 : stop . end
-               }
+               (+) {
+                 workerB1 ! 0.5 : datum<Int> . & { workerC1 ? result(Int) . t },
+                 workerB1 ! 0.5 : stop . end
+               } }
   
-  workerB1 : mu t . 
-               workerA1 & {
-                 datum(Int) . workerC1 (+) datum(Int) . t,
-                 stop . workerC1 (+) stop . end
+  workerB1 : mu t .
+               & {
+                 workerA1 ? datum(Int) . (+) { workerC1 ! 1.0 : datum<Int> . t },
+                 workerA1 ? stop . (+) { workerC1 ! 1.0 : stop . end }
                }
   
   workerC1 : mu t .
-               workerB1 & {
-                 datum(Int) . workerA1 (+) result(Int) . t,
-                 stop . end
+               & {
+                 workerB1 ? datum(Int) . (+) { workerA1 ! 1.0 : result<Int> . t },
+                 workerB1 ? stop . end
                }
   
   
-  workerA2 : starter & datum(Int) .
+  workerA2 : & { starter ? datum(Int) .
              mu t .
-               workerB2 (+) {
-                 0.5 : datum(Int) . workerC2 & result(Int) . t,
-                 0.5 : stop . end
-               }
+               (+) {
+                 workerB2 ! 0.5 : datum<Int> . & { workerC2 ? result(Int) . t },
+                 workerB2 ! 0.5 : stop . end
+               } }
   
-  workerB2 : mu t . 
-               workerA2 & {
-                 datum(Int) . workerC2 (+) datum(Int) . t,
-                 stop . workerC2 (+) stop . end
+  workerB2 : mu t .
+               & {
+                 workerA2 ? datum(Int) . (+) { workerC2 ! 1.0 : datum<Int> . t },
+                 workerA2 ? stop . (+) { workerC2 ! 1.0 : stop . end }
                }
   
   workerC2 : mu t .
-               workerB2 & {
-                 datum(Int) . workerA2 (+) result(Int) . t,
-                 stop . end
+               & {
+                 workerB2 ? datum(Int) . (+) { workerA2 ! 1.0 : result<Int> . t },
+                 workerB2 ? stop . end
                }
   
   
-  workerA3 : starter & datum(Int) .
+  workerA3 : & { starter ? datum(Int) .
              mu t .
-               workerB3 (+) {
-                 0.5 : datum(Int) . workerC3 & result(Int) . t,
-                 0.5 : stop . end
-               }
+               (+) {
+                 workerB3 ! 0.5 : datum<Int> . & { workerC3 ? result(Int) . t },
+                 workerB3 ! 0.5 : stop . end
+               } }
   
-  workerB3 : mu t . 
-               workerA3 & {
-                 datum(Int) . workerC3 (+) datum(Int) . t,
-                 stop . workerC3 (+) stop . end
+  workerB3 : mu t .
+               & {
+                 workerA3 ? datum(Int) . (+) { workerC3 ! 1.0 : datum<Int> . t },
+                 workerA3 ? stop . (+) { workerC3 ! 1.0 : stop . end }
                }
   
   workerC3 : mu t .
-               workerB3 & {
-                 datum(Int) . workerA3 (+) result(Int) . t,
-                 stop . end
+               & {
+                 workerB3 ? datum(Int) . (+) { workerA3 ! 1.0 : result<Int> . t },
+                 workerB3 ? stop . end
                }
   
   
@@ -1609,17 +1613,18 @@ For each context file in this directory, run [prose output] to check the model a
   
    ======= TEST ../examples/non-terminating.ctx =======
   
-  a : b (+) {
-        0.5 : l1 . end,
-        0.5 : l2 . mu t . b (+) l2 . t
+  a : (+) {
+        b ! 0.5 : l1 . end,
+        b ! 0.5 : l2 . mu t . (+) { b ! 1.0 : l2 . t }
       }
   
   b : mu t .
-      a & {
-        l1 . end,
-        l2 . t
+      & {
+        a ? l1 . end,
+        a ? l2 . t
       }
-      
+  
+  
    ======= PRISM output ========
   
   global fail : bool init false;
@@ -1693,8 +1698,8 @@ For each context file in this directory, run [prose output] to check the model a
   
    ======= TEST ../examples/open.ctx =======
   
-  alice : bob (+) { 0.33 : a.end, 0.33 : b . carol(+) c . end, 0.34 : c . end }
-  bob : alice & { a.end, b.end, c.end }
+  alice : (+) { bob ! 0.33 : a.end, bob ! 0.33 : b . (+) { carol ! 1.0 : c . end }, bob ! 0.34 : c . end }
+  bob : & { alice ? a.end, alice ? b.end, alice ? c.end }
   
   
    ======= PRISM output ========
@@ -1779,17 +1784,17 @@ For each context file in this directory, run [prose output] to check the model a
   
    ======= TEST ../examples/prob-deadlock.ctx =======
   
-  commander : a (+) {
-                0.7 : deadlock . end,
-                0.3 : nodeadlock . end
+  commander : (+) {
+                a ! 0.7 : deadlock . end,
+                a ! 0.3 : nodeadlock . end
               }
   
-  a : commander & {
-        deadlock . b & msg . end,
-        nodeadlock . b (+) msg . end
+  a : & {
+        commander ? deadlock . & { b ? msg . end },
+        commander ? nodeadlock . (+) { b ! 1.0 : msg . end }
       }
   
-  b : a & msg . end
+  b : & { a ? msg . end }
   
   
    ======= PRISM output ========
@@ -1883,9 +1888,10 @@ For each context file in this directory, run [prose output] to check the model a
   
    ======= TEST ../examples/prob-over-one.ctx =======
   
-  a : b (+) { 0.4 : l1 . end, 0.7 : l2 . end }
+  a : (+) { b ! 0.4 : l1 . end, b ! 0.7 : l2 . end }
   
-  b : a & { l1 . end, l2 . end } 
+  b : & { a ? l1 . end, a ? l2 . end }
+  
    ======= PRISM output ========
   
   Typing context is not well-formed: probabilities sum to greater than one. Found 1.100000
@@ -1902,50 +1908,51 @@ For each context file in this directory, run [prose output] to check the model a
    ======= TEST ../examples/rec-map-reduce.ctx =======
   
   mapper : mu t .
-             worker1 (+) datum(Int) .
-             worker2 (+) datum(Int) .
-             worker3 (+) datum(Int) .
-             reducer & {
-               continue(Int) . t,
-               stop . 
-                 worker1 (+) stop .
-                 worker2 (+) stop .
-                 worker3 (+) stop .
-                 end
-             }
+             (+) { worker1 ! 1.0 : datum<Int> .
+             (+) { worker2 ! 1.0 : datum<Int> .
+             (+) { worker3 ! 1.0 : datum<Int> .
+             & {
+               reducer ? continue(Int) . t,
+               reducer ? stop .
+                 (+) { worker1 ! 1.0 : stop .
+                 (+) { worker2 ! 1.0 : stop .
+                 (+) { worker3 ! 1.0 : stop .
+                 end } } }
+             } } } }
   
-  worker1 : mapper & datum(Int) .
+  worker1 : & { mapper ? datum(Int) .
             mu t .
-              reducer (+) result(Int) .
-              mapper & {
-                datum(Int) . t,
-                stop . end
-              }
+              (+) { reducer ! 1.0 : result<Int> .
+              & {
+                mapper ? datum(Int) . t,
+                mapper ? stop . end
+              } } }
   
-  worker2 : mapper & datum(Int) .
+  worker2 : & { mapper ? datum(Int) .
             mu t .
-              reducer (+) result(Int) .
-              mapper & {
-                datum(Int) . t,
-                stop . end
-              }
+              (+) { reducer ! 1.0 : result<Int> .
+              & {
+                mapper ? datum(Int) . t,
+                mapper ? stop . end
+              } } }
   
-  worker3 : mapper & datum(Int) .
+  worker3 : & { mapper ? datum(Int) .
             mu t .
-              reducer (+) result(Int) .
-              mapper & {
-                datum(Int) . t,
-                stop . end
-              }
+              (+) { reducer ! 1.0 : result<Int> .
+              & {
+                mapper ? datum(Int) . t,
+                mapper ? stop . end
+              } } }
   
   reducer : mu t .
-              worker1 & result(Int) .
-              worker2 & result(Int) .
-              worker3 & result(Int) .
-              mapper (+) {
-                0.4 : continue(Int) . t,
-                0.6 : stop.end
-              }
+              & { worker1 ? result(Int) .
+              & { worker2 ? result(Int) .
+              & { worker3 ? result(Int) .
+              (+) {
+                mapper ! 0.4 : continue<Int> . t,
+                mapper ! 0.6 : stop.end
+              } } } }
+  
    ======= PRISM output ========
   
   global fail : bool init false;
@@ -2098,22 +2105,22 @@ For each context file in this directory, run [prose output] to check the model a
   
    ======= TEST ../examples/rec-two-buyers.ctx =======
   
-  alice: shop(+)query(Str) .
-         shop&price(Int) .
+  alice: (+) { shop ! 1.0 : query<Str> .
+         & { shop ? price(Int) .
          mu t .
-            bob (+) {
-                0.5 : split(Int) . bob & {yes . shop (+) buy . end, no . t},
-                0.5 : cancel . shop (+) no . end
-            }
+            (+) {
+                bob ! 0.5 : split<Int> . & { bob ? yes . (+) { shop ! 1.0 : buy . end }, bob ? no . t },
+                bob ! 0.5 : cancel . (+) { shop ! 1.0 : no . end }
+            } } }
   
-  shop: alice&query(Str) . alice(+)price(Int) . alice&{buy.end, no.end}
+  shop: & { alice ? query(Str) . (+) { alice ! 1.0 : price<Int> . & { alice ? buy.end, alice ? no.end } } }
   
   bob: mu t .
-         alice & {
-           split(Int) . alice (+) {0.5 : yes.end, 0.5 : no.t},
-           cancel . end
+         & {
+           alice ? split(Int) . (+) { alice ! 0.5 : yes.end, alice ! 0.5 : no.t },
+           alice ? cancel . end
          }
-                
+  
   
    ======= PRISM output ========
   
@@ -2239,40 +2246,40 @@ For each context file in this directory, run [prose output] to check the model a
      This test checks for this case.
   *)
   
-  p : q (+) {
-        0.5 : l1 . end,
-        0.5 : l2 . q (+) l1 . end
+  p : (+) {
+        q ! 0.5 : l1 . end,
+        q ! 0.5 : l2 . (+) { q ! 1.0 : l1 . end }
       }
   
-  q : p & {
-        l1 . end,
-        l2 . p & l1 . end
+  q : & {
+        p ? l1 . end,
+        p ? l2 . & { p ? l1 . end }
       }
   
   
   (* Try the symmetric case for if the ID ordering changes *)
   
-  p1 : q1 (+) {
-        0.5 : l1 . q1 (+) l2 . end,
-        0.5 : l2 . end
+  p1 : (+) {
+        q1 ! 0.5 : l1 . (+) { q1 ! 1.0 : l2 . end },
+        q1 ! 0.5 : l2 . end
       }
   
-  q1 : p1 & {
-        l1 . p1 & l2 . end,
-        l2 . end
+  q1 : & {
+        p1 ? l1 . & { p1 ? l2 . end },
+        p1 ? l2 . end
       }
   
   
   (* Shuffle the ordering of the two branches *)
   
-  q2 : p2 & {
-        l1 . end,
-        l2 . p2 & l1 . end
+  q2 : & {
+        p2 ? l1 . end,
+        p2 ? l2 . & { p2 ? l1 . end }
       }
   
-  p2 : q2 (+) {
-        0.5 : l2 . q2 (+) l1 . end,
-        0.5 : l1 . end
+  p2 : (+) {
+        q2 ! 0.5 : l2 . (+) { q2 ! 1.0 : l1 . end },
+        q2 ! 0.5 : l1 . end
       }
   
   
@@ -2405,8 +2412,8 @@ For each context file in this directory, run [prose output] to check the model a
   
    ======= TEST ../examples/simple.ctx =======
   
-  alice : bob (+) { 0.33 : a.end, 0.67 : b(Int).end }
-  bob : alice & { a.end, b(Int).end }
+  alice : (+) { bob ! 0.33 : a.end, bob ! 0.67 : b<Int>.end }
+  bob : & { alice ? a.end, alice ? b(Int).end }
   
   
   
@@ -2483,17 +2490,17 @@ For each context file in this directory, run [prose output] to check the model a
   
   (* Case where PDF is different from NPDF, due to unknown behaviour *)
   
-  commander : a (+) {
-                0.5 : deadlock . end,
-                0.3 : nodeadlock . end
+  commander : (+) {
+                a ! 0.5 : deadlock . end,
+                a ! 0.3 : nodeadlock . end
               }
   
-  a : commander & {
-        deadlock . b & msg . end,
-        nodeadlock . b (+) msg . end
+  a : & {
+        commander ? deadlock . & { b ? msg . end },
+        commander ? nodeadlock . (+) { b ! 1.0 : msg . end }
       }
   
-  b : a & msg . end
+  b : & { a ? msg . end }
   
    ======= PRISM output ========
   
@@ -2588,37 +2595,38 @@ For each context file in this directory, run [prose output] to check the model a
   
   (* What happens if we send to a recipient who does not ever expect to receive? *)
   
-  alice : bob (+) {
-  	        0.4 : l1 . end,
-  	        0.6 : l2 . end
+  alice : (+) {
+  	        bob ! 0.4 : l1 . end,
+  	        bob ! 0.6 : l2 . end
           }
   
-  bob : charlie & {
-  	      l1 . end,
-  	      l2 . end
+  bob : & {
+  	      charlie ? l1 . end,
+  	      charlie ? l2 . end
         }
   
-  charlie : bob (+) {
-  	          0.5 : l1 . end,
-  	          0.5 : l2 . end
+  charlie : (+) {
+  	          bob ! 0.5 : l1 . end,
+  	          bob ! 0.5 : l2 . end
             }
   
   (* What about the other way? *)
   
-  a : b & {
-        l1 . end,
-        l2 . end
+  a : & {
+        b ? l1 . end,
+        b ? l2 . end
       }
   
-  b : c (+) {
-        0.7 : l1 . end,
-        0.3 : l2 . end
+  b : (+) {
+        c ! 0.7 : l1 . end,
+        c ! 0.3 : l2 . end
       }
   
-  c : b & {
-        l1 . end,
-        l2 . end
+  c : & {
+        b ? l1 . end,
+        b ? l2 . end
       }
+  
    ======= PRISM output ========
   
   global fail : bool init false;
@@ -2749,17 +2757,18 @@ For each context file in this directory, run [prose output] to check the model a
   
   (* Translation example *)
   
-  p : q (+) {
-        0.2 : l1 . mu t . q (+) l1 . t,
-        0.3 : l2 . q (+) l2 . end,
-        0.4 : l3 . end
+  p : (+) {
+        q ! 0.2 : l1 . mu t . (+) { q ! 1.0 : l1 . t },
+        q ! 0.3 : l2 . (+) { q ! 1.0 : l2 . end },
+        q ! 0.4 : l3 . end
   }
   
-  q : p & {
-        l1 . mu t. p & l1 . t,
-        l2 . p & l2 . end,
-        l3 . end
+  q : & {
+        p ? l1 . mu t. & { p ? l1 . t },
+        p ? l2 . & { p ? l2 . end },
+        p ? l3 . end
   }
+  
    ======= PRISM output ========
   
   global fail : bool init false;
@@ -2843,9 +2852,10 @@ For each context file in this directory, run [prose output] to check the model a
   
    ======= TEST ../examples/unbound-variable.ctx =======
   
-  a : mu t . b (+) { 0.5 : l1 . t1, 0.5 : l2 . end }
+  a : mu t . (+) { b ! 0.5 : l1 . t1, b ! 0.5 : l2 . end }
   
-  b : mu t . a & { l1 . end, l2 . end }
+  b : mu t . & { a ? l1 . end, a ? l2 . end }
+  
    ======= PRISM output ========
   
   Typing context is not well-formed: unbound variable t1
@@ -2863,25 +2873,26 @@ For each context file in this directory, run [prose output] to check the model a
   
   (* Two pairs being unsafe in parallel *)
   
-  a : b (+) {
-        0.4 : l1 . end,
-        0.6 : l2 . end
+  a : (+) {
+        b ! 0.4 : l1 . end,
+        b ! 0.6 : l2 . end
       }
   
-  b : a & {
-        l2 . end,
-        l3 . end
+  b : & {
+        a ? l2 . end,
+        a ? l3 . end
       }
   
-  c : d (+) {
-        0.3 : l1 . end,
-        0.7 : l2 . end
+  c : (+) {
+        d ! 0.3 : l1 . end,
+        d ! 0.7 : l2 . end
       }
   
-  d : c & {
-        l2 . end,
-        l3 . end
+  d : & {
+        c ? l2 . end,
+        c ? l3 . end
       }
+  
    ======= PRISM output ========
   
   global fail : bool init false;
@@ -2984,19 +2995,19 @@ For each context file in this directory, run [prose output] to check the model a
   
    ======= TEST ../examples/unsafe.ctx =======
   
-  alice : bob (+) {
-            0.6 : l1 . end,
-            0.3 : l2 .
-                  bob (+) {
-                    0.9 : l3 . end,
-                    0.1 : l4 . end
+  alice : (+) {
+            bob ! 0.6 : l1 . end,
+            bob ! 0.3 : l2 .
+                  (+) {
+                    bob ! 0.9 : l3 . end,
+                    bob ! 0.1 : l4 . end
                   },
-            0.1 : l5 . end
+            bob ! 0.1 : l5 . end
           }
   
-  bob : alice & {
-          l1 . end,
-          l2 . alice & l3 . end
+  bob : & {
+          alice ? l1 . end,
+          alice ? l2 . & { alice ? l3 . end }
         }
   
   
@@ -3087,8 +3098,9 @@ For each context file in this directory, run [prose output] to check the model a
   
   (* This context has a zero-probability reduction into a deadlocked context. *)
   
-  p : q (+) { 0.5 : l1 . end, 0 : l2 . q (+) l3 . end }
-  q : p & { l1 . end, l2 . end }
+  p : (+) { q ! 0.5 : l1 . end, q ! 0 : l2 . (+) { q ! 1.0 : l3 . end } }
+  q : & { p ? l1 . end, p ? l2 . end }
+  
    ======= PRISM output ========
   
   Warning: found zero-probability in context. Non-probabilistic properties (e.g. safety) may be inaccurate, and normalised probabilities may be undefined. If you are not already, use flag [-balance] to check non-probabilistic properties. See help options for [verify]/[output] for more details on [-balance].
@@ -3171,8 +3183,9 @@ For each context file in this directory, run [prose output] to check the model a
   
   (* This context has only zero-probability reductions, making normalised properties undefined. *)
   
-  p : q (+) { 0 : l1 . end }
-  q : p & l1 . end
+  p : (+) { q ! 0 : l1 . end }
+  q : & { p ? l1 . end }
+  
    ======= PRISM output ========
   
   Warning: found zero-probability in context. Non-probabilistic properties (e.g. safety) may be inaccurate, and normalised probabilities may be undefined. If you are not already, use flag [-balance] to check non-probabilistic properties. See help options for [verify]/[output] for more details on [-balance].
@@ -3246,8 +3259,8 @@ For each context file in this directory, run [prose output] to check the model a
   
   (* This context has a zero-probability reduction into an unsafe context. *)
   
-  p : q (+) { 0.5 : l1 . end, 0 : l2 . q (+) l3 . end }
-  q : p & { l1 . end, l2 . p & l2 . end }
+  p : (+) { q ! 0.5 : l1 . end, q ! 0 : l2 . (+) { q ! 1.0 : l3 . end } }
+  q : & { p ? l1 . end, p ? l2 . & { p ? l2 . end } }
   
    ======= PRISM output ========
   

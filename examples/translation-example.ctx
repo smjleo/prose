@@ -1,13 +1,13 @@
 (* Translation example *)
 
-p : q (+) {
-      0.2 : l1 . mu t . q (+) l1 . t,
-      0.3 : l2 . q (+) l2 . end,
-      0.4 : l3 . end
+p : (+) {
+      q ! 0.2 : l1 . mu t . (+) { q ! 1.0 : l1 . t },
+      q ! 0.3 : l2 . (+) { q ! 1.0 : l2 . end },
+      q ! 0.4 : l3 . end
 }
 
-q : p & {
-      l1 . mu t. p & l1 . t,
-      l2 . p & l2 . end,
-      l3 . end
+q : & {
+      p ? l1 . mu t. & { p ? l1 . t },
+      p ? l2 . & { p ? l2 . end },
+      p ? l3 . end
 }

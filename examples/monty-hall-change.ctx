@@ -6,22 +6,22 @@
 
    Compare with [monty-hall-stay.ctx]. *)
 
-car : host (+) {
-        0.3 : l1 . end,
-        0.3 : l2 . end,
-        0.3 : l3 . end
+car : (+) {
+        host ! 0.3 : l1 . end,
+        host ! 0.3 : l2 . end,
+        host ! 0.3 : l3 . end
       }
 
-host : car & {
-         l1 . player (+) {
-           0.5 : l2 . player & l1 . end,
-           0.5 : l3 . player & l1 . end
+host : & {
+         car ? l1 . (+) {
+           player ! 0.5 : l2 . & { player ? l1 . end },
+           player ! 0.5 : l3 . & { player ? l1 . end }
          },
-         l2 . player (+) l3 . player & l2 . end,
-         l3 . player (+) l2 . player & l3 . end
+         car ? l2 . (+) { player ! 1.0 : l3 . & { player ? l2 . end } },
+         car ? l3 . (+) { player ! 1.0 : l2 . & { player ? l3 . end } }
       }
 
-player : host & {
-           l2 . host (+) l3 . end,
-           l3 . host (+) l2 . end
+player : & {
+           host ? l2 . (+) { host ! 1.0 : l3 . end },
+           host ? l3 . (+) { host ! 1.0 : l2 . end }
          }

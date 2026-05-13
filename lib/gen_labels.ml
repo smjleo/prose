@@ -47,7 +47,7 @@ let enabled_states ~id_map ~direction ~from_participant ~to_participant ~tag con
           ; tag = Some (Action.Communication.Tag.tag ch_label ch_sort)
           })
       in
-      List.map choices ~f:(fun { ch_cont; ch_label; ch_sort } ->
+      List.map choices ~f:(fun { ch_part = _; ch_cont; ch_label; ch_sort } ->
         let communication =
           { Action.Communication.from_participant
           ; to_participant
@@ -70,8 +70,20 @@ let enabled_states ~id_map ~direction ~from_participant ~to_participant ~tag con
     | Ast.End -> Int.Set.empty
     | Mu (_var, t) -> enabled_states' ~state t
     | Variable _var -> Int.Set.empty
-    | Internal { int_part; int_choices } ->
+    | Internal choice_branches ->
+      (* For now, handle single-branch case *)
+      let int_choices =
+        match choice_branches with
+        | [ single_branch ] -> single_branch
+        | _ -> failwith "Nondeterminism not yet supported in gen_labels"
+      in
       let bald_choices = List.map int_choices ~f:(fun (_p, c) -> c) in
+      (* Extract participant from first choice *)
+      let int_part =
+        match int_choices with
+        | (_, { Ast.ch_part; _ }) :: _ -> ch_part
+        | [] -> failwith "Empty internal choice"
+      in
       let rest =
         communication_rest
           bald_choices
@@ -86,7 +98,13 @@ let enabled_states ~id_map ~direction ~from_participant ~to_participant ~tag con
        | `Branching, _ -> rest
        | _, false -> rest
        | `Output, true -> Set.union rest (Int.Set.singleton state))
-    | External { ext_part; ext_choices } ->
+    | External ext_choices ->
+      (* Extract participant from first choice *)
+      let ext_part =
+        match ext_choices with
+        | { Ast.ch_part; _ } :: _ -> ch_part
+        | [] -> failwith "Empty external choice"
+      in
       let rest =
         communication_rest
           ext_choices

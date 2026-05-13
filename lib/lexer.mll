@@ -26,6 +26,11 @@ rule read =
   | "}"      { RBRACE }
   | "("      { LPAREN }
   | ")"      { RPAREN }
+  | "!"      { BANG }
+  | "?"      { QUESTION }
+  | "+"      { PLUS }
+  | "<"      { LANGLE }
+  | ">"      { RANGLE }
   | "Int"    { INT }
   | "Str"    { STR }
   | "Bool"   { BOOL }
