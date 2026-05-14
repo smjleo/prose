@@ -2,8 +2,8 @@
 
 s : & {
       b ? connect . (+) {
-                 c ! 0.3 : login . & { a ? authorise . end },
-                 c ! 0.2 : cancel . (+) { e ! 1.0 : stop . end }
+                 c ! 0.6 : login . & { a ? authorise . end },
+                 c ! 0.4 : cancel . (+) { e ! 1.0 : stop . end }
                },
       b ? err . mu t . & { b ? retry . t }
     }

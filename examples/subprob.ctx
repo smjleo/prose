@@ -1,8 +1,8 @@
 (* Case where PDF is different from NPDF, due to unknown behaviour *)
 
 commander : (+) {
-              a ! 0.5 : deadlock . end,
-              a ! 0.3 : nodeadlock . end
+              a ! 0.6 : deadlock . end,
+              a ! 0.4 : nodeadlock . end
             }
 
 a : & {

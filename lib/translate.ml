@@ -1,9 +1,6 @@
 open! Core
 open Prism
 
-let fail_var = StringVar "fail"
-let not_fail = Eq (Var fail_var, BoolConst false)
-
 (** The {| - |} function in the paper, which takes a session type and
     produces a list of commands for the PRISM module. *)
 let rec translate_type ~id_map ~participant ~state ~state_size ~var_map ty =
@@ -24,182 +21,109 @@ let rec translate_type ~id_map ~participant ~state ~state_size ~var_map ty =
       ty
   | Variable _var -> []
   | Internal choice_branches ->
-    (* TODO: nondeterminism *)
-    let int_choices =
-      match choice_branches with
-      | [ single_branch ] -> single_branch
-      | _ -> failwith "Nondeterminism not yet supported in translation"
-    in
-    (* TODO: multiple participants *)
-    let int_part =
-      match int_choices with
-      | (_, { Ast.ch_part; _ }) :: _ -> ch_part
-      | [] -> failwith "Empty internal choice"
-    in
-    let new_communication label_sort =
-      (* Beware, different definition to [new_communication] in [External]! *)
-      let tag =
-        match label_sort with
-        | None -> None
-        | Some (label, sort) -> Some (Action.Communication.Tag.tag label sort)
-      in
-      { Action.Communication.from_participant = participant
-      ; to_participant = int_part
-      ; tag
-      }
-    in
-    let int_choices =
-      (* We sort the internal choice according to their ID, so that the index used to
-         denote the next state is canonical. *)
-      List.sort int_choices ~compare:(fun (_f1, c1) (_f2, c2) ->
-        let id { Ast.ch_label; ch_sort; _ } =
-          new_communication (Some (ch_label, ch_sort))
-          |> Action.Id_map.id id_map
-          |> Option.value_exn
+    let initial_commands =
+      List.mapi choice_branches ~f:(fun branch_index branch ->
+        let choice_updates =
+          List.mapi branch ~f:(fun choice_index (prob, _choice) ->
+            let intermediate =
+              Type_utils.intermediate_state_offset
+                ~branch_index
+                ~choice_index
+                ~choice_branches
+            in
+            Prism.Float prob, [ IntUpdate (state_var, IntConst (state + 1 + intermediate)) ])
         in
-        Int.compare (id c1) (id c2))
-    in
-    let initial =
-      { action = Action.communication (new_communication None)
-      ; guard = And (Eq (Var state_var, IntConst state), not_fail)
-      ; updates =
-          ( Prism.Float (1.0 -. List.sum (module Float) int_choices ~f:(fun (p, _c) -> p))
-          , [ IntUpdate (state_var, IntConst (state_size + 1)) ] )
-          :: List.mapi int_choices ~f:(fun i (prob, _) ->
-            Prism.Float prob, [ IntUpdate (state_var, IntConst (state + i + 1)) ])
-      }
-    in
-    let communications =
-      List.map int_choices ~f:(fun (_p, { ch_label; ch_sort; _ }) ->
-        new_communication (Some (ch_label, ch_sort)))
-    in
-    let bald_choices =
-      (* Choices without probabilities *)
-      List.map int_choices ~f:(fun (_p, c) -> c)
-    in
-    let choices =
-      List.mapi bald_choices ~f:(fun i { ch_part = _; ch_label; ch_sort; ch_cont } ->
-        let communication = new_communication (Some (ch_label, ch_sort)) in
-        let new_state =
-          match ch_cont with
-          | End -> state_size
-          | Variable t -> Map.find_exn var_map t
-          | Mu _ | Internal _ | External _ ->
-            Type_utils.next_state
-              ~direction:`Internal
-              ~state
-              ~communication
-              ~communications
-              ~choices:bald_choices
-              ~id_map
-        in
-        { action = Action.communication communication
-        ; guard = And (Eq (Var state_var, IntConst (state + i + 1)), not_fail)
-        ; updates = [ Prism.Float 1.0, [ IntUpdate (state_var, IntConst new_state) ] ]
+        { action = Action.blank
+        ; guard = Eq (Var state_var, IntConst state)
+        ; updates = choice_updates
         })
     in
-    let continuations =
-      List.concat_map bald_choices ~f:(fun { ch_part = _; ch_cont; ch_label; ch_sort } ->
-        let communication = new_communication (Some (ch_label, ch_sort)) in
-        let new_state =
-          Type_utils.next_state
-            ~direction:`Internal
-            ~state
-            ~communication
-            ~communications
-            ~choices:bald_choices
-            ~id_map
-        in
-        translate_type ch_cont ~id_map ~participant ~state:new_state ~state_size ~var_map)
+    let sync_commands =
+      List.concat_mapi choice_branches ~f:(fun branch_index branch ->
+        List.mapi branch ~f:(fun choice_index (_prob, { Ast.ch_part; ch_label; ch_sort; ch_cont }) ->
+          let communication =
+            { Action.Communication.from_participant = participant
+            ; to_participant = ch_part
+            ; tag = Some (Action.Communication.Tag.tag ch_label ch_sort)
+            }
+          in
+          let intermediate =
+            Type_utils.intermediate_state_offset
+              ~branch_index
+              ~choice_index
+              ~choice_branches
+          in
+          let new_state =
+            match ch_cont with
+            | End -> state_size
+            | Variable t -> Map.find_exn var_map t
+            | Mu _ | Internal _ | External _ ->
+              Type_utils.next_state_internal_nd
+                ~state
+                ~branch_index
+                ~choice_index
+                ~choice_branches
+          in
+          { action = Action.communication communication
+          ; guard = Eq (Var state_var, IntConst (state + 1 + intermediate))
+          ; updates = [ Prism.Float 1.0, [ IntUpdate (state_var, IntConst new_state) ] ]
+          }))
     in
-    List.concat [ [ initial ]; choices; continuations ]
+    let continuations =
+      List.concat_mapi choice_branches ~f:(fun branch_index branch ->
+        List.concat_mapi branch ~f:(fun choice_index (_prob, { Ast.ch_cont; _ }) ->
+          let new_state =
+            Type_utils.next_state_internal_nd
+              ~state
+              ~branch_index
+              ~choice_index
+              ~choice_branches
+          in
+          translate_type ch_cont ~id_map ~participant ~state:new_state ~state_size ~var_map))
+    in
+    List.concat [ initial_commands; sync_commands; continuations ]
   | External ext_choices ->
-    (* TODO: multiple participants *)
-    let ext_part =
-      match ext_choices with
-      | { Ast.ch_part; _ } :: _ -> ch_part
-      | [] -> failwith "Empty external choice"
-    in
-    let new_communication label_sort =
-      (* Beware, different definition to [new_communication] in [Internal]! *)
-      let tag =
-        match label_sort with
-        | None -> None
-        | Some (label, sort) -> Some (Action.Communication.Tag.tag label sort)
-      in
-      { Action.Communication.from_participant = ext_part
-      ; to_participant = participant
-      ; tag
-      }
-    in
-    let initial =
-      { action =
-          Action.communication
-            { from_participant = ext_part; to_participant = participant; tag = None }
-      ; guard = And (Eq (Var state_var, IntConst state), not_fail)
-      ; updates = [ Prism.Float 1.0, [ IntUpdate (state_var, IntConst (state + 1)) ] ]
-      }
-    in
-    let communications =
-      List.map ext_choices ~f:(fun { ch_part = _; ch_label; ch_sort; _ } ->
-        new_communication (Some (ch_label, ch_sort)))
-    in
-    let choices =
-      List.map ext_choices ~f:(fun { ch_part = _; ch_cont; ch_label; ch_sort } ->
-        let communication = new_communication (Some (ch_label, ch_sort)) in
+    let receive_commands =
+      List.mapi ext_choices ~f:(fun choice_index { Ast.ch_part; ch_label; ch_sort; ch_cont } ->
+        let communication =
+          { Action.Communication.from_participant = ch_part
+          ; to_participant = participant
+          ; tag = Some (Action.Communication.Tag.tag ch_label ch_sort)
+          }
+        in
         let new_state =
           match ch_cont with
           | End -> state_size
           | Variable t -> Map.find_exn var_map t
           | Mu _ | Internal _ | External _ ->
-            Type_utils.next_state
-              ~direction:`External
-              ~state
-              ~communication
-              ~communications
-              ~choices:ext_choices
-              ~id_map
+            Type_utils.next_state_external ~state ~choice_index ~ext_choices
         in
         { action = Action.communication communication
-        ; guard = And (Eq (Var state_var, IntConst (state + 1)), not_fail)
+        ; guard = Eq (Var state_var, IntConst state)
         ; updates = [ Prism.Float 1.0, [ IntUpdate (state_var, IntConst new_state) ] ]
         })
     in
     let continuations =
-      List.concat_map ext_choices ~f:(fun { ch_part = _; ch_cont; ch_label; ch_sort } ->
-        let communication = new_communication (Some (ch_label, ch_sort)) in
+      List.concat_mapi ext_choices ~f:(fun choice_index { Ast.ch_cont; _ } ->
         let new_state =
-          Type_utils.next_state
-            ~direction:`External
-            ~state
-            ~communication
-            ~communications
-            ~choices:ext_choices
-            ~id_map
+          Type_utils.next_state_external ~state ~choice_index ~ext_choices
         in
         translate_type ch_cont ~id_map ~participant ~state:new_state ~state_size ~var_map)
     in
-    List.concat [ [ initial ]; choices; continuations ]
+    List.concat [ receive_commands; continuations ]
 ;;
 
 let translate_ctx_item ~id_map { Ast.ctx_part; ctx_type } =
-  { locals = [ Int (StringVar ctx_part, Type_utils.state_space ctx_type + 1) ]
+  { locals = [ Int (StringVar ctx_part, Type_utils.state_space ctx_type) ]
   ; participant = ctx_part
   ; commands =
-      { action = Action.blank
-      ; guard =
-          And
-            ( Eq (Var (StringVar ctx_part), IntConst (Type_utils.state_space ctx_type + 1))
-            , not_fail )
-      ; updates = [ Prism.Float 1.0, [ BoolUpdate (StringVar "fail", BoolConst true) ] ]
-      }
-      :: translate_type
-           ~id_map
-           ~participant:ctx_part
-           ~state:0
-           ~state_size:(Type_utils.state_space ctx_type)
-           ~var_map:String.Map.empty
-           ctx_type
+      translate_type
+        ~id_map
+        ~participant:ctx_part
+        ~state:0
+        ~state_size:(Type_utils.state_space ctx_type)
+        ~var_map:String.Map.empty
+        ctx_type
   }
 ;;
 
@@ -246,9 +170,9 @@ let closure modules =
 let translate context =
   let id_map = Action.Communication.in_context context |> Action.Id_map.of_list in
   let modules = List.map ~f:(translate_ctx_item ~id_map) context in
-  ( { globals = [ Bool (StringVar "fail") ]
+  ( { globals = []
     ; modules = closure modules :: modules
-    ; labels = Gen_labels.generate ~id_map context
+    ; labels = Gen_labels.generate context
     }
   , Gen_props.generate context )
 ;;

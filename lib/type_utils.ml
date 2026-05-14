@@ -5,77 +5,54 @@ let rec state_space = function
   | Mu (_var, t) -> state_space t
   | Variable _ -> 0
   | Internal choice_branches ->
-    (* For now, handle single-branch case *)
-    let int_choices =
-      match choice_branches with
-      | [ single_branch ] -> single_branch
-      | _ -> failwith "Nondeterminism not yet supported in state_space"
+    let all_choices = List.concat choice_branches in
+    let continuation_space =
+      List.fold_left all_choices ~init:0 ~f:(fun acc (_prob, { Ast.ch_cont; _ }) ->
+        acc + state_space ch_cont)
     in
-    List.fold_left
-      ~init:0
-      ~f:(fun acc (_prob, { Ast.ch_cont; _ }) -> acc + state_space ch_cont)
-      int_choices
-    + List.length int_choices
-    + 1
+    1 + List.length all_choices + continuation_space
   | External ext_choices ->
-    List.fold_left
-      ~init:0
-      ~f:(fun acc { Ast.ch_cont; _ } -> acc + state_space ch_cont)
-      ext_choices
-    + 2
-;;
-
-(** Calculate the big summation in the paper:
-      \sum_{i | ID(p::q::l_i) < ID(action)} SS(T_i)
-    where communication is p::q::l_j for some j
-          communications contains all p::q::l_i
-      and choices contains l_i and T_i for all p::q choices *)
-let sum_states_until communication ~communications ~choices ~id_map =
-  (* TODO: This currently contains a lot of redundant list traversals - probably fine
-     since we don't expect a large list, but it'd be nice if it can be made more
-     efficient. *)
-  let id =
-    match Action.Id_map.id id_map communication with
-    | None ->
-      error_s
-        [%message
-          "can't find communication in ID map" (communication : Action.Communication.t)]
-      |> ok_exn
-    | Some id -> id
-  in
-  List.filter communications ~f:(fun communication ->
-    let id' =
-      match Action.Id_map.id id_map communication with
-      | None ->
-        error_s
-          [%message
-            "can't find communication within provided communications in ID map"
-              (communication : Action.Communication.t)
-              (communications : Action.Communication.t list)]
-        |> ok_exn
-      | Some id' -> id'
+    let continuation_space =
+      List.fold_left ext_choices ~init:0 ~f:(fun acc { Ast.ch_cont; _ } ->
+        acc + state_space ch_cont)
     in
-    id' < id)
-  |> List.sum
-       (module Int)
-       ~f:(fun c ->
-         match Action.Communication.find_choice c choices with
-         | None ->
-           error_s
-             [%message
-               "can't find choice with communication"
-                 (c : Action.Communication.t)
-                 (choices : Ast.choice list)]
-           |> ok_exn
-         | Some { ch_cont; _ } -> state_space ch_cont)
+    1 + continuation_space
 ;;
 
-let next_state ~direction ~state ~communication ~communications ~choices ~id_map =
-  let delta = sum_states_until communication ~communications ~choices ~id_map in
-  (* TODO: dedup calculations with translation function *)
-  match direction with
-  | `Internal -> state + 1 + List.length choices + delta
-  | `External -> state + 2 + delta
+let intermediate_state_offset ~branch_index ~choice_index ~choice_branches =
+  let sum_previous_branch_sizes =
+    List.take choice_branches branch_index
+    |> List.sum (module Int) ~f:List.length
+  in
+  sum_previous_branch_sizes + choice_index
+;;
+
+let next_state_internal_nd ~state ~branch_index ~choice_index ~choice_branches =
+  let total_choices =
+    List.sum (module Int) choice_branches ~f:List.length
+  in
+  let sum_previous_state_spaces =
+    let previous_branches = List.take choice_branches branch_index in
+    let previous_full =
+      List.concat previous_branches
+      |> List.sum (module Int) ~f:(fun (_p, { Ast.ch_cont; _ }) -> state_space ch_cont)
+    in
+    let current_branch = List.nth_exn choice_branches branch_index in
+    let current_partial =
+      List.take current_branch choice_index
+      |> List.sum (module Int) ~f:(fun (_p, { Ast.ch_cont; _ }) -> state_space ch_cont)
+    in
+    previous_full + current_partial
+  in
+  state + 1 + total_choices + sum_previous_state_spaces
+;;
+
+let next_state_external ~state ~choice_index ~ext_choices =
+  let sum_previous_state_spaces =
+    List.take ext_choices choice_index
+    |> List.sum (module Int) ~f:(fun { Ast.ch_cont; _ } -> state_space ch_cont)
+  in
+  state + 1 + sum_previous_state_spaces
 ;;
 
 let communicates_exn ~context ~from_participant ~to_participant =

@@ -5,9 +5,9 @@
    Compare with [monty-hall-change.ctx]. *)
 
 car : (+) {
-        host ! 0.3 : l1 . end,
-        host ! 0.3 : l2 . end,
-        host ! 0.3 : l3 . end
+        host ! 0.34 : l1 . end,
+        host ! 0.33 : l2 . end,
+        host ! 0.33 : l3 . end
       }
 
 host : & {

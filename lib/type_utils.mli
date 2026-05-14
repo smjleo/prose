@@ -4,14 +4,23 @@ open! Core
     not including the very last state which denotes the failure state. *)
 val state_space : Ast.session_type -> int
 
-(** Calculate what the next state should be after a communication. *)
-val next_state
-  :  direction:[ `Internal | `External ]
-  -> state:int
-  -> communication:Action.Communication.t
-  -> communications:Action.Communication.t list
-  -> choices:Ast.choice list
-  -> id_map:Action.Id_map.t
+val intermediate_state_offset
+  :  branch_index:int
+  -> choice_index:int
+  -> choice_branches:(Ast.probability * Ast.choice) list list
+  -> int
+
+val next_state_internal_nd
+  :  state:int
+  -> branch_index:int
+  -> choice_index:int
+  -> choice_branches:(Ast.probability * Ast.choice) list list
+  -> int
+
+val next_state_external
+  :  state:int
+  -> choice_index:int
+  -> ext_choices:Ast.choice list
   -> int
 
 (** Does from_participant try to communicate with to_participant?

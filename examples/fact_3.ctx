@@ -4,14 +4,14 @@ w0 : mu t .
 w1 : mu t . & { w2 ? req .
             (+) { w0 ! 1.0 : req .
             & {
-               w0 ? res(Int) . (+) { w2 ! 0.5 : res<Int> . t, w2 ! 0.3 : err . t },
+               w0 ? res(Int) . (+) { w2 ! 0.6 : res<Int> . t, w2 ! 0.4 : err . t },
                w0 ? err . (+) { w2 ! 1.0 : err . t }
             } } }
 
 w2 : mu t . & { w3 ? req .
             (+) { w1 ! 1.0 : req .
             & {
-               w1 ? res(Int) . (+) { w3 ! 0.5 : res<Int> . t, w3 ! 0.3 : err . t },
+               w1 ? res(Int) . (+) { w3 ! 0.6 : res<Int> . t, w3 ! 0.4 : err . t },
                w1 ? err . (+) { w3 ! 1.0 : err . t }
             } } }
 
