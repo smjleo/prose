@@ -112,21 +112,33 @@ For each context file in this directory, run [prose output] to check the model a
   // Type safety
   P>=1 [ (G ((("cando_a_s_authorise_unit" & "cando_a_s_branch") => "cando_a_s_authorise_unit_branch") & ((("cando_b_s_connect_unit" & "cando_b_s_branch") => "cando_b_s_connect_unit_branch") & ((("cando_b_s_err_unit" & "cando_b_s_branch") => "cando_b_s_err_unit_branch") & ((("cando_b_s_retry_unit" & "cando_b_s_branch") => "cando_b_s_retry_unit_branch") & ((("cando_c_a_pass_unit" & "cando_c_a_branch") => "cando_c_a_pass_unit_branch") & ((("cando_c_a_quit_unit" & "cando_c_a_branch") => "cando_c_a_quit_unit_branch") & ((("cando_s_c_cancel_unit" & "cando_s_c_branch") => "cando_s_c_cancel_unit_branch") & ((("cando_s_c_login_unit" & "cando_s_c_branch") => "cando_s_c_login_unit_branch") & (("cando_s_e_stop_unit" & "cando_s_e_branch") => "cando_s_e_stop_unit_branch")))))))))) ]
   
-  // Probabilistic deadlock freedom
+  // Deadlock freedom (lower bound)
   Pmin=? [ (G ("deadlock" => "end")) ]
   
-  // Probabilistic termination
+  // Deadlock freedom (upper bound)
+  Pmax=? [ (G ("deadlock" => "end")) ]
+  
+  // Termination (lower bound)
   Pmin=? [ (F "deadlock") ]
+  
+  // Termination (upper bound)
+  Pmax=? [ (F "deadlock") ]
   
    ======= Property checking =======
   
   Type safety
   Result: true
   
-  Probabilistic deadlock freedom
+  Deadlock freedom (lower bound)
   Result: 0.76 (exact floating point)
   
-  Probabilistic termination
+  Deadlock freedom (upper bound)
+  Result: 0.76 (exact floating point)
+  
+  Termination (lower bound)
+  Result: 0.6 (exact floating point)
+  
+  Termination (upper bound)
   Result: 0.6 (exact floating point)
   
   
@@ -515,21 +527,33 @@ For each context file in this directory, run [prose output] to check the model a
   // Type safety
   P>=1 [ (G ((("cando_dice1_dummy_repeat_unit" & "cando_dice1_dummy_branch") => "cando_dice1_dummy_repeat_unit_branch") & ((("cando_p0_q0_l1_unit" & "cando_p0_q0_branch") => "cando_p0_q0_l1_unit_branch") & ((("cando_p0_q0_l2_unit" & "cando_p0_q0_branch") => "cando_p0_q0_l2_unit_branch") & ((("cando_p1_q1_l3_unit" & "cando_p1_q1_branch") => "cando_p1_q1_l3_unit_branch") & ((("cando_p1_q1_l4_unit" & "cando_p1_q1_branch") => "cando_p1_q1_l4_unit_branch") & ((("cando_p2_q2_l5_unit" & "cando_p2_q2_branch") => "cando_p2_q2_l5_unit_branch") & ((("cando_p2_q2_l6_unit" & "cando_p2_q2_branch") => "cando_p2_q2_l6_unit_branch") & ((("cando_p3_q3_d1_unit" & "cando_p3_q3_branch") => "cando_p3_q3_d1_unit_branch") & ((("cando_p3_q3_l1_unit" & "cando_p3_q3_branch") => "cando_p3_q3_l1_unit_branch") & ((("cando_p4_q4_d2_unit" & "cando_p4_q4_branch") => "cando_p4_q4_d2_unit_branch") & ((("cando_p4_q4_d3_unit" & "cando_p4_q4_branch") => "cando_p4_q4_d3_unit_branch") & ((("cando_p5_q5_d4_unit" & "cando_p5_q5_branch") => "cando_p5_q5_d4_unit_branch") & ((("cando_p5_q5_d5_unit" & "cando_p5_q5_branch") => "cando_p5_q5_d5_unit_branch") & ((("cando_p6_q6_d6_unit" & "cando_p6_q6_branch") => "cando_p6_q6_d6_unit_branch") & ((("cando_p6_q6_l2_unit" & "cando_p6_q6_branch") => "cando_p6_q6_l2_unit_branch") & ((("cando_q0_p1_go_unit" & "cando_q0_p1_branch") => "cando_q0_p1_go_unit_branch") & ((("cando_q0_p2_go_unit" & "cando_q0_p2_branch") => "cando_q0_p2_go_unit_branch") & ((("cando_q1_p3_go_unit" & "cando_q1_p3_branch") => "cando_q1_p3_go_unit_branch") & ((("cando_q1_p4_go_unit" & "cando_q1_p4_branch") => "cando_q1_p4_go_unit_branch") & ((("cando_q2_p5_go_unit" & "cando_q2_p5_branch") => "cando_q2_p5_go_unit_branch") & ((("cando_q2_p6_go_unit" & "cando_q2_p6_branch") => "cando_q2_p6_go_unit_branch") & ((("cando_q3_dice1_done_unit" & "cando_q3_dice1_branch") => "cando_q3_dice1_done_unit_branch") & ((("cando_q3_q0_redo_unit" & "cando_q3_q0_branch") => "cando_q3_q0_redo_unit_branch") & ((("cando_q4_dice2_done_unit" & "cando_q4_dice2_branch") => "cando_q4_dice2_done_unit_branch") & ((("cando_q4_dice3_done_unit" & "cando_q4_dice3_branch") => "cando_q4_dice3_done_unit_branch") & ((("cando_q5_dice4_done_unit" & "cando_q5_dice4_branch") => "cando_q5_dice4_done_unit_branch") & ((("cando_q5_dice5_done_unit" & "cando_q5_dice5_branch") => "cando_q5_dice5_done_unit_branch") & ((("cando_q6_dice6_done_unit" & "cando_q6_dice6_branch") => "cando_q6_dice6_done_unit_branch") & (("cando_q6_q0_redo_unit" & "cando_q6_q0_branch") => "cando_q6_q0_redo_unit_branch")))))))))))))))))))))))))))))) ]
   
-  // Probabilistic deadlock freedom
+  // Deadlock freedom (lower bound)
   Pmin=? [ (G ("deadlock" => "end")) ]
   
-  // Probabilistic termination
+  // Deadlock freedom (upper bound)
+  Pmax=? [ (G ("deadlock" => "end")) ]
+  
+  // Termination (lower bound)
   Pmin=? [ (F "deadlock") ]
+  
+  // Termination (upper bound)
+  Pmax=? [ (F "deadlock") ]
   
    ======= Property checking =======
   
   Type safety
   Result: true
   
-  Probabilistic deadlock freedom
+  Deadlock freedom (lower bound)
   Result: 0.16666698455810547 (+/- 1.1920963061161968E-6 estimated; rel err 7.1525641942636435E-6)
   
-  Probabilistic termination
+  Deadlock freedom (upper bound)
+  Result: 0.16666698455810547 (+/- 1.1920963061161968E-6 estimated; rel err 7.1525641942636435E-6)
+  
+  Termination (lower bound)
+  Result: 0.8333330154418945 (+/- 5.960467888147447E-6 estimated; rel err 7.1525641942636435E-6)
+  
+  Termination (upper bound)
   Result: 0.8333330154418945 (+/- 5.960467888147447E-6 estimated; rel err 7.1525641942636435E-6)
   
   
@@ -577,21 +601,33 @@ For each context file in this directory, run [prose output] to check the model a
   // Type safety
   P>=1 [ (G ((("cando_p_q_l_bool" & "cando_p_q_branch") => "cando_p_q_l_bool_branch") & (("cando_p_q_l_int" & "cando_p_q_branch") => "cando_p_q_l_int_branch"))) ]
   
-  // Probabilistic deadlock freedom
+  // Deadlock freedom (lower bound)
   Pmin=? [ (G ("deadlock" => "end")) ]
   
-  // Probabilistic termination
+  // Deadlock freedom (upper bound)
+  Pmax=? [ (G ("deadlock" => "end")) ]
+  
+  // Termination (lower bound)
   Pmin=? [ (F "deadlock") ]
+  
+  // Termination (upper bound)
+  Pmax=? [ (F "deadlock") ]
   
    ======= Property checking =======
   
   Type safety
   Result: false
   
-  Probabilistic deadlock freedom
+  Deadlock freedom (lower bound)
   Result: 0.0 (exact floating point)
   
-  Probabilistic termination
+  Deadlock freedom (upper bound)
+  Result: 0.0 (exact floating point)
+  
+  Termination (lower bound)
+  Result: 1.0 (exact floating point)
+  
+  Termination (upper bound)
   Result: 1.0 (exact floating point)
   
   
@@ -720,21 +756,33 @@ For each context file in this directory, run [prose output] to check the model a
   // Type safety
   P>=1 [ (G ((("cando_w0_w1_err_unit" & "cando_w0_w1_branch") => "cando_w0_w1_err_unit_branch") & ((("cando_w0_w1_res_int" & "cando_w0_w1_branch") => "cando_w0_w1_res_int_branch") & ((("cando_w1_w0_req_unit" & "cando_w1_w0_branch") => "cando_w1_w0_req_unit_branch") & ((("cando_w1_w2_err_unit" & "cando_w1_w2_branch") => "cando_w1_w2_err_unit_branch") & ((("cando_w1_w2_res_int" & "cando_w1_w2_branch") => "cando_w1_w2_res_int_branch") & ((("cando_w2_w1_req_unit" & "cando_w2_w1_branch") => "cando_w2_w1_req_unit_branch") & ((("cando_w2_w3_err_unit" & "cando_w2_w3_branch") => "cando_w2_w3_err_unit_branch") & ((("cando_w2_w3_res_int" & "cando_w2_w3_branch") => "cando_w2_w3_res_int_branch") & ((("cando_w3_dummy_done_unit" & "cando_w3_dummy_branch") => "cando_w3_dummy_done_unit_branch") & (("cando_w3_w2_req_unit" & "cando_w3_w2_branch") => "cando_w3_w2_req_unit_branch"))))))))))) ]
   
-  // Probabilistic deadlock freedom
+  // Deadlock freedom (lower bound)
   Pmin=? [ (G ("deadlock" => "end")) ]
   
-  // Probabilistic termination
+  // Deadlock freedom (upper bound)
+  Pmax=? [ (G ("deadlock" => "end")) ]
+  
+  // Termination (lower bound)
   Pmin=? [ (F "deadlock") ]
+  
+  // Termination (upper bound)
+  Pmax=? [ (F "deadlock") ]
   
    ======= Property checking =======
   
   Type safety
   Result: true
   
-  Probabilistic deadlock freedom
+  Deadlock freedom (lower bound)
   Result: 0.252 (exact floating point)
   
-  Probabilistic termination
+  Deadlock freedom (upper bound)
+  Result: 0.252 (exact floating point)
+  
+  Termination (lower bound)
+  Result: 0.748 (exact floating point)
+  
+  Termination (upper bound)
   Result: 0.748 (exact floating point)
   
   
@@ -802,21 +850,33 @@ For each context file in this directory, run [prose output] to check the model a
   // Type safety
   P>=1 [ (G ((("cando_a_b_l1_unit" & "cando_a_b_branch") => "cando_a_b_l1_unit_branch") & ((("cando_a_b_l2_unit" & "cando_a_b_branch") => "cando_a_b_l2_unit_branch") & (("cando_c_d_l3_unit" & "cando_c_d_branch") => "cando_c_d_l3_unit_branch")))) ]
   
-  // Probabilistic deadlock freedom
+  // Deadlock freedom (lower bound)
   Pmin=? [ (G ("deadlock" => "end")) ]
   
-  // Probabilistic termination
+  // Deadlock freedom (upper bound)
+  Pmax=? [ (G ("deadlock" => "end")) ]
+  
+  // Termination (lower bound)
   Pmin=? [ (F "deadlock") ]
+  
+  // Termination (upper bound)
+  Pmax=? [ (F "deadlock") ]
   
    ======= Property checking =======
   
   Type safety
   Result: true
   
-  Probabilistic deadlock freedom
+  Deadlock freedom (lower bound)
   Result: 1.0 (exact floating point)
   
-  Probabilistic termination
+  Deadlock freedom (upper bound)
+  Result: 1.0 (exact floating point)
+  
+  Termination (lower bound)
+  Result: 0.4 (exact floating point)
+  
+  Termination (upper bound)
   Result: 0.4 (exact floating point)
   
   
@@ -924,21 +984,33 @@ For each context file in this directory, run [prose output] to check the model a
   // Type safety
   P>=1 [ (G ((("cando_car_host_l1_unit" & "cando_car_host_branch") => "cando_car_host_l1_unit_branch") & ((("cando_car_host_l2_unit" & "cando_car_host_branch") => "cando_car_host_l2_unit_branch") & ((("cando_car_host_l3_unit" & "cando_car_host_branch") => "cando_car_host_l3_unit_branch") & ((("cando_host_player_l2_unit" & "cando_host_player_branch") => "cando_host_player_l2_unit_branch") & ((("cando_host_player_l3_unit" & "cando_host_player_branch") => "cando_host_player_l3_unit_branch") & ((("cando_player_host_l1_unit" & "cando_player_host_branch") => "cando_player_host_l1_unit_branch") & ((("cando_player_host_l2_unit" & "cando_player_host_branch") => "cando_player_host_l2_unit_branch") & (("cando_player_host_l3_unit" & "cando_player_host_branch") => "cando_player_host_l3_unit_branch"))))))))) ]
   
-  // Probabilistic deadlock freedom
+  // Deadlock freedom (lower bound)
   Pmin=? [ (G ("deadlock" => "end")) ]
   
-  // Probabilistic termination
+  // Deadlock freedom (upper bound)
+  Pmax=? [ (G ("deadlock" => "end")) ]
+  
+  // Termination (lower bound)
   Pmin=? [ (F "deadlock") ]
+  
+  // Termination (upper bound)
+  Pmax=? [ (F "deadlock") ]
   
    ======= Property checking =======
   
   Type safety
   Result: false
   
-  Probabilistic deadlock freedom
+  Deadlock freedom (lower bound)
   Result: 0.6599999999999999 (exact floating point)
   
-  Probabilistic termination
+  Deadlock freedom (upper bound)
+  Result: 0.6599999999999999 (exact floating point)
+  
+  Termination (lower bound)
+  Result: 1.0 (exact floating point)
+  
+  Termination (upper bound)
   Result: 1.0 (exact floating point)
   
   
@@ -1046,21 +1118,33 @@ For each context file in this directory, run [prose output] to check the model a
   // Type safety
   P>=1 [ (G ((("cando_car_host_l1_unit" & "cando_car_host_branch") => "cando_car_host_l1_unit_branch") & ((("cando_car_host_l2_unit" & "cando_car_host_branch") => "cando_car_host_l2_unit_branch") & ((("cando_car_host_l3_unit" & "cando_car_host_branch") => "cando_car_host_l3_unit_branch") & ((("cando_host_player_l2_unit" & "cando_host_player_branch") => "cando_host_player_l2_unit_branch") & ((("cando_host_player_l3_unit" & "cando_host_player_branch") => "cando_host_player_l3_unit_branch") & ((("cando_player_host_l1_unit" & "cando_player_host_branch") => "cando_player_host_l1_unit_branch") & ((("cando_player_host_l2_unit" & "cando_player_host_branch") => "cando_player_host_l2_unit_branch") & (("cando_player_host_l3_unit" & "cando_player_host_branch") => "cando_player_host_l3_unit_branch"))))))))) ]
   
-  // Probabilistic deadlock freedom
+  // Deadlock freedom (lower bound)
   Pmin=? [ (G ("deadlock" => "end")) ]
   
-  // Probabilistic termination
+  // Deadlock freedom (upper bound)
+  Pmax=? [ (G ("deadlock" => "end")) ]
+  
+  // Termination (lower bound)
   Pmin=? [ (F "deadlock") ]
+  
+  // Termination (upper bound)
+  Pmax=? [ (F "deadlock") ]
   
    ======= Property checking =======
   
   Type safety
   Result: false
   
-  Probabilistic deadlock freedom
+  Deadlock freedom (lower bound)
   Result: 0.33999999999999997 (exact floating point)
   
-  Probabilistic termination
+  Deadlock freedom (upper bound)
+  Result: 0.33999999999999997 (exact floating point)
+  
+  Termination (lower bound)
+  Result: 1.0 (exact floating point)
+  
+  Termination (upper bound)
   Result: 1.0 (exact floating point)
   
   
@@ -1109,21 +1193,33 @@ For each context file in this directory, run [prose output] to check the model a
   // Type safety
   P>=1 [ (G ((("cando_p_q_l1_unit" & "cando_p_q_branch") => "cando_p_q_l1_unit_branch") & (("cando_p_q_l2_unit" & "cando_p_q_branch") => "cando_p_q_l2_unit_branch"))) ]
   
-  // Probabilistic deadlock freedom
+  // Deadlock freedom (lower bound)
   Pmin=? [ (G ("deadlock" => "end")) ]
   
-  // Probabilistic termination
+  // Deadlock freedom (upper bound)
+  Pmax=? [ (G ("deadlock" => "end")) ]
+  
+  // Termination (lower bound)
   Pmin=? [ (F "deadlock") ]
+  
+  // Termination (upper bound)
+  Pmax=? [ (F "deadlock") ]
   
    ======= Property checking =======
   
   Type safety
   Result: true
   
-  Probabilistic deadlock freedom
+  Deadlock freedom (lower bound)
   Result: 1.0 (exact floating point)
   
-  Probabilistic termination
+  Deadlock freedom (upper bound)
+  Result: 1.0 (exact floating point)
+  
+  Termination (lower bound)
+  Result: 1.0 (exact floating point)
+  
+  Termination (upper bound)
   Result: 1.0 (exact floating point)
   
   
@@ -1358,21 +1454,33 @@ For each context file in this directory, run [prose output] to check the model a
   // Type safety
   P>=1 [ (G ((("cando_starter_workerA1_datum_int" & "cando_starter_workerA1_branch") => "cando_starter_workerA1_datum_int_branch") & ((("cando_starter_workerA2_datum_int" & "cando_starter_workerA2_branch") => "cando_starter_workerA2_datum_int_branch") & ((("cando_starter_workerA3_datum_int" & "cando_starter_workerA3_branch") => "cando_starter_workerA3_datum_int_branch") & ((("cando_workerA1_workerB1_datum_int" & "cando_workerA1_workerB1_branch") => "cando_workerA1_workerB1_datum_int_branch") & ((("cando_workerA1_workerB1_stop_unit" & "cando_workerA1_workerB1_branch") => "cando_workerA1_workerB1_stop_unit_branch") & ((("cando_workerA2_workerB2_datum_int" & "cando_workerA2_workerB2_branch") => "cando_workerA2_workerB2_datum_int_branch") & ((("cando_workerA2_workerB2_stop_unit" & "cando_workerA2_workerB2_branch") => "cando_workerA2_workerB2_stop_unit_branch") & ((("cando_workerA3_workerB3_datum_int" & "cando_workerA3_workerB3_branch") => "cando_workerA3_workerB3_datum_int_branch") & ((("cando_workerA3_workerB3_stop_unit" & "cando_workerA3_workerB3_branch") => "cando_workerA3_workerB3_stop_unit_branch") & ((("cando_workerB1_workerC1_datum_int" & "cando_workerB1_workerC1_branch") => "cando_workerB1_workerC1_datum_int_branch") & ((("cando_workerB1_workerC1_stop_unit" & "cando_workerB1_workerC1_branch") => "cando_workerB1_workerC1_stop_unit_branch") & ((("cando_workerB2_workerC2_datum_int" & "cando_workerB2_workerC2_branch") => "cando_workerB2_workerC2_datum_int_branch") & ((("cando_workerB2_workerC2_stop_unit" & "cando_workerB2_workerC2_branch") => "cando_workerB2_workerC2_stop_unit_branch") & ((("cando_workerB3_workerC3_datum_int" & "cando_workerB3_workerC3_branch") => "cando_workerB3_workerC3_datum_int_branch") & ((("cando_workerB3_workerC3_stop_unit" & "cando_workerB3_workerC3_branch") => "cando_workerB3_workerC3_stop_unit_branch") & ((("cando_workerC1_workerA1_result_int" & "cando_workerC1_workerA1_branch") => "cando_workerC1_workerA1_result_int_branch") & ((("cando_workerC2_workerA2_result_int" & "cando_workerC2_workerA2_branch") => "cando_workerC2_workerA2_result_int_branch") & (("cando_workerC3_workerA3_result_int" & "cando_workerC3_workerA3_branch") => "cando_workerC3_workerA3_result_int_branch"))))))))))))))))))) ]
   
-  // Probabilistic deadlock freedom
+  // Deadlock freedom (lower bound)
   Pmin=? [ (G ("deadlock" => "end")) ]
   
-  // Probabilistic termination
+  // Deadlock freedom (upper bound)
+  Pmax=? [ (G ("deadlock" => "end")) ]
+  
+  // Termination (lower bound)
   Pmin=? [ (F "deadlock") ]
+  
+  // Termination (upper bound)
+  Pmax=? [ (F "deadlock") ]
   
    ======= Property checking =======
   
   Type safety
   Result: true
   
-  Probabilistic deadlock freedom
+  Deadlock freedom (lower bound)
   Result: 1.0 (exact floating point)
   
-  Probabilistic termination
+  Deadlock freedom (upper bound)
+  Result: 1.0 (exact floating point)
+  
+  Termination (lower bound)
+  Result: 1.0 (exact floating point)
+  
+  Termination (upper bound)
   Result: 1.0 (exact floating point)
   
   
@@ -1428,22 +1536,117 @@ For each context file in this directory, run [prose output] to check the model a
   // Type safety
   P>=1 [ (G ((("cando_a_b_l1_unit" & "cando_a_b_branch") => "cando_a_b_l1_unit_branch") & (("cando_a_b_l2_unit" & "cando_a_b_branch") => "cando_a_b_l2_unit_branch"))) ]
   
-  // Probabilistic deadlock freedom
+  // Deadlock freedom (lower bound)
   Pmin=? [ (G ("deadlock" => "end")) ]
   
-  // Probabilistic termination
+  // Deadlock freedom (upper bound)
+  Pmax=? [ (G ("deadlock" => "end")) ]
+  
+  // Termination (lower bound)
   Pmin=? [ (F "deadlock") ]
+  
+  // Termination (upper bound)
+  Pmax=? [ (F "deadlock") ]
   
    ======= Property checking =======
   
   Type safety
   Result: true
   
-  Probabilistic deadlock freedom
+  Deadlock freedom (lower bound)
   Result: 1.0 (exact floating point)
   
-  Probabilistic termination
+  Deadlock freedom (upper bound)
+  Result: 1.0 (exact floating point)
+  
+  Termination (lower bound)
   Result: 0.5 (exact floating point)
+  
+  Termination (upper bound)
+  Result: 0.5 (exact floating point)
+  
+  
+  
+  
+   ======= TEST ../examples/nondeterminism.ctx =======
+  
+  (* Nondeterminism example: two branches with different termination probabilities *)
+  
+  p : (+) { q ! 0.6 : l1 . end, q ! 0.4 : l2 . mu t . (+) { q ! 1.0 : l2 . t } }
+    + (+) { q ! 0.4 : l1 . end, q ! 0.6 : l2 . mu t . (+) { q ! 1.0 : l2 . t } }
+  
+  q : & { p ? l1 . end, p ? l2 . mu t . & { p ? l2 . t } }
+  
+   ======= PRISM output ========
+  
+  
+  module closure
+    closure : bool init false;
+  
+    [] false -> 1:(closure'=false);
+  endmodule
+  
+  module p
+    p : [0..9] init 0;
+  
+    [] p=0 -> 0.6:(p'=1) + 0.4:(p'=2);
+    [] p=0 -> 0.4:(p'=3) + 0.6:(p'=4);
+    [p_q_l1_unit] p=1 -> 1:(p'=9);
+    [p_q_l2_unit] p=2 -> 1:(p'=5);
+    [p_q_l1_unit] p=3 -> 1:(p'=9);
+    [p_q_l2_unit] p=4 -> 1:(p'=7);
+    [] p=5 -> 1:(p'=6);
+    [p_q_l2_unit] p=6 -> 1:(p'=5);
+    [] p=7 -> 1:(p'=8);
+    [p_q_l2_unit] p=8 -> 1:(p'=7);
+  endmodule
+  
+  module q
+    q : [0..2] init 0;
+  
+    [p_q_l1_unit] q=0 -> 1:(q'=2);
+    [p_q_l2_unit] q=0 -> 1:(q'=1);
+    [p_q_l2_unit] q=1 -> 1:(q'=1);
+  endmodule
+  
+  label "end" = (p=9) & (q=2);
+  label "cando_p_q_l1_unit" = p=0;
+  label "cando_p_q_l1_unit_branch" = q=0;
+  label "cando_p_q_l2_unit" = (p=0) | (p=5) | (p=7);
+  label "cando_p_q_l2_unit_branch" = (q=0) | (q=1);
+  label "cando_p_q_branch" = (q=0) | (q=1);
+  
+  // Type safety
+  P>=1 [ (G ((("cando_p_q_l1_unit" & "cando_p_q_branch") => "cando_p_q_l1_unit_branch") & (("cando_p_q_l2_unit" & "cando_p_q_branch") => "cando_p_q_l2_unit_branch"))) ]
+  
+  // Deadlock freedom (lower bound)
+  Pmin=? [ (G ("deadlock" => "end")) ]
+  
+  // Deadlock freedom (upper bound)
+  Pmax=? [ (G ("deadlock" => "end")) ]
+  
+  // Termination (lower bound)
+  Pmin=? [ (F "deadlock") ]
+  
+  // Termination (upper bound)
+  Pmax=? [ (F "deadlock") ]
+  
+   ======= Property checking =======
+  
+  Type safety
+  Result: true
+  
+  Deadlock freedom (lower bound)
+  Result: 1.0 (exact floating point)
+  
+  Deadlock freedom (upper bound)
+  Result: 1.0 (exact floating point)
+  
+  Termination (lower bound)
+  Result: 0.4 (exact floating point)
+  
+  Termination (upper bound)
+  Result: 0.6 (exact floating point)
   
   
   
@@ -1498,21 +1701,33 @@ For each context file in this directory, run [prose output] to check the model a
   // Type safety
   P>=1 [ (G ((("cando_alice_bob_a_unit" & "cando_alice_bob_branch") => "cando_alice_bob_a_unit_branch") & ((("cando_alice_bob_b_unit" & "cando_alice_bob_branch") => "cando_alice_bob_b_unit_branch") & ((("cando_alice_bob_c_unit" & "cando_alice_bob_branch") => "cando_alice_bob_c_unit_branch") & (("cando_alice_carol_c_unit" & "cando_alice_carol_branch") => "cando_alice_carol_c_unit_branch"))))) ]
   
-  // Probabilistic deadlock freedom
+  // Deadlock freedom (lower bound)
   Pmin=? [ (G ("deadlock" => "end")) ]
   
-  // Probabilistic termination
+  // Deadlock freedom (upper bound)
+  Pmax=? [ (G ("deadlock" => "end")) ]
+  
+  // Termination (lower bound)
   Pmin=? [ (F "deadlock") ]
+  
+  // Termination (upper bound)
+  Pmax=? [ (F "deadlock") ]
   
    ======= Property checking =======
   
   Type safety
   Result: true
   
-  Probabilistic deadlock freedom
+  Deadlock freedom (lower bound)
   Result: 0.6699999999999999 (exact floating point)
   
-  Probabilistic termination
+  Deadlock freedom (upper bound)
+  Result: 0.6699999999999999 (exact floating point)
+  
+  Termination (lower bound)
+  Result: 1.0 (exact floating point)
+  
+  Termination (upper bound)
   Result: 1.0 (exact floating point)
   
   
@@ -1582,21 +1797,33 @@ For each context file in this directory, run [prose output] to check the model a
   // Type safety
   P>=1 [ (G ((("cando_a_b_msg_unit" & "cando_a_b_branch") => "cando_a_b_msg_unit_branch") & ((("cando_b_a_msg_unit" & "cando_b_a_branch") => "cando_b_a_msg_unit_branch") & ((("cando_commander_a_deadlock_unit" & "cando_commander_a_branch") => "cando_commander_a_deadlock_unit_branch") & (("cando_commander_a_nodeadlock_unit" & "cando_commander_a_branch") => "cando_commander_a_nodeadlock_unit_branch"))))) ]
   
-  // Probabilistic deadlock freedom
+  // Deadlock freedom (lower bound)
   Pmin=? [ (G ("deadlock" => "end")) ]
   
-  // Probabilistic termination
+  // Deadlock freedom (upper bound)
+  Pmax=? [ (G ("deadlock" => "end")) ]
+  
+  // Termination (lower bound)
   Pmin=? [ (F "deadlock") ]
+  
+  // Termination (upper bound)
+  Pmax=? [ (F "deadlock") ]
   
    ======= Property checking =======
   
   Type safety
   Result: true
   
-  Probabilistic deadlock freedom
+  Deadlock freedom (lower bound)
   Result: 0.30000000000000004 (exact floating point)
   
-  Probabilistic termination
+  Deadlock freedom (upper bound)
+  Result: 0.30000000000000004 (exact floating point)
+  
+  Termination (lower bound)
+  Result: 1.0 (exact floating point)
+  
+  Termination (upper bound)
   Result: 1.0 (exact floating point)
   
   
@@ -1771,21 +1998,33 @@ For each context file in this directory, run [prose output] to check the model a
   // Type safety
   P>=1 [ (G ((("cando_mapper_worker1_datum_int" & "cando_mapper_worker1_branch") => "cando_mapper_worker1_datum_int_branch") & ((("cando_mapper_worker1_stop_unit" & "cando_mapper_worker1_branch") => "cando_mapper_worker1_stop_unit_branch") & ((("cando_mapper_worker2_datum_int" & "cando_mapper_worker2_branch") => "cando_mapper_worker2_datum_int_branch") & ((("cando_mapper_worker2_stop_unit" & "cando_mapper_worker2_branch") => "cando_mapper_worker2_stop_unit_branch") & ((("cando_mapper_worker3_datum_int" & "cando_mapper_worker3_branch") => "cando_mapper_worker3_datum_int_branch") & ((("cando_mapper_worker3_stop_unit" & "cando_mapper_worker3_branch") => "cando_mapper_worker3_stop_unit_branch") & ((("cando_reducer_mapper_continue_int" & "cando_reducer_mapper_branch") => "cando_reducer_mapper_continue_int_branch") & ((("cando_reducer_mapper_stop_unit" & "cando_reducer_mapper_branch") => "cando_reducer_mapper_stop_unit_branch") & ((("cando_worker1_reducer_result_int" & "cando_worker1_reducer_branch") => "cando_worker1_reducer_result_int_branch") & ((("cando_worker2_reducer_result_int" & "cando_worker2_reducer_branch") => "cando_worker2_reducer_result_int_branch") & (("cando_worker3_reducer_result_int" & "cando_worker3_reducer_branch") => "cando_worker3_reducer_result_int_branch")))))))))))) ]
   
-  // Probabilistic deadlock freedom
+  // Deadlock freedom (lower bound)
   Pmin=? [ (G ("deadlock" => "end")) ]
   
-  // Probabilistic termination
+  // Deadlock freedom (upper bound)
+  Pmax=? [ (G ("deadlock" => "end")) ]
+  
+  // Termination (lower bound)
   Pmin=? [ (F "deadlock") ]
+  
+  // Termination (upper bound)
+  Pmax=? [ (F "deadlock") ]
   
    ======= Property checking =======
   
   Type safety
   Result: true
   
-  Probabilistic deadlock freedom
+  Deadlock freedom (lower bound)
   Result: 1.0 (exact floating point)
   
-  Probabilistic termination
+  Deadlock freedom (upper bound)
+  Result: 1.0 (exact floating point)
+  
+  Termination (lower bound)
+  Result: 1.0 (exact floating point)
+  
+  Termination (upper bound)
   Result: 1.0 (exact floating point)
   
   
@@ -1880,21 +2119,33 @@ For each context file in this directory, run [prose output] to check the model a
   // Type safety
   P>=1 [ (G ((("cando_alice_bob_cancel_unit" & "cando_alice_bob_branch") => "cando_alice_bob_cancel_unit_branch") & ((("cando_alice_bob_split_int" & "cando_alice_bob_branch") => "cando_alice_bob_split_int_branch") & ((("cando_alice_shop_buy_unit" & "cando_alice_shop_branch") => "cando_alice_shop_buy_unit_branch") & ((("cando_alice_shop_no_unit" & "cando_alice_shop_branch") => "cando_alice_shop_no_unit_branch") & ((("cando_alice_shop_query_str" & "cando_alice_shop_branch") => "cando_alice_shop_query_str_branch") & ((("cando_bob_alice_no_unit" & "cando_bob_alice_branch") => "cando_bob_alice_no_unit_branch") & ((("cando_bob_alice_yes_unit" & "cando_bob_alice_branch") => "cando_bob_alice_yes_unit_branch") & (("cando_shop_alice_price_int" & "cando_shop_alice_branch") => "cando_shop_alice_price_int_branch"))))))))) ]
   
-  // Probabilistic deadlock freedom
+  // Deadlock freedom (lower bound)
   Pmin=? [ (G ("deadlock" => "end")) ]
   
-  // Probabilistic termination
+  // Deadlock freedom (upper bound)
+  Pmax=? [ (G ("deadlock" => "end")) ]
+  
+  // Termination (lower bound)
   Pmin=? [ (F "deadlock") ]
+  
+  // Termination (upper bound)
+  Pmax=? [ (F "deadlock") ]
   
    ======= Property checking =======
   
   Type safety
   Result: true
   
-  Probabilistic deadlock freedom
+  Deadlock freedom (lower bound)
   Result: 1.0 (exact floating point)
   
-  Probabilistic termination
+  Deadlock freedom (upper bound)
+  Result: 1.0 (exact floating point)
+  
+  Termination (lower bound)
+  Result: 1.0 (exact floating point)
+  
+  Termination (upper bound)
   Result: 1.0 (exact floating point)
   
   
@@ -2032,21 +2283,33 @@ For each context file in this directory, run [prose output] to check the model a
   // Type safety
   P>=1 [ (G ((("cando_p_q_l1_unit" & "cando_p_q_branch") => "cando_p_q_l1_unit_branch") & ((("cando_p_q_l2_unit" & "cando_p_q_branch") => "cando_p_q_l2_unit_branch") & ((("cando_p1_q1_l1_unit" & "cando_p1_q1_branch") => "cando_p1_q1_l1_unit_branch") & ((("cando_p1_q1_l2_unit" & "cando_p1_q1_branch") => "cando_p1_q1_l2_unit_branch") & ((("cando_p2_q2_l1_unit" & "cando_p2_q2_branch") => "cando_p2_q2_l1_unit_branch") & (("cando_p2_q2_l2_unit" & "cando_p2_q2_branch") => "cando_p2_q2_l2_unit_branch"))))))) ]
   
-  // Probabilistic deadlock freedom
+  // Deadlock freedom (lower bound)
   Pmin=? [ (G ("deadlock" => "end")) ]
   
-  // Probabilistic termination
+  // Deadlock freedom (upper bound)
+  Pmax=? [ (G ("deadlock" => "end")) ]
+  
+  // Termination (lower bound)
   Pmin=? [ (F "deadlock") ]
+  
+  // Termination (upper bound)
+  Pmax=? [ (F "deadlock") ]
   
    ======= Property checking =======
   
   Type safety
   Result: true
   
-  Probabilistic deadlock freedom
+  Deadlock freedom (lower bound)
   Result: 1.0 (exact floating point)
   
-  Probabilistic termination
+  Deadlock freedom (upper bound)
+  Result: 1.0 (exact floating point)
+  
+  Termination (lower bound)
+  Result: 1.0 (exact floating point)
+  
+  Termination (upper bound)
   Result: 1.0 (exact floating point)
   
   
@@ -2093,21 +2356,33 @@ For each context file in this directory, run [prose output] to check the model a
   // Type safety
   P>=1 [ (G ((("cando_alice_bob_a_unit" & "cando_alice_bob_branch") => "cando_alice_bob_a_unit_branch") & (("cando_alice_bob_b_int" & "cando_alice_bob_branch") => "cando_alice_bob_b_int_branch"))) ]
   
-  // Probabilistic deadlock freedom
+  // Deadlock freedom (lower bound)
   Pmin=? [ (G ("deadlock" => "end")) ]
   
-  // Probabilistic termination
+  // Deadlock freedom (upper bound)
+  Pmax=? [ (G ("deadlock" => "end")) ]
+  
+  // Termination (lower bound)
   Pmin=? [ (F "deadlock") ]
+  
+  // Termination (upper bound)
+  Pmax=? [ (F "deadlock") ]
   
    ======= Property checking =======
   
   Type safety
   Result: true
   
-  Probabilistic deadlock freedom
+  Deadlock freedom (lower bound)
   Result: 1.0 (exact floating point)
   
-  Probabilistic termination
+  Deadlock freedom (upper bound)
+  Result: 1.0 (exact floating point)
+  
+  Termination (lower bound)
+  Result: 1.0 (exact floating point)
+  
+  Termination (upper bound)
   Result: 1.0 (exact floating point)
   
   
@@ -2178,21 +2453,33 @@ For each context file in this directory, run [prose output] to check the model a
   // Type safety
   P>=1 [ (G ((("cando_a_b_msg_unit" & "cando_a_b_branch") => "cando_a_b_msg_unit_branch") & ((("cando_b_a_msg_unit" & "cando_b_a_branch") => "cando_b_a_msg_unit_branch") & ((("cando_commander_a_deadlock_unit" & "cando_commander_a_branch") => "cando_commander_a_deadlock_unit_branch") & (("cando_commander_a_nodeadlock_unit" & "cando_commander_a_branch") => "cando_commander_a_nodeadlock_unit_branch"))))) ]
   
-  // Probabilistic deadlock freedom
+  // Deadlock freedom (lower bound)
   Pmin=? [ (G ("deadlock" => "end")) ]
   
-  // Probabilistic termination
+  // Deadlock freedom (upper bound)
+  Pmax=? [ (G ("deadlock" => "end")) ]
+  
+  // Termination (lower bound)
   Pmin=? [ (F "deadlock") ]
+  
+  // Termination (upper bound)
+  Pmax=? [ (F "deadlock") ]
   
    ======= Property checking =======
   
   Type safety
   Result: true
   
-  Probabilistic deadlock freedom
+  Deadlock freedom (lower bound)
   Result: 0.4 (exact floating point)
   
-  Probabilistic termination
+  Deadlock freedom (upper bound)
+  Result: 0.4 (exact floating point)
+  
+  Termination (lower bound)
+  Result: 1.0 (exact floating point)
+  
+  Termination (upper bound)
   Result: 1.0 (exact floating point)
   
   
@@ -2316,21 +2603,33 @@ For each context file in this directory, run [prose output] to check the model a
   // Type safety
   P>=1 [ (G ((("cando_alice_bob_l1_unit" & "cando_alice_bob_branch") => "cando_alice_bob_l1_unit_branch") & ((("cando_alice_bob_l2_unit" & "cando_alice_bob_branch") => "cando_alice_bob_l2_unit_branch") & ((("cando_b_a_l1_unit" & "cando_b_a_branch") => "cando_b_a_l1_unit_branch") & ((("cando_b_a_l2_unit" & "cando_b_a_branch") => "cando_b_a_l2_unit_branch") & ((("cando_b_c_l1_unit" & "cando_b_c_branch") => "cando_b_c_l1_unit_branch") & ((("cando_b_c_l2_unit" & "cando_b_c_branch") => "cando_b_c_l2_unit_branch") & ((("cando_charlie_bob_l1_unit" & "cando_charlie_bob_branch") => "cando_charlie_bob_l1_unit_branch") & (("cando_charlie_bob_l2_unit" & "cando_charlie_bob_branch") => "cando_charlie_bob_l2_unit_branch"))))))))) ]
   
-  // Probabilistic deadlock freedom
+  // Deadlock freedom (lower bound)
   Pmin=? [ (G ("deadlock" => "end")) ]
   
-  // Probabilistic termination
+  // Deadlock freedom (upper bound)
+  Pmax=? [ (G ("deadlock" => "end")) ]
+  
+  // Termination (lower bound)
   Pmin=? [ (F "deadlock") ]
+  
+  // Termination (upper bound)
+  Pmax=? [ (F "deadlock") ]
   
    ======= Property checking =======
   
   Type safety
   Result: true
   
-  Probabilistic deadlock freedom
+  Deadlock freedom (lower bound)
   Result: 0.0 (exact floating point)
   
-  Probabilistic termination
+  Deadlock freedom (upper bound)
+  Result: 0.0 (exact floating point)
+  
+  Termination (lower bound)
+  Result: 1.0 (exact floating point)
+  
+  Termination (upper bound)
   Result: 1.0 (exact floating point)
   
   
@@ -2396,21 +2695,33 @@ For each context file in this directory, run [prose output] to check the model a
   // Type safety
   P>=1 [ (G ((("cando_p_q_l1_unit" & "cando_p_q_branch") => "cando_p_q_l1_unit_branch") & ((("cando_p_q_l2_unit" & "cando_p_q_branch") => "cando_p_q_l2_unit_branch") & (("cando_p_q_l3_unit" & "cando_p_q_branch") => "cando_p_q_l3_unit_branch")))) ]
   
-  // Probabilistic deadlock freedom
+  // Deadlock freedom (lower bound)
   Pmin=? [ (G ("deadlock" => "end")) ]
   
-  // Probabilistic termination
+  // Deadlock freedom (upper bound)
+  Pmax=? [ (G ("deadlock" => "end")) ]
+  
+  // Termination (lower bound)
   Pmin=? [ (F "deadlock") ]
+  
+  // Termination (upper bound)
+  Pmax=? [ (F "deadlock") ]
   
    ======= Property checking =======
   
   Type safety
   Result: true
   
-  Probabilistic deadlock freedom
+  Deadlock freedom (lower bound)
   Result: 1.0 (exact floating point)
   
-  Probabilistic termination
+  Deadlock freedom (upper bound)
+  Result: 1.0 (exact floating point)
+  
+  Termination (lower bound)
+  Result: 0.8 (exact floating point)
+  
+  Termination (upper bound)
   Result: 0.8 (exact floating point)
   
   
@@ -2520,21 +2831,33 @@ For each context file in this directory, run [prose output] to check the model a
   // Type safety
   P>=1 [ (G ((("cando_a_b_l1_unit" & "cando_a_b_branch") => "cando_a_b_l1_unit_branch") & ((("cando_a_b_l2_unit" & "cando_a_b_branch") => "cando_a_b_l2_unit_branch") & ((("cando_a_b_l3_unit" & "cando_a_b_branch") => "cando_a_b_l3_unit_branch") & ((("cando_c_d_l1_unit" & "cando_c_d_branch") => "cando_c_d_l1_unit_branch") & ((("cando_c_d_l2_unit" & "cando_c_d_branch") => "cando_c_d_l2_unit_branch") & (("cando_c_d_l3_unit" & "cando_c_d_branch") => "cando_c_d_l3_unit_branch"))))))) ]
   
-  // Probabilistic deadlock freedom
+  // Deadlock freedom (lower bound)
   Pmin=? [ (G ("deadlock" => "end")) ]
   
-  // Probabilistic termination
+  // Deadlock freedom (upper bound)
+  Pmax=? [ (G ("deadlock" => "end")) ]
+  
+  // Termination (lower bound)
   Pmin=? [ (F "deadlock") ]
+  
+  // Termination (upper bound)
+  Pmax=? [ (F "deadlock") ]
   
    ======= Property checking =======
   
   Type safety
   Result: false
   
-  Probabilistic deadlock freedom
+  Deadlock freedom (lower bound)
   Result: 0.41999999999999993 (exact floating point)
   
-  Probabilistic termination
+  Deadlock freedom (upper bound)
+  Result: 0.42000000000000004 (exact floating point)
+  
+  Termination (lower bound)
+  Result: 1.0 (exact floating point)
+  
+  Termination (upper bound)
   Result: 1.0 (exact floating point)
   
   
@@ -2605,21 +2928,33 @@ For each context file in this directory, run [prose output] to check the model a
   // Type safety
   P>=1 [ (G ((("cando_alice_bob_l1_unit" & "cando_alice_bob_branch") => "cando_alice_bob_l1_unit_branch") & ((("cando_alice_bob_l2_unit" & "cando_alice_bob_branch") => "cando_alice_bob_l2_unit_branch") & ((("cando_alice_bob_l3_unit" & "cando_alice_bob_branch") => "cando_alice_bob_l3_unit_branch") & ((("cando_alice_bob_l4_unit" & "cando_alice_bob_branch") => "cando_alice_bob_l4_unit_branch") & (("cando_alice_bob_l5_unit" & "cando_alice_bob_branch") => "cando_alice_bob_l5_unit_branch")))))) ]
   
-  // Probabilistic deadlock freedom
+  // Deadlock freedom (lower bound)
   Pmin=? [ (G ("deadlock" => "end")) ]
   
-  // Probabilistic termination
+  // Deadlock freedom (upper bound)
+  Pmax=? [ (G ("deadlock" => "end")) ]
+  
+  // Termination (lower bound)
   Pmin=? [ (F "deadlock") ]
+  
+  // Termination (upper bound)
+  Pmax=? [ (F "deadlock") ]
   
    ======= Property checking =======
   
   Type safety
   Result: false
   
-  Probabilistic deadlock freedom
+  Deadlock freedom (lower bound)
   Result: 0.87 (exact floating point)
   
-  Probabilistic termination
+  Deadlock freedom (upper bound)
+  Result: 0.87 (exact floating point)
+  
+  Termination (lower bound)
+  Result: 1.0 (exact floating point)
+  
+  Termination (upper bound)
   Result: 1.0 (exact floating point)
   
   
@@ -2673,11 +3008,17 @@ For each context file in this directory, run [prose output] to check the model a
   // Type safety
   P>=1 [ (G ((("cando_p_q_l1_unit" & "cando_p_q_branch") => "cando_p_q_l1_unit_branch") & ((("cando_p_q_l2_unit" & "cando_p_q_branch") => "cando_p_q_l2_unit_branch") & (("cando_p_q_l3_unit" & "cando_p_q_branch") => "cando_p_q_l3_unit_branch")))) ]
   
-  // Probabilistic deadlock freedom
+  // Deadlock freedom (lower bound)
   Pmin=? [ (G ("deadlock" => "end")) ]
   
-  // Probabilistic termination
+  // Deadlock freedom (upper bound)
+  Pmax=? [ (G ("deadlock" => "end")) ]
+  
+  // Termination (lower bound)
   Pmin=? [ (F "deadlock") ]
+  
+  // Termination (upper bound)
+  Pmax=? [ (F "deadlock") ]
   
    ======= Property checking =======
   
@@ -2686,10 +3027,16 @@ For each context file in this directory, run [prose output] to check the model a
   Type safety
   Result: true
   
-  Probabilistic deadlock freedom
+  Deadlock freedom (lower bound)
   Result: 1.0 (exact floating point)
   
-  Probabilistic termination
+  Deadlock freedom (upper bound)
+  Result: 1.0 (exact floating point)
+  
+  Termination (lower bound)
+  Result: 1.0 (exact floating point)
+  
+  Termination (upper bound)
   Result: 1.0 (exact floating point)
   
   
@@ -2732,21 +3079,33 @@ For each context file in this directory, run [prose output] to check the model a
   // Type safety
   P>=1 [ (G (("cando_p_q_l1_unit" & "cando_p_q_branch") => "cando_p_q_l1_unit_branch")) ]
   
-  // Probabilistic deadlock freedom
+  // Deadlock freedom (lower bound)
   Pmin=? [ (G ("deadlock" => "end")) ]
   
-  // Probabilistic termination
+  // Deadlock freedom (upper bound)
+  Pmax=? [ (G ("deadlock" => "end")) ]
+  
+  // Termination (lower bound)
   Pmin=? [ (F "deadlock") ]
+  
+  // Termination (upper bound)
+  Pmax=? [ (F "deadlock") ]
   
    ======= Property checking =======
   
   Type safety
   Result: true
   
-  Probabilistic deadlock freedom
+  Deadlock freedom (lower bound)
   Result: 1.0 (exact floating point)
   
-  Probabilistic termination
+  Deadlock freedom (upper bound)
+  Result: 1.0 (exact floating point)
+  
+  Termination (lower bound)
+  Result: 1.0 (exact floating point)
+  
+  Termination (upper bound)
   Result: 1.0 (exact floating point)
   
   
@@ -2801,11 +3160,17 @@ For each context file in this directory, run [prose output] to check the model a
   // Type safety
   P>=1 [ (G ((("cando_p_q_l1_unit" & "cando_p_q_branch") => "cando_p_q_l1_unit_branch") & ((("cando_p_q_l2_unit" & "cando_p_q_branch") => "cando_p_q_l2_unit_branch") & (("cando_p_q_l3_unit" & "cando_p_q_branch") => "cando_p_q_l3_unit_branch")))) ]
   
-  // Probabilistic deadlock freedom
+  // Deadlock freedom (lower bound)
   Pmin=? [ (G ("deadlock" => "end")) ]
   
-  // Probabilistic termination
+  // Deadlock freedom (upper bound)
+  Pmax=? [ (G ("deadlock" => "end")) ]
+  
+  // Termination (lower bound)
   Pmin=? [ (F "deadlock") ]
+  
+  // Termination (upper bound)
+  Pmax=? [ (F "deadlock") ]
   
    ======= Property checking =======
   
@@ -2814,10 +3179,16 @@ For each context file in this directory, run [prose output] to check the model a
   Type safety
   Result: true
   
-  Probabilistic deadlock freedom
+  Deadlock freedom (lower bound)
   Result: 1.0 (exact floating point)
   
-  Probabilistic termination
+  Deadlock freedom (upper bound)
+  Result: 1.0 (exact floating point)
+  
+  Termination (lower bound)
+  Result: 1.0 (exact floating point)
+  
+  Termination (upper bound)
   Result: 1.0 (exact floating point)
   
   

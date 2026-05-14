@@ -1,0 +1,6 @@
+(* Nondeterminism example: two branches with different termination probabilities *)
+
+p : (+) { q ! 0.6 : l1 . end, q ! 0.4 : l2 . mu t . (+) { q ! 1.0 : l2 . t } }
+  + (+) { q ! 0.4 : l1 . end, q ! 0.6 : l2 . mu t . (+) { q ! 1.0 : l2 . t } }
+
+q : & { p ? l1 . end, p ? l2 . mu t . & { p ? l2 . t } }

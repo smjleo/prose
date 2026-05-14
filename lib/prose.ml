@@ -271,7 +271,7 @@ let run_prism_and_get_output ~model_output_file ~prop_output_file ~is_session_fi
 
 let term_only ~ctx_file ~upper () =
   let iterations = 10 in
-  let termination_annotation = Psl.Annotation.Probabilisic_termination in
+  let termination_annotation = Psl.Annotation.Termination_lower in
   with_prism_files
     ~ctx_file
     ~print_ast:false

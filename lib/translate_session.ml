@@ -282,7 +282,9 @@ let translate ~upper session =
   let modules = List.map ~f:(translate_session_item ~upper) session in
   let open Psl in
   let properties =
-    [ Annotation.Probabilisic_termination, P (Exact, F (Label Deadlock)) ]
+    [ Annotation.Termination_lower, P (ExactMin, F (Label Deadlock))
+    ; Annotation.Termination_upper, P (ExactMax, F (Label Deadlock))
+    ]
   in
   let globals =
     match upper with

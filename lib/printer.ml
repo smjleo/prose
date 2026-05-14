@@ -157,7 +157,8 @@ let print_model ?output_file ?(use_unbounded_ints=false) model =
 open Psl
 
 let print_bound ppf = function
-  | Exact -> fprintf ppf "min=?"
+  | ExactMin -> fprintf ppf "min=?"
+  | ExactMax -> fprintf ppf "max=?"
   | Lt x -> fprintf ppf "<%g" x
   | Le x -> fprintf ppf "<=%g" x
   | Gt x -> fprintf ppf ">%g" x

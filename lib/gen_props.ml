@@ -9,8 +9,10 @@ let rec conjunction = function
 
 let deadlock = Label Prism.Deadlock
 
-let deadlock_freedom = P (Exact, G (Implies (deadlock, Label Prism.End)))
-let termination = P (Exact, F deadlock)
+let deadlock_freedom_lower = P (ExactMin, G (Implies (deadlock, Label Prism.End)))
+let deadlock_freedom_upper = P (ExactMax, G (Implies (deadlock, Label Prism.End)))
+let termination_lower = P (ExactMin, F deadlock)
+let termination_upper = P (ExactMax, F deadlock)
 
 let safety context =
   let communications = Action.Communication.in_context context in
@@ -26,7 +28,9 @@ let safety context =
 
 let generate context =
   [ Annotation.Type_safety, safety context
-  ; Annotation.Probabilistic_deadlock_freedom, deadlock_freedom
-  ; Annotation.Probabilisic_termination, termination
+  ; Annotation.Deadlock_freedom_lower, deadlock_freedom_lower
+  ; Annotation.Deadlock_freedom_upper, deadlock_freedom_upper
+  ; Annotation.Termination_lower, termination_lower
+  ; Annotation.Termination_upper, termination_upper
   ]
 ;;

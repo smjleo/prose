@@ -4,10 +4,10 @@ let annotation_to_short_string =
   let open Psl.Annotation in
   function
   | Type_safety -> "Safe"
-  | Probabilistic_deadlock_freedom -> "PDF"
-  | Normalised_probabilistic_deadlock_freedom -> "NPDF"
-  | Probabilisic_termination -> "PTerm"
-  | Normalised_probabilistic_termination -> "NTerm"
+  | Deadlock_freedom_lower -> "DF-L"
+  | Deadlock_freedom_upper -> "DF-U"
+  | Termination_lower -> "Term-L"
+  | Termination_upper -> "Term-U"
 ;;
 
 let default_filename_col_width = 30
