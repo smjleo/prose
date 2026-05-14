@@ -33,12 +33,20 @@ let safety context =
 ;;
 
 let generate context =
-  List.zip_exn
-    Annotation.all
-    [ safety context
-    ; deadlock_freedom
-    ; normalised_deadlock_freedom
-    ; termination
-    ; normalised_termination
-    ]
+  (* List.zip_exn *)
+  (*   Annotation.all *)
+  (*   [ safety context *)
+  (*   ; deadlock_freedom *)
+  (*   ; normalised_deadlock_freedom *)
+  (*   ; termination *)
+  (*   ; normalised_termination *)
+  (*   ] *)
+  (* TODO: other properties *)
+  ignore
+    ( context
+    , safety
+    , deadlock_freedom
+    , normalised_deadlock_freedom
+    , normalised_termination );
+  [ Annotation.Probabilisic_termination, termination ]
 ;;
