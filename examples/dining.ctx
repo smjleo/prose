@@ -1,0 +1,173 @@
+f0 : mu t. & {
+  p0 ? pick . (+) { p0 ! 1.0 : free .
+    mu s. & {
+      p0 ? drop . t,
+      p2 ? pick . (+) { p2 ! 1.0 : notFree . s }
+    }},
+  p2 ? pick . (+) { p2 ! 1.0 : free .
+    mu s. & {
+      p2 ? drop . t,
+      p0 ? pick . (+) { p0 ! 1.0 : notFree . s }
+    }}
+}
+
+f1 : mu t. & {
+  p1 ? pick . (+) { p1 ! 1.0 : free .
+    mu s. & {
+      p1 ? drop . t,
+      p0 ? pick . (+) { p0 ! 1.0 : notFree . s }
+    }},
+  p0 ? pick . (+) { p0 ! 1.0 : free .
+    mu s. & {
+      p0 ? drop . t,
+      p1 ? pick . (+) { p1 ! 1.0 : notFree . s }
+    }}
+}
+
+f2 : mu t. & {
+  p2 ? pick . (+) { p2 ! 1.0 : free .
+    mu s. & {
+      p2 ? drop . t,
+      p1 ? pick . (+) { p1 ! 1.0 : notFree . s }
+    }},
+  p1 ? pick . (+) { p1 ! 1.0 : free .
+    mu s. & {
+      p1 ? drop . t,
+      p2 ? pick . (+) { p2 ! 1.0 : notFree . s }
+    }}
+}
+
+p0 : mu t. (+) {
+  f0 ! 0.5 : pick . & {
+    f0 ? free .
+      (+) { f1 ! 1.0 : pick . & {
+        f1 ? free .
+          (+) { q ! 1.0 : eat . (+) { f1 ! 1.0 : drop . (+) { f0 ! 1.0 : drop . t }}},
+        f1 ? notFree .
+          (+) { f0 ! 1.0 : drop . t }
+      }},
+    f0 ? notFree .
+      mu s. (+) { f0 ! 1.0 : pick . & {
+        f0 ? free .
+          (+) { f1 ! 1.0 : pick . & {
+            f1 ? free .
+              (+) { q ! 1.0 : eat . (+) { f1 ! 1.0 : drop . (+) { f0 ! 1.0 : drop . t }}},
+            f1 ? notFree .
+              (+) { f0 ! 1.0 : drop . t }
+          }},
+        f0 ? notFree . s
+      }}
+  },
+  f1 ! 0.5 : pick . & {
+    f1 ? free .
+      (+) { f0 ! 1.0 : pick . & {
+        f0 ? free .
+          (+) { q ! 1.0 : eat . (+) { f0 ! 1.0 : drop . (+) { f1 ! 1.0 : drop . t }}},
+        f0 ? notFree .
+          (+) { f1 ! 1.0 : drop . t }
+      }},
+    f1 ? notFree .
+      mu s. (+) { f1 ! 1.0 : pick . & {
+        f1 ? free .
+          (+) { f0 ! 1.0 : pick . & {
+            f0 ? free .
+              (+) { q ! 1.0 : eat . (+) { f0 ! 1.0 : drop . (+) { f1 ! 1.0 : drop . t }}},
+            f0 ? notFree .
+              (+) { f1 ! 1.0 : drop . t }
+          }},
+        f1 ? notFree . s
+      }}
+  }
+}
+
+p1 : mu t. (+) {
+  f1 ! 0.5 : pick . & {
+    f1 ? free .
+      (+) { f2 ! 1.0 : pick . & {
+        f2 ? free .
+          (+) { q ! 1.0 : eat . (+) { f2 ! 1.0 : drop . (+) { f1 ! 1.0 : drop . t }}},
+        f2 ? notFree .
+          (+) { f1 ! 1.0 : drop . t }
+      }},
+    f1 ? notFree .
+      mu s. (+) { f1 ! 1.0 : pick . & {
+        f1 ? free .
+          (+) { f2 ! 1.0 : pick . & {
+            f2 ? free .
+              (+) { q ! 1.0 : eat . (+) { f2 ! 1.0 : drop . (+) { f1 ! 1.0 : drop . t }}},
+            f2 ? notFree .
+              (+) { f1 ! 1.0 : drop . t }
+          }},
+        f1 ? notFree . s
+      }}
+  },
+  f2 ! 0.5 : pick . & {
+    f2 ? free .
+      (+) { f1 ! 1.0 : pick . & {
+        f1 ? free .
+          (+) { q ! 1.0 : eat . (+) { f1 ! 1.0 : drop . (+) { f2 ! 1.0 : drop . t }}},
+        f1 ? notFree .
+          (+) { f2 ! 1.0 : drop . t }
+      }},
+    f2 ? notFree .
+      mu s. (+) { f2 ! 1.0 : pick . & {
+        f2 ? free .
+          (+) { f1 ! 1.0 : pick . & {
+            f1 ? free .
+              (+) { q ! 1.0 : eat . (+) { f1 ! 1.0 : drop . (+) { f2 ! 1.0 : drop . t }}},
+            f1 ? notFree .
+              (+) { f2 ! 1.0 : drop . t }
+          }},
+        f2 ? notFree . s
+      }}
+  }
+}
+
+p2 : mu t. (+) {
+  f2 ! 0.5 : pick . & {
+    f2 ? free .
+      (+) { f0 ! 1.0 : pick . & {
+        f0 ? free .
+          (+) { q ! 1.0 : eat . (+) { f0 ! 1.0 : drop . (+) { f2 ! 1.0 : drop . t }}},
+        f0 ? notFree .
+          (+) { f2 ! 1.0 : drop . t }
+      }},
+    f2 ? notFree .
+      mu s. (+) { f2 ! 1.0 : pick . & {
+        f2 ? free .
+          (+) { f0 ! 1.0 : pick . & {
+            f0 ? free .
+              (+) { q ! 1.0 : eat . (+) { f0 ! 1.0 : drop . (+) { f2 ! 1.0 : drop . t }}},
+            f0 ? notFree .
+              (+) { f2 ! 1.0 : drop . t }
+          }},
+        f2 ? notFree . s
+      }}
+  },
+  f0 ! 0.5 : pick . & {
+    f0 ? free .
+      (+) { f2 ! 1.0 : pick . & {
+        f2 ? free .
+          (+) { q ! 1.0 : eat . (+) { f2 ! 1.0 : drop . (+) { f0 ! 1.0 : drop . t }}},
+        f2 ? notFree .
+          (+) { f0 ! 1.0 : drop . t }
+      }},
+    f0 ? notFree .
+      mu s. (+) { f0 ! 1.0 : pick . & {
+        f0 ? free .
+          (+) { f2 ! 1.0 : pick . & {
+            f2 ? free .
+              (+) { q ! 1.0 : eat . (+) { f2 ! 1.0 : drop . (+) { f0 ! 1.0 : drop . t }}},
+            f2 ? notFree .
+              (+) { f0 ! 1.0 : drop . t }
+          }},
+        f0 ? notFree . s
+      }}
+  }
+}
+
+q : mu t. & {
+  p0 ? eat . t,
+  p1 ? eat . t,
+  p2 ? eat . t
+}

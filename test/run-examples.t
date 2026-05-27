@@ -633,6 +633,565 @@ For each context file in this directory, run [prose output] to check the model a
   
   
   
+   ======= TEST ../examples/dining.ctx =======
+  
+  f0 : mu t. & {
+    p0 ? pick . (+) { p0 ! 1.0 : free .
+      mu s. & {
+        p0 ? drop . t,
+        p2 ? pick . (+) { p2 ! 1.0 : notFree . s }
+      }},
+    p2 ? pick . (+) { p2 ! 1.0 : free .
+      mu s. & {
+        p2 ? drop . t,
+        p0 ? pick . (+) { p0 ! 1.0 : notFree . s }
+      }}
+  }
+  
+  f1 : mu t. & {
+    p1 ? pick . (+) { p1 ! 1.0 : free .
+      mu s. & {
+        p1 ? drop . t,
+        p0 ? pick . (+) { p0 ! 1.0 : notFree . s }
+      }},
+    p0 ? pick . (+) { p0 ! 1.0 : free .
+      mu s. & {
+        p0 ? drop . t,
+        p1 ? pick . (+) { p1 ! 1.0 : notFree . s }
+      }}
+  }
+  
+  f2 : mu t. & {
+    p2 ? pick . (+) { p2 ! 1.0 : free .
+      mu s. & {
+        p2 ? drop . t,
+        p1 ? pick . (+) { p1 ! 1.0 : notFree . s }
+      }},
+    p1 ? pick . (+) { p1 ! 1.0 : free .
+      mu s. & {
+        p1 ? drop . t,
+        p2 ? pick . (+) { p2 ! 1.0 : notFree . s }
+      }}
+  }
+  
+  p0 : mu t. (+) {
+    f0 ! 0.5 : pick . & {
+      f0 ? free .
+        (+) { f1 ! 1.0 : pick . & {
+          f1 ? free .
+            (+) { q ! 1.0 : eat . (+) { f1 ! 1.0 : drop . (+) { f0 ! 1.0 : drop . t }}},
+          f1 ? notFree .
+            (+) { f0 ! 1.0 : drop . t }
+        }},
+      f0 ? notFree .
+        mu s. (+) { f0 ! 1.0 : pick . & {
+          f0 ? free .
+            (+) { f1 ! 1.0 : pick . & {
+              f1 ? free .
+                (+) { q ! 1.0 : eat . (+) { f1 ! 1.0 : drop . (+) { f0 ! 1.0 : drop . t }}},
+              f1 ? notFree .
+                (+) { f0 ! 1.0 : drop . t }
+            }},
+          f0 ? notFree . s
+        }}
+    },
+    f1 ! 0.5 : pick . & {
+      f1 ? free .
+        (+) { f0 ! 1.0 : pick . & {
+          f0 ? free .
+            (+) { q ! 1.0 : eat . (+) { f0 ! 1.0 : drop . (+) { f1 ! 1.0 : drop . t }}},
+          f0 ? notFree .
+            (+) { f1 ! 1.0 : drop . t }
+        }},
+      f1 ? notFree .
+        mu s. (+) { f1 ! 1.0 : pick . & {
+          f1 ? free .
+            (+) { f0 ! 1.0 : pick . & {
+              f0 ? free .
+                (+) { q ! 1.0 : eat . (+) { f0 ! 1.0 : drop . (+) { f1 ! 1.0 : drop . t }}},
+              f0 ? notFree .
+                (+) { f1 ! 1.0 : drop . t }
+            }},
+          f1 ? notFree . s
+        }}
+    }
+  }
+  
+  p1 : mu t. (+) {
+    f1 ! 0.5 : pick . & {
+      f1 ? free .
+        (+) { f2 ! 1.0 : pick . & {
+          f2 ? free .
+            (+) { q ! 1.0 : eat . (+) { f2 ! 1.0 : drop . (+) { f1 ! 1.0 : drop . t }}},
+          f2 ? notFree .
+            (+) { f1 ! 1.0 : drop . t }
+        }},
+      f1 ? notFree .
+        mu s. (+) { f1 ! 1.0 : pick . & {
+          f1 ? free .
+            (+) { f2 ! 1.0 : pick . & {
+              f2 ? free .
+                (+) { q ! 1.0 : eat . (+) { f2 ! 1.0 : drop . (+) { f1 ! 1.0 : drop . t }}},
+              f2 ? notFree .
+                (+) { f1 ! 1.0 : drop . t }
+            }},
+          f1 ? notFree . s
+        }}
+    },
+    f2 ! 0.5 : pick . & {
+      f2 ? free .
+        (+) { f1 ! 1.0 : pick . & {
+          f1 ? free .
+            (+) { q ! 1.0 : eat . (+) { f1 ! 1.0 : drop . (+) { f2 ! 1.0 : drop . t }}},
+          f1 ? notFree .
+            (+) { f2 ! 1.0 : drop . t }
+        }},
+      f2 ? notFree .
+        mu s. (+) { f2 ! 1.0 : pick . & {
+          f2 ? free .
+            (+) { f1 ! 1.0 : pick . & {
+              f1 ? free .
+                (+) { q ! 1.0 : eat . (+) { f1 ! 1.0 : drop . (+) { f2 ! 1.0 : drop . t }}},
+              f1 ? notFree .
+                (+) { f2 ! 1.0 : drop . t }
+            }},
+          f2 ? notFree . s
+        }}
+    }
+  }
+  
+  p2 : mu t. (+) {
+    f2 ! 0.5 : pick . & {
+      f2 ? free .
+        (+) { f0 ! 1.0 : pick . & {
+          f0 ? free .
+            (+) { q ! 1.0 : eat . (+) { f0 ! 1.0 : drop . (+) { f2 ! 1.0 : drop . t }}},
+          f0 ? notFree .
+            (+) { f2 ! 1.0 : drop . t }
+        }},
+      f2 ? notFree .
+        mu s. (+) { f2 ! 1.0 : pick . & {
+          f2 ? free .
+            (+) { f0 ! 1.0 : pick . & {
+              f0 ? free .
+                (+) { q ! 1.0 : eat . (+) { f0 ! 1.0 : drop . (+) { f2 ! 1.0 : drop . t }}},
+              f0 ? notFree .
+                (+) { f2 ! 1.0 : drop . t }
+            }},
+          f2 ? notFree . s
+        }}
+    },
+    f0 ! 0.5 : pick . & {
+      f0 ? free .
+        (+) { f2 ! 1.0 : pick . & {
+          f2 ? free .
+            (+) { q ! 1.0 : eat . (+) { f2 ! 1.0 : drop . (+) { f0 ! 1.0 : drop . t }}},
+          f2 ? notFree .
+            (+) { f0 ! 1.0 : drop . t }
+        }},
+      f0 ? notFree .
+        mu s. (+) { f0 ! 1.0 : pick . & {
+          f0 ? free .
+            (+) { f2 ! 1.0 : pick . & {
+              f2 ? free .
+                (+) { q ! 1.0 : eat . (+) { f2 ! 1.0 : drop . (+) { f0 ! 1.0 : drop . t }}},
+              f2 ? notFree .
+                (+) { f0 ! 1.0 : drop . t }
+            }},
+          f0 ? notFree . s
+        }}
+    }
+  }
+  
+  q : mu t. & {
+    p0 ? eat . t,
+    p1 ? eat . t,
+    p2 ? eat . t
+  }
+  
+   ======= PRISM output ========
+  
+  
+  module closure
+    closure : bool init false;
+  
+  endmodule
+  
+  module f0
+    f0 : [0..11] init 0;
+  
+    [p0_f0_pick_unit] f0=0 -> 1:(f0'=1);
+    [p2_f0_pick_unit] f0=0 -> 1:(f0'=6);
+    [] f0=1 -> 1:(f0'=2);
+    [f0_p0_free_unit] f0=2 -> 1:(f0'=3);
+    [p0_f0_drop_unit] f0=3 -> 1:(f0'=0);
+    [p2_f0_pick_unit] f0=3 -> 1:(f0'=4);
+    [] f0=4 -> 1:(f0'=5);
+    [f0_p2_notFree_unit] f0=5 -> 1:(f0'=3);
+    [] f0=6 -> 1:(f0'=7);
+    [f0_p2_free_unit] f0=7 -> 1:(f0'=8);
+    [p2_f0_drop_unit] f0=8 -> 1:(f0'=0);
+    [p0_f0_pick_unit] f0=8 -> 1:(f0'=9);
+    [] f0=9 -> 1:(f0'=10);
+    [f0_p0_notFree_unit] f0=10 -> 1:(f0'=8);
+  endmodule
+  
+  module f1
+    f1 : [0..11] init 0;
+  
+    [p1_f1_pick_unit] f1=0 -> 1:(f1'=1);
+    [p0_f1_pick_unit] f1=0 -> 1:(f1'=6);
+    [] f1=1 -> 1:(f1'=2);
+    [f1_p1_free_unit] f1=2 -> 1:(f1'=3);
+    [p1_f1_drop_unit] f1=3 -> 1:(f1'=0);
+    [p0_f1_pick_unit] f1=3 -> 1:(f1'=4);
+    [] f1=4 -> 1:(f1'=5);
+    [f1_p0_notFree_unit] f1=5 -> 1:(f1'=3);
+    [] f1=6 -> 1:(f1'=7);
+    [f1_p0_free_unit] f1=7 -> 1:(f1'=8);
+    [p0_f1_drop_unit] f1=8 -> 1:(f1'=0);
+    [p1_f1_pick_unit] f1=8 -> 1:(f1'=9);
+    [] f1=9 -> 1:(f1'=10);
+    [f1_p1_notFree_unit] f1=10 -> 1:(f1'=8);
+  endmodule
+  
+  module f2
+    f2 : [0..11] init 0;
+  
+    [p2_f2_pick_unit] f2=0 -> 1:(f2'=1);
+    [p1_f2_pick_unit] f2=0 -> 1:(f2'=6);
+    [] f2=1 -> 1:(f2'=2);
+    [f2_p2_free_unit] f2=2 -> 1:(f2'=3);
+    [p2_f2_drop_unit] f2=3 -> 1:(f2'=0);
+    [p1_f2_pick_unit] f2=3 -> 1:(f2'=4);
+    [] f2=4 -> 1:(f2'=5);
+    [f2_p1_notFree_unit] f2=5 -> 1:(f2'=3);
+    [] f2=6 -> 1:(f2'=7);
+    [f2_p1_free_unit] f2=7 -> 1:(f2'=8);
+    [p1_f2_drop_unit] f2=8 -> 1:(f2'=0);
+    [p2_f2_pick_unit] f2=8 -> 1:(f2'=9);
+    [] f2=9 -> 1:(f2'=10);
+    [f2_p2_notFree_unit] f2=10 -> 1:(f2'=8);
+  endmodule
+  
+  module p0
+    p0 : [0..55] init 0;
+  
+    [] p0=0 -> 0.5:(p0'=1) + 0.5:(p0'=2);
+    [p0_f0_pick_unit] p0=1 -> 1:(p0'=3);
+    [p0_f1_pick_unit] p0=2 -> 1:(p0'=29);
+    [f0_p0_free_unit] p0=3 -> 1:(p0'=4);
+    [f0_p0_notFree_unit] p0=3 -> 1:(p0'=15);
+    [] p0=4 -> 1:(p0'=5);
+    [p0_f1_pick_unit] p0=5 -> 1:(p0'=6);
+    [f1_p0_free_unit] p0=6 -> 1:(p0'=7);
+    [f1_p0_notFree_unit] p0=6 -> 1:(p0'=13);
+    [] p0=7 -> 1:(p0'=8);
+    [p0_q_eat_unit] p0=8 -> 1:(p0'=9);
+    [] p0=9 -> 1:(p0'=10);
+    [p0_f1_drop_unit] p0=10 -> 1:(p0'=11);
+    [] p0=11 -> 1:(p0'=12);
+    [p0_f0_drop_unit] p0=12 -> 1:(p0'=0);
+    [] p0=13 -> 1:(p0'=14);
+    [p0_f0_drop_unit] p0=14 -> 1:(p0'=0);
+    [] p0=15 -> 1:(p0'=16);
+    [p0_f0_pick_unit] p0=16 -> 1:(p0'=17);
+    [f0_p0_free_unit] p0=17 -> 1:(p0'=18);
+    [f0_p0_notFree_unit] p0=17 -> 1:(p0'=15);
+    [] p0=18 -> 1:(p0'=19);
+    [p0_f1_pick_unit] p0=19 -> 1:(p0'=20);
+    [f1_p0_free_unit] p0=20 -> 1:(p0'=21);
+    [f1_p0_notFree_unit] p0=20 -> 1:(p0'=27);
+    [] p0=21 -> 1:(p0'=22);
+    [p0_q_eat_unit] p0=22 -> 1:(p0'=23);
+    [] p0=23 -> 1:(p0'=24);
+    [p0_f1_drop_unit] p0=24 -> 1:(p0'=25);
+    [] p0=25 -> 1:(p0'=26);
+    [p0_f0_drop_unit] p0=26 -> 1:(p0'=0);
+    [] p0=27 -> 1:(p0'=28);
+    [p0_f0_drop_unit] p0=28 -> 1:(p0'=0);
+    [f1_p0_free_unit] p0=29 -> 1:(p0'=30);
+    [f1_p0_notFree_unit] p0=29 -> 1:(p0'=41);
+    [] p0=30 -> 1:(p0'=31);
+    [p0_f0_pick_unit] p0=31 -> 1:(p0'=32);
+    [f0_p0_free_unit] p0=32 -> 1:(p0'=33);
+    [f0_p0_notFree_unit] p0=32 -> 1:(p0'=39);
+    [] p0=33 -> 1:(p0'=34);
+    [p0_q_eat_unit] p0=34 -> 1:(p0'=35);
+    [] p0=35 -> 1:(p0'=36);
+    [p0_f0_drop_unit] p0=36 -> 1:(p0'=37);
+    [] p0=37 -> 1:(p0'=38);
+    [p0_f1_drop_unit] p0=38 -> 1:(p0'=0);
+    [] p0=39 -> 1:(p0'=40);
+    [p0_f1_drop_unit] p0=40 -> 1:(p0'=0);
+    [] p0=41 -> 1:(p0'=42);
+    [p0_f1_pick_unit] p0=42 -> 1:(p0'=43);
+    [f1_p0_free_unit] p0=43 -> 1:(p0'=44);
+    [f1_p0_notFree_unit] p0=43 -> 1:(p0'=41);
+    [] p0=44 -> 1:(p0'=45);
+    [p0_f0_pick_unit] p0=45 -> 1:(p0'=46);
+    [f0_p0_free_unit] p0=46 -> 1:(p0'=47);
+    [f0_p0_notFree_unit] p0=46 -> 1:(p0'=53);
+    [] p0=47 -> 1:(p0'=48);
+    [p0_q_eat_unit] p0=48 -> 1:(p0'=49);
+    [] p0=49 -> 1:(p0'=50);
+    [p0_f0_drop_unit] p0=50 -> 1:(p0'=51);
+    [] p0=51 -> 1:(p0'=52);
+    [p0_f1_drop_unit] p0=52 -> 1:(p0'=0);
+    [] p0=53 -> 1:(p0'=54);
+    [p0_f1_drop_unit] p0=54 -> 1:(p0'=0);
+  endmodule
+  
+  module p1
+    p1 : [0..55] init 0;
+  
+    [] p1=0 -> 0.5:(p1'=1) + 0.5:(p1'=2);
+    [p1_f1_pick_unit] p1=1 -> 1:(p1'=3);
+    [p1_f2_pick_unit] p1=2 -> 1:(p1'=29);
+    [f1_p1_free_unit] p1=3 -> 1:(p1'=4);
+    [f1_p1_notFree_unit] p1=3 -> 1:(p1'=15);
+    [] p1=4 -> 1:(p1'=5);
+    [p1_f2_pick_unit] p1=5 -> 1:(p1'=6);
+    [f2_p1_free_unit] p1=6 -> 1:(p1'=7);
+    [f2_p1_notFree_unit] p1=6 -> 1:(p1'=13);
+    [] p1=7 -> 1:(p1'=8);
+    [p1_q_eat_unit] p1=8 -> 1:(p1'=9);
+    [] p1=9 -> 1:(p1'=10);
+    [p1_f2_drop_unit] p1=10 -> 1:(p1'=11);
+    [] p1=11 -> 1:(p1'=12);
+    [p1_f1_drop_unit] p1=12 -> 1:(p1'=0);
+    [] p1=13 -> 1:(p1'=14);
+    [p1_f1_drop_unit] p1=14 -> 1:(p1'=0);
+    [] p1=15 -> 1:(p1'=16);
+    [p1_f1_pick_unit] p1=16 -> 1:(p1'=17);
+    [f1_p1_free_unit] p1=17 -> 1:(p1'=18);
+    [f1_p1_notFree_unit] p1=17 -> 1:(p1'=15);
+    [] p1=18 -> 1:(p1'=19);
+    [p1_f2_pick_unit] p1=19 -> 1:(p1'=20);
+    [f2_p1_free_unit] p1=20 -> 1:(p1'=21);
+    [f2_p1_notFree_unit] p1=20 -> 1:(p1'=27);
+    [] p1=21 -> 1:(p1'=22);
+    [p1_q_eat_unit] p1=22 -> 1:(p1'=23);
+    [] p1=23 -> 1:(p1'=24);
+    [p1_f2_drop_unit] p1=24 -> 1:(p1'=25);
+    [] p1=25 -> 1:(p1'=26);
+    [p1_f1_drop_unit] p1=26 -> 1:(p1'=0);
+    [] p1=27 -> 1:(p1'=28);
+    [p1_f1_drop_unit] p1=28 -> 1:(p1'=0);
+    [f2_p1_free_unit] p1=29 -> 1:(p1'=30);
+    [f2_p1_notFree_unit] p1=29 -> 1:(p1'=41);
+    [] p1=30 -> 1:(p1'=31);
+    [p1_f1_pick_unit] p1=31 -> 1:(p1'=32);
+    [f1_p1_free_unit] p1=32 -> 1:(p1'=33);
+    [f1_p1_notFree_unit] p1=32 -> 1:(p1'=39);
+    [] p1=33 -> 1:(p1'=34);
+    [p1_q_eat_unit] p1=34 -> 1:(p1'=35);
+    [] p1=35 -> 1:(p1'=36);
+    [p1_f1_drop_unit] p1=36 -> 1:(p1'=37);
+    [] p1=37 -> 1:(p1'=38);
+    [p1_f2_drop_unit] p1=38 -> 1:(p1'=0);
+    [] p1=39 -> 1:(p1'=40);
+    [p1_f2_drop_unit] p1=40 -> 1:(p1'=0);
+    [] p1=41 -> 1:(p1'=42);
+    [p1_f2_pick_unit] p1=42 -> 1:(p1'=43);
+    [f2_p1_free_unit] p1=43 -> 1:(p1'=44);
+    [f2_p1_notFree_unit] p1=43 -> 1:(p1'=41);
+    [] p1=44 -> 1:(p1'=45);
+    [p1_f1_pick_unit] p1=45 -> 1:(p1'=46);
+    [f1_p1_free_unit] p1=46 -> 1:(p1'=47);
+    [f1_p1_notFree_unit] p1=46 -> 1:(p1'=53);
+    [] p1=47 -> 1:(p1'=48);
+    [p1_q_eat_unit] p1=48 -> 1:(p1'=49);
+    [] p1=49 -> 1:(p1'=50);
+    [p1_f1_drop_unit] p1=50 -> 1:(p1'=51);
+    [] p1=51 -> 1:(p1'=52);
+    [p1_f2_drop_unit] p1=52 -> 1:(p1'=0);
+    [] p1=53 -> 1:(p1'=54);
+    [p1_f2_drop_unit] p1=54 -> 1:(p1'=0);
+  endmodule
+  
+  module p2
+    p2 : [0..55] init 0;
+  
+    [] p2=0 -> 0.5:(p2'=1) + 0.5:(p2'=2);
+    [p2_f2_pick_unit] p2=1 -> 1:(p2'=3);
+    [p2_f0_pick_unit] p2=2 -> 1:(p2'=29);
+    [f2_p2_free_unit] p2=3 -> 1:(p2'=4);
+    [f2_p2_notFree_unit] p2=3 -> 1:(p2'=15);
+    [] p2=4 -> 1:(p2'=5);
+    [p2_f0_pick_unit] p2=5 -> 1:(p2'=6);
+    [f0_p2_free_unit] p2=6 -> 1:(p2'=7);
+    [f0_p2_notFree_unit] p2=6 -> 1:(p2'=13);
+    [] p2=7 -> 1:(p2'=8);
+    [p2_q_eat_unit] p2=8 -> 1:(p2'=9);
+    [] p2=9 -> 1:(p2'=10);
+    [p2_f0_drop_unit] p2=10 -> 1:(p2'=11);
+    [] p2=11 -> 1:(p2'=12);
+    [p2_f2_drop_unit] p2=12 -> 1:(p2'=0);
+    [] p2=13 -> 1:(p2'=14);
+    [p2_f2_drop_unit] p2=14 -> 1:(p2'=0);
+    [] p2=15 -> 1:(p2'=16);
+    [p2_f2_pick_unit] p2=16 -> 1:(p2'=17);
+    [f2_p2_free_unit] p2=17 -> 1:(p2'=18);
+    [f2_p2_notFree_unit] p2=17 -> 1:(p2'=15);
+    [] p2=18 -> 1:(p2'=19);
+    [p2_f0_pick_unit] p2=19 -> 1:(p2'=20);
+    [f0_p2_free_unit] p2=20 -> 1:(p2'=21);
+    [f0_p2_notFree_unit] p2=20 -> 1:(p2'=27);
+    [] p2=21 -> 1:(p2'=22);
+    [p2_q_eat_unit] p2=22 -> 1:(p2'=23);
+    [] p2=23 -> 1:(p2'=24);
+    [p2_f0_drop_unit] p2=24 -> 1:(p2'=25);
+    [] p2=25 -> 1:(p2'=26);
+    [p2_f2_drop_unit] p2=26 -> 1:(p2'=0);
+    [] p2=27 -> 1:(p2'=28);
+    [p2_f2_drop_unit] p2=28 -> 1:(p2'=0);
+    [f0_p2_free_unit] p2=29 -> 1:(p2'=30);
+    [f0_p2_notFree_unit] p2=29 -> 1:(p2'=41);
+    [] p2=30 -> 1:(p2'=31);
+    [p2_f2_pick_unit] p2=31 -> 1:(p2'=32);
+    [f2_p2_free_unit] p2=32 -> 1:(p2'=33);
+    [f2_p2_notFree_unit] p2=32 -> 1:(p2'=39);
+    [] p2=33 -> 1:(p2'=34);
+    [p2_q_eat_unit] p2=34 -> 1:(p2'=35);
+    [] p2=35 -> 1:(p2'=36);
+    [p2_f2_drop_unit] p2=36 -> 1:(p2'=37);
+    [] p2=37 -> 1:(p2'=38);
+    [p2_f0_drop_unit] p2=38 -> 1:(p2'=0);
+    [] p2=39 -> 1:(p2'=40);
+    [p2_f0_drop_unit] p2=40 -> 1:(p2'=0);
+    [] p2=41 -> 1:(p2'=42);
+    [p2_f0_pick_unit] p2=42 -> 1:(p2'=43);
+    [f0_p2_free_unit] p2=43 -> 1:(p2'=44);
+    [f0_p2_notFree_unit] p2=43 -> 1:(p2'=41);
+    [] p2=44 -> 1:(p2'=45);
+    [p2_f2_pick_unit] p2=45 -> 1:(p2'=46);
+    [f2_p2_free_unit] p2=46 -> 1:(p2'=47);
+    [f2_p2_notFree_unit] p2=46 -> 1:(p2'=53);
+    [] p2=47 -> 1:(p2'=48);
+    [p2_q_eat_unit] p2=48 -> 1:(p2'=49);
+    [] p2=49 -> 1:(p2'=50);
+    [p2_f2_drop_unit] p2=50 -> 1:(p2'=51);
+    [] p2=51 -> 1:(p2'=52);
+    [p2_f0_drop_unit] p2=52 -> 1:(p2'=0);
+    [] p2=53 -> 1:(p2'=54);
+    [p2_f0_drop_unit] p2=54 -> 1:(p2'=0);
+  endmodule
+  
+  module q
+    q : [0..1] init 0;
+  
+    [p0_q_eat_unit] q=0 -> 1:(q'=0);
+    [p1_q_eat_unit] q=0 -> 1:(q'=0);
+    [p2_q_eat_unit] q=0 -> 1:(q'=0);
+  endmodule
+  
+  label "end" = (f0=11) & (f1=11) & (f2=11) & (p0=55) & (p1=55) & (p2=55) & (q=1);
+  label "cando_f0_p0_free_unit" = f0=1;
+  label "cando_f0_p0_free_unit_branch" = (p0=3) | (p0=17) | (p0=32) | (p0=46);
+  label "cando_f0_p0_notFree_unit" = f0=9;
+  label "cando_f0_p0_notFree_unit_branch" = (p0=3) | (p0=17) | (p0=32) | (p0=46);
+  label "cando_f0_p2_free_unit" = f0=6;
+  label "cando_f0_p2_free_unit_branch" = (p2=6) | (p2=20) | (p2=29) | (p2=43);
+  label "cando_f0_p2_notFree_unit" = f0=4;
+  label "cando_f0_p2_notFree_unit_branch" = (p2=6) | (p2=20) | (p2=29) | (p2=43);
+  label "cando_f1_p0_free_unit" = f1=6;
+  label "cando_f1_p0_free_unit_branch" = (p0=6) | (p0=20) | (p0=29) | (p0=43);
+  label "cando_f1_p0_notFree_unit" = f1=4;
+  label "cando_f1_p0_notFree_unit_branch" = (p0=6) | (p0=20) | (p0=29) | (p0=43);
+  label "cando_f1_p1_free_unit" = f1=1;
+  label "cando_f1_p1_free_unit_branch" = (p1=3) | (p1=17) | (p1=32) | (p1=46);
+  label "cando_f1_p1_notFree_unit" = f1=9;
+  label "cando_f1_p1_notFree_unit_branch" = (p1=3) | (p1=17) | (p1=32) | (p1=46);
+  label "cando_f2_p1_free_unit" = f2=6;
+  label "cando_f2_p1_free_unit_branch" = (p1=6) | (p1=20) | (p1=29) | (p1=43);
+  label "cando_f2_p1_notFree_unit" = f2=4;
+  label "cando_f2_p1_notFree_unit_branch" = (p1=6) | (p1=20) | (p1=29) | (p1=43);
+  label "cando_f2_p2_free_unit" = f2=1;
+  label "cando_f2_p2_free_unit_branch" = (p2=3) | (p2=17) | (p2=32) | (p2=46);
+  label "cando_f2_p2_notFree_unit" = f2=9;
+  label "cando_f2_p2_notFree_unit_branch" = (p2=3) | (p2=17) | (p2=32) | (p2=46);
+  label "cando_p0_f0_drop_unit" = (p0=11) | (p0=13) | (p0=25) | (p0=27) | (p0=35) | (p0=49);
+  label "cando_p0_f0_drop_unit_branch" = f0=3;
+  label "cando_p0_f0_pick_unit" = (p0=0) | (p0=15) | (p0=30) | (p0=44);
+  label "cando_p0_f0_pick_unit_branch" = (f0=0) | (f0=8);
+  label "cando_p0_f1_drop_unit" = (p0=9) | (p0=23) | (p0=37) | (p0=39) | (p0=51) | (p0=53);
+  label "cando_p0_f1_drop_unit_branch" = f1=8;
+  label "cando_p0_f1_pick_unit" = (p0=0) | (p0=4) | (p0=18) | (p0=41);
+  label "cando_p0_f1_pick_unit_branch" = (f1=0) | (f1=3);
+  label "cando_p0_q_eat_unit" = (p0=7) | (p0=21) | (p0=33) | (p0=47);
+  label "cando_p0_q_eat_unit_branch" = q=0;
+  label "cando_p1_f1_drop_unit" = (p1=11) | (p1=13) | (p1=25) | (p1=27) | (p1=35) | (p1=49);
+  label "cando_p1_f1_drop_unit_branch" = f1=3;
+  label "cando_p1_f1_pick_unit" = (p1=0) | (p1=15) | (p1=30) | (p1=44);
+  label "cando_p1_f1_pick_unit_branch" = (f1=0) | (f1=8);
+  label "cando_p1_f2_drop_unit" = (p1=9) | (p1=23) | (p1=37) | (p1=39) | (p1=51) | (p1=53);
+  label "cando_p1_f2_drop_unit_branch" = f2=8;
+  label "cando_p1_f2_pick_unit" = (p1=0) | (p1=4) | (p1=18) | (p1=41);
+  label "cando_p1_f2_pick_unit_branch" = (f2=0) | (f2=3);
+  label "cando_p1_q_eat_unit" = (p1=7) | (p1=21) | (p1=33) | (p1=47);
+  label "cando_p1_q_eat_unit_branch" = q=0;
+  label "cando_p2_f0_drop_unit" = (p2=9) | (p2=23) | (p2=37) | (p2=39) | (p2=51) | (p2=53);
+  label "cando_p2_f0_drop_unit_branch" = f0=8;
+  label "cando_p2_f0_pick_unit" = (p2=0) | (p2=4) | (p2=18) | (p2=41);
+  label "cando_p2_f0_pick_unit_branch" = (f0=0) | (f0=3);
+  label "cando_p2_f2_drop_unit" = (p2=11) | (p2=13) | (p2=25) | (p2=27) | (p2=35) | (p2=49);
+  label "cando_p2_f2_drop_unit_branch" = f2=3;
+  label "cando_p2_f2_pick_unit" = (p2=0) | (p2=15) | (p2=30) | (p2=44);
+  label "cando_p2_f2_pick_unit_branch" = (f2=0) | (f2=8);
+  label "cando_p2_q_eat_unit" = (p2=7) | (p2=21) | (p2=33) | (p2=47);
+  label "cando_p2_q_eat_unit_branch" = q=0;
+  label "cando_f0_p0_branch" = (p0=3) | (p0=17) | (p0=32) | (p0=46);
+  label "cando_f0_p2_branch" = (p2=6) | (p2=20) | (p2=29) | (p2=43);
+  label "cando_f1_p0_branch" = (p0=6) | (p0=20) | (p0=29) | (p0=43);
+  label "cando_f1_p1_branch" = (p1=3) | (p1=17) | (p1=32) | (p1=46);
+  label "cando_f2_p1_branch" = (p1=6) | (p1=20) | (p1=29) | (p1=43);
+  label "cando_f2_p2_branch" = (p2=3) | (p2=17) | (p2=32) | (p2=46);
+  label "cando_p0_f0_branch" = (f0=0) | (f0=3) | (f0=8);
+  label "cando_p0_f1_branch" = (f1=0) | (f1=3) | (f1=8);
+  label "cando_p0_q_branch" = q=0;
+  label "cando_p1_f1_branch" = (f1=0) | (f1=3) | (f1=8);
+  label "cando_p1_f2_branch" = (f2=0) | (f2=3) | (f2=8);
+  label "cando_p1_q_branch" = q=0;
+  label "cando_p2_f0_branch" = (f0=0) | (f0=3) | (f0=8);
+  label "cando_p2_f2_branch" = (f2=0) | (f2=3) | (f2=8);
+  label "cando_p2_q_branch" = q=0;
+  
+  // Type safety
+  P>=1 [ (G ((("cando_f0_p0_free_unit" & "cando_f0_p0_branch") => "cando_f0_p0_free_unit_branch") & ((("cando_f0_p0_notFree_unit" & "cando_f0_p0_branch") => "cando_f0_p0_notFree_unit_branch") & ((("cando_f0_p2_free_unit" & "cando_f0_p2_branch") => "cando_f0_p2_free_unit_branch") & ((("cando_f0_p2_notFree_unit" & "cando_f0_p2_branch") => "cando_f0_p2_notFree_unit_branch") & ((("cando_f1_p0_free_unit" & "cando_f1_p0_branch") => "cando_f1_p0_free_unit_branch") & ((("cando_f1_p0_notFree_unit" & "cando_f1_p0_branch") => "cando_f1_p0_notFree_unit_branch") & ((("cando_f1_p1_free_unit" & "cando_f1_p1_branch") => "cando_f1_p1_free_unit_branch") & ((("cando_f1_p1_notFree_unit" & "cando_f1_p1_branch") => "cando_f1_p1_notFree_unit_branch") & ((("cando_f2_p1_free_unit" & "cando_f2_p1_branch") => "cando_f2_p1_free_unit_branch") & ((("cando_f2_p1_notFree_unit" & "cando_f2_p1_branch") => "cando_f2_p1_notFree_unit_branch") & ((("cando_f2_p2_free_unit" & "cando_f2_p2_branch") => "cando_f2_p2_free_unit_branch") & ((("cando_f2_p2_notFree_unit" & "cando_f2_p2_branch") => "cando_f2_p2_notFree_unit_branch") & ((("cando_p0_f0_drop_unit" & "cando_p0_f0_branch") => "cando_p0_f0_drop_unit_branch") & ((("cando_p0_f0_pick_unit" & "cando_p0_f0_branch") => "cando_p0_f0_pick_unit_branch") & ((("cando_p0_f1_drop_unit" & "cando_p0_f1_branch") => "cando_p0_f1_drop_unit_branch") & ((("cando_p0_f1_pick_unit" & "cando_p0_f1_branch") => "cando_p0_f1_pick_unit_branch") & ((("cando_p0_q_eat_unit" & "cando_p0_q_branch") => "cando_p0_q_eat_unit_branch") & ((("cando_p1_f1_drop_unit" & "cando_p1_f1_branch") => "cando_p1_f1_drop_unit_branch") & ((("cando_p1_f1_pick_unit" & "cando_p1_f1_branch") => "cando_p1_f1_pick_unit_branch") & ((("cando_p1_f2_drop_unit" & "cando_p1_f2_branch") => "cando_p1_f2_drop_unit_branch") & ((("cando_p1_f2_pick_unit" & "cando_p1_f2_branch") => "cando_p1_f2_pick_unit_branch") & ((("cando_p1_q_eat_unit" & "cando_p1_q_branch") => "cando_p1_q_eat_unit_branch") & ((("cando_p2_f0_drop_unit" & "cando_p2_f0_branch") => "cando_p2_f0_drop_unit_branch") & ((("cando_p2_f0_pick_unit" & "cando_p2_f0_branch") => "cando_p2_f0_pick_unit_branch") & ((("cando_p2_f2_drop_unit" & "cando_p2_f2_branch") => "cando_p2_f2_drop_unit_branch") & ((("cando_p2_f2_pick_unit" & "cando_p2_f2_branch") => "cando_p2_f2_pick_unit_branch") & (("cando_p2_q_eat_unit" & "cando_p2_q_branch") => "cando_p2_q_eat_unit_branch")))))))))))))))))))))))))))) ]
+  
+  // Deadlock freedom (lower bound)
+  Pmin=? [ (G ("deadlock" => "end")) ]
+  
+  // Deadlock freedom (upper bound)
+  Pmax=? [ (G ("deadlock" => "end")) ]
+  
+  // Termination (lower bound)
+  Pmin=? [ (F "deadlock") ]
+  
+  // Termination (upper bound)
+  Pmax=? [ (F "deadlock") ]
+  
+   ======= Property checking =======
+  
+  Type safety
+  Result: true
+  
+  Deadlock freedom (lower bound)
+  Result: 1.0 (exact floating point)
+  
+  Deadlock freedom (upper bound)
+  Result: 1.0 (exact floating point)
+  
+  Termination (lower bound)
+  Result: 0.0 (exact floating point)
+  
+  Termination (upper bound)
+  Result: 0.0 (exact floating point)
+  
+  
+  
+  
    ======= TEST ../examples/fact_3.ctx =======
   
   w0 : mu t .
