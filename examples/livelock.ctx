@@ -1,0 +1,10 @@
+(* Weak almost-sure livelock: a and b loop forever exchanging [ping], while c
+   waits for a [done] message from a that is never sent. The system never
+   deadlocks (a and b always progress), but c is starved forever, so the
+   context is not almost-surely live. *)
+
+a : mu t . (+) { b ! 1.0 : ping . t }
+
+b : mu t . & { a ? ping . t }
+
+c : & { a ? done . end }

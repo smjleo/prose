@@ -1,0 +1,11 @@
+p : (+) {
+        q ! 0.7 : ok . (+) { r ! 1.0 : notify . end },
+        q ! 0.3 : go . mu t . (+) { q ! 1.0 : go . t }
+      }
+
+q : & {
+        p ? ok . end,
+        p ? go . mu t . & { p ? go . t }
+      }
+
+r : & { p ? notify . end }

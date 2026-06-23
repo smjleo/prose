@@ -7,6 +7,8 @@ module Annotation : sig
     | Deadlock_freedom_upper
     | Termination_lower
     | Termination_upper
+    | Liveness_lower
+    | Liveness_upper
   [@@deriving equal, sexp_of]
 
   val all : t list

@@ -108,6 +108,7 @@ For each context file in this directory, run [prose output] to check the model a
   label "cando_c_a_branch" = a=0;
   label "cando_s_c_branch" = c=0;
   label "cando_s_e_branch" = false;
+  label "wals" = ((s=0) & (c=0) & (a=0) & (b=2)) | ((s=6) & (c=4) & (a=0) & (b=5)) | ((s=6) & (c=5) & (a=3) & (b=5)) | ((s=7) & (c=0) & (a=0) & (b=4));
   
   // Type safety
   P>=1 [ (G ((("cando_a_s_authorise_unit" & "cando_a_s_branch") => "cando_a_s_authorise_unit_branch") & ((("cando_b_s_connect_unit" & "cando_b_s_branch") => "cando_b_s_connect_unit_branch") & ((("cando_b_s_err_unit" & "cando_b_s_branch") => "cando_b_s_err_unit_branch") & ((("cando_b_s_retry_unit" & "cando_b_s_branch") => "cando_b_s_retry_unit_branch") & ((("cando_c_a_pass_unit" & "cando_c_a_branch") => "cando_c_a_pass_unit_branch") & ((("cando_c_a_quit_unit" & "cando_c_a_branch") => "cando_c_a_quit_unit_branch") & ((("cando_s_c_cancel_unit" & "cando_s_c_branch") => "cando_s_c_cancel_unit_branch") & ((("cando_s_c_login_unit" & "cando_s_c_branch") => "cando_s_c_login_unit_branch") & (("cando_s_e_stop_unit" & "cando_s_e_branch") => "cando_s_e_stop_unit_branch")))))))))) ]
@@ -123,6 +124,12 @@ For each context file in this directory, run [prose output] to check the model a
   
   // Termination (upper bound)
   Pmax=? [ (F "deadlock") ]
+  
+  // Liveness (lower bound)
+  Pmin=? [ (G (!"wals")) ]
+  
+  // Liveness (upper bound)
+  Pmax=? [ (G (!"wals")) ]
   
    ======= Property checking =======
   
@@ -140,6 +147,12 @@ For each context file in this directory, run [prose output] to check the model a
   
   Termination (upper bound)
   Result: 0.6 (exact floating point)
+  
+  Liveness (lower bound)
+  Result: 0.36 (exact floating point)
+  
+  Liveness (upper bound)
+  Result: 0.36 (exact floating point)
   
   
   
@@ -523,6 +536,7 @@ For each context file in this directory, run [prose output] to check the model a
   label "cando_q5_dice5_branch" = dice5=0;
   label "cando_q6_dice6_branch" = dice6=0;
   label "cando_q6_q0_branch" = q0=6;
+  label "wals" = ((p0=1) & (q0=0) & (p1=0) & (q1=0) & (p2=0) & (q2=0) & (p3=0) & (q3=0) & (p4=0) & (q4=0) & (p5=0) & (q5=0) & (p6=0) & (q6=0) & (dice1=0) & (dice2=0) & (dice3=0) & (dice4=0) & (dice5=0) & (dice6=0) & (dummy=0)) | ((p0=2) & (q0=0) & (p1=0) & (q1=0) & (p2=0) & (q2=0) & (p3=0) & (q3=0) & (p4=0) & (q4=0) & (p5=0) & (q5=0) & (p6=0) & (q6=0) & (dice1=0) & (dice2=0) & (dice3=0) & (dice4=0) & (dice5=0) & (dice6=0) & (dummy=0)) | ((p0=3) & (q0=2) & (p1=0) & (q1=0) & (p2=0) & (q2=0) & (p3=0) & (q3=0) & (p4=0) & (q4=0) & (p5=0) & (q5=0) & (p6=0) & (q6=0) & (dice1=0) & (dice2=0) & (dice3=0) & (dice4=0) & (dice5=0) & (dice6=0) & (dummy=0)) | ((p0=3) & (q0=3) & (p1=0) & (q1=0) & (p2=0) & (q2=0) & (p3=0) & (q3=0) & (p4=2) & (q4=0) & (p5=0) & (q5=0) & (p6=0) & (q6=0) & (dice1=0) & (dice2=0) & (dice3=0) & (dice4=0) & (dice5=0) & (dice6=0) & (dummy=0)) | ((p0=3) & (q0=3) & (p1=0) & (q1=0) & (p2=0) & (q2=0) & (p3=0) & (q3=0) & (p4=3) & (q4=0) & (p5=0) & (q5=0) & (p6=0) & (q6=0) & (dice1=0) & (dice2=0) & (dice3=0) & (dice4=0) & (dice5=0) & (dice6=0) & (dummy=0)) | ((p0=3) & (q0=3) & (p1=0) & (q1=0) & (p2=0) & (q2=0) & (p3=0) & (q3=0) & (p4=4) & (q4=2) & (p5=0) & (q5=0) & (p6=0) & (q6=0) & (dice1=0) & (dice2=0) & (dice3=0) & (dice4=0) & (dice5=0) & (dice6=0) & (dummy=0)) | ((p0=3) & (q0=3) & (p1=0) & (q1=0) & (p2=0) & (q2=0) & (p3=0) & (q3=0) & (p4=4) & (q4=4) & (p5=0) & (q5=0) & (p6=0) & (q6=0) & (dice1=0) & (dice2=0) & (dice3=0) & (dice4=0) & (dice5=0) & (dice6=0) & (dummy=0)) | ((p0=3) & (q0=3) & (p1=0) & (q1=0) & (p2=0) & (q2=0) & (p3=0) & (q3=0) & (p4=4) & (q4=5) & (p5=0) & (q5=0) & (p6=0) & (q6=0) & (dice1=0) & (dice2=0) & (dice3=1) & (dice4=0) & (dice5=0) & (dice6=0) & (dummy=0)) | ((p0=3) & (q0=3) & (p1=0) & (q1=0) & (p2=0) & (q2=0) & (p3=0) & (q3=0) & (p4=4) & (q4=5) & (p5=0) & (q5=0) & (p6=0) & (q6=0) & (dice1=0) & (dice2=1) & (dice3=0) & (dice4=0) & (dice5=0) & (dice6=0) & (dummy=0)) | ((p0=3) & (q0=3) & (p1=0) & (q1=0) & (p2=0) & (q2=0) & (p3=0) & (q3=2) & (p4=0) & (q4=0) & (p5=0) & (q5=0) & (p6=0) & (q6=0) & (dice1=0) & (dice2=0) & (dice3=0) & (dice4=0) & (dice5=0) & (dice6=0) & (dummy=0)) | ((p0=3) & (q0=3) & (p1=0) & (q1=0) & (p2=0) & (q2=0) & (p3=2) & (q3=0) & (p4=0) & (q4=0) & (p5=0) & (q5=0) & (p6=0) & (q6=0) & (dice1=0) & (dice2=0) & (dice3=0) & (dice4=0) & (dice5=0) & (dice6=0) & (dummy=0)) | ((p0=3) & (q0=3) & (p1=0) & (q1=0) & (p2=0) & (q2=0) & (p3=3) & (q3=0) & (p4=0) & (q4=0) & (p5=0) & (q5=0) & (p6=0) & (q6=0) & (dice1=0) & (dice2=0) & (dice3=0) & (dice4=0) & (dice5=0) & (dice6=0) & (dummy=0)) | ((p0=3) & (q0=3) & (p1=0) & (q1=0) & (p2=0) & (q2=0) & (p3=4) & (q3=4) & (p4=0) & (q4=0) & (p5=0) & (q5=0) & (p6=0) & (q6=0) & (dice1=0) & (dice2=0) & (dice3=0) & (dice4=0) & (dice5=0) & (dice6=0) & (dummy=0)) | ((p0=3) & (q0=3) & (p1=0) & (q1=0) & (p2=0) & (q2=0) & (p3=4) & (q3=5) & (p4=0) & (q4=0) & (p5=0) & (q5=0) & (p6=0) & (q6=0) & (dice1=2) & (dice2=0) & (dice3=0) & (dice4=0) & (dice5=0) & (dice6=0) & (dummy=0)) | ((p0=3) & (q0=3) & (p1=0) & (q1=2) & (p2=0) & (q2=0) & (p3=0) & (q3=0) & (p4=0) & (q4=0) & (p5=0) & (q5=0) & (p6=0) & (q6=0) & (dice1=0) & (dice2=0) & (dice3=0) & (dice4=0) & (dice5=0) & (dice6=0) & (dummy=0)) | ((p0=3) & (q0=3) & (p1=0) & (q1=4) & (p2=0) & (q2=0) & (p3=0) & (q3=0) & (p4=0) & (q4=0) & (p5=0) & (q5=0) & (p6=0) & (q6=0) & (dice1=0) & (dice2=0) & (dice3=0) & (dice4=0) & (dice5=0) & (dice6=0) & (dummy=0)) | ((p0=3) & (q0=3) & (p1=2) & (q1=0) & (p2=0) & (q2=0) & (p3=0) & (q3=0) & (p4=0) & (q4=0) & (p5=0) & (q5=0) & (p6=0) & (q6=0) & (dice1=0) & (dice2=0) & (dice3=0) & (dice4=0) & (dice5=0) & (dice6=0) & (dummy=0)) | ((p0=3) & (q0=3) & (p1=3) & (q1=0) & (p2=0) & (q2=0) & (p3=0) & (q3=0) & (p4=0) & (q4=0) & (p5=0) & (q5=0) & (p6=0) & (q6=0) & (dice1=0) & (dice2=0) & (dice3=0) & (dice4=0) & (dice5=0) & (dice6=0) & (dummy=0)) | ((p0=3) & (q0=5) & (p1=0) & (q1=0) & (p2=0) & (q2=0) & (p3=0) & (q3=0) & (p4=0) & (q4=0) & (p5=0) & (q5=0) & (p6=0) & (q6=0) & (dice1=0) & (dice2=0) & (dice3=0) & (dice4=0) & (dice5=0) & (dice6=0) & (dummy=0)) | ((p0=3) & (q0=5) & (p1=0) & (q1=0) & (p2=0) & (q2=0) & (p3=0) & (q3=0) & (p4=0) & (q4=0) & (p5=0) & (q5=0) & (p6=4) & (q6=0) & (dice1=0) & (dice2=0) & (dice3=0) & (dice4=0) & (dice5=0) & (dice6=0) & (dummy=0)) | ((p0=3) & (q0=6) & (p1=0) & (q1=0) & (p2=0) & (q2=0) & (p3=0) & (q3=0) & (p4=0) & (q4=0) & (p5=0) & (q5=0) & (p6=2) & (q6=0) & (dice1=0) & (dice2=0) & (dice3=0) & (dice4=0) & (dice5=0) & (dice6=0) & (dummy=0)) | ((p0=3) & (q0=6) & (p1=0) & (q1=0) & (p2=0) & (q2=0) & (p3=0) & (q3=0) & (p4=0) & (q4=0) & (p5=0) & (q5=0) & (p6=3) & (q6=0) & (dice1=0) & (dice2=0) & (dice3=0) & (dice4=0) & (dice5=0) & (dice6=0) & (dummy=0)) | ((p0=3) & (q0=6) & (p1=0) & (q1=0) & (p2=0) & (q2=0) & (p3=0) & (q3=0) & (p4=0) & (q4=0) & (p5=0) & (q5=0) & (p6=4) & (q6=2) & (dice1=0) & (dice2=0) & (dice3=0) & (dice4=0) & (dice5=0) & (dice6=0) & (dummy=0)) | ((p0=3) & (q0=6) & (p1=0) & (q1=0) & (p2=0) & (q2=0) & (p3=0) & (q3=0) & (p4=0) & (q4=0) & (p5=0) & (q5=0) & (p6=4) & (q6=4) & (dice1=0) & (dice2=0) & (dice3=0) & (dice4=0) & (dice5=0) & (dice6=0) & (dummy=0)) | ((p0=3) & (q0=6) & (p1=0) & (q1=0) & (p2=0) & (q2=0) & (p3=0) & (q3=0) & (p4=0) & (q4=0) & (p5=0) & (q5=0) & (p6=4) & (q6=5) & (dice1=0) & (dice2=0) & (dice3=0) & (dice4=0) & (dice5=0) & (dice6=1) & (dummy=0)) | ((p0=3) & (q0=6) & (p1=0) & (q1=0) & (p2=0) & (q2=0) & (p3=0) & (q3=0) & (p4=0) & (q4=0) & (p5=2) & (q5=0) & (p6=0) & (q6=0) & (dice1=0) & (dice2=0) & (dice3=0) & (dice4=0) & (dice5=0) & (dice6=0) & (dummy=0)) | ((p0=3) & (q0=6) & (p1=0) & (q1=0) & (p2=0) & (q2=0) & (p3=0) & (q3=0) & (p4=0) & (q4=0) & (p5=2) & (q5=0) & (p6=4) & (q6=0) & (dice1=0) & (dice2=0) & (dice3=0) & (dice4=0) & (dice5=0) & (dice6=0) & (dummy=0)) | ((p0=3) & (q0=6) & (p1=0) & (q1=0) & (p2=0) & (q2=0) & (p3=0) & (q3=0) & (p4=0) & (q4=0) & (p5=3) & (q5=0) & (p6=0) & (q6=0) & (dice1=0) & (dice2=0) & (dice3=0) & (dice4=0) & (dice5=0) & (dice6=0) & (dummy=0)) | ((p0=3) & (q0=6) & (p1=0) & (q1=0) & (p2=0) & (q2=0) & (p3=0) & (q3=0) & (p4=0) & (q4=0) & (p5=3) & (q5=0) & (p6=4) & (q6=0) & (dice1=0) & (dice2=0) & (dice3=0) & (dice4=0) & (dice5=0) & (dice6=0) & (dummy=0)) | ((p0=3) & (q0=6) & (p1=0) & (q1=0) & (p2=0) & (q2=0) & (p3=0) & (q3=0) & (p4=0) & (q4=0) & (p5=4) & (q5=2) & (p6=0) & (q6=0) & (dice1=0) & (dice2=0) & (dice3=0) & (dice4=0) & (dice5=0) & (dice6=0) & (dummy=0)) | ((p0=3) & (q0=6) & (p1=0) & (q1=0) & (p2=0) & (q2=0) & (p3=0) & (q3=0) & (p4=0) & (q4=0) & (p5=4) & (q5=2) & (p6=4) & (q6=0) & (dice1=0) & (dice2=0) & (dice3=0) & (dice4=0) & (dice5=0) & (dice6=0) & (dummy=0)) | ((p0=3) & (q0=6) & (p1=0) & (q1=0) & (p2=0) & (q2=0) & (p3=0) & (q3=0) & (p4=0) & (q4=0) & (p5=4) & (q5=4) & (p6=0) & (q6=0) & (dice1=0) & (dice2=0) & (dice3=0) & (dice4=0) & (dice5=0) & (dice6=0) & (dummy=0)) | ((p0=3) & (q0=6) & (p1=0) & (q1=0) & (p2=0) & (q2=0) & (p3=0) & (q3=0) & (p4=0) & (q4=0) & (p5=4) & (q5=4) & (p6=4) & (q6=0) & (dice1=0) & (dice2=0) & (dice3=0) & (dice4=0) & (dice5=0) & (dice6=0) & (dummy=0)) | ((p0=3) & (q0=6) & (p1=0) & (q1=0) & (p2=0) & (q2=0) & (p3=0) & (q3=0) & (p4=0) & (q4=0) & (p5=4) & (q5=5) & (p6=0) & (q6=0) & (dice1=0) & (dice2=0) & (dice3=0) & (dice4=0) & (dice5=1) & (dice6=0) & (dummy=0)) | ((p0=3) & (q0=6) & (p1=0) & (q1=0) & (p2=0) & (q2=0) & (p3=0) & (q3=0) & (p4=0) & (q4=0) & (p5=4) & (q5=5) & (p6=0) & (q6=0) & (dice1=0) & (dice2=0) & (dice3=0) & (dice4=1) & (dice5=0) & (dice6=0) & (dummy=0)) | ((p0=3) & (q0=6) & (p1=0) & (q1=0) & (p2=0) & (q2=0) & (p3=0) & (q3=0) & (p4=0) & (q4=0) & (p5=4) & (q5=5) & (p6=4) & (q6=0) & (dice1=0) & (dice2=0) & (dice3=0) & (dice4=0) & (dice5=1) & (dice6=0) & (dummy=0)) | ((p0=3) & (q0=6) & (p1=0) & (q1=0) & (p2=0) & (q2=0) & (p3=0) & (q3=0) & (p4=0) & (q4=0) & (p5=4) & (q5=5) & (p6=4) & (q6=0) & (dice1=0) & (dice2=0) & (dice3=0) & (dice4=1) & (dice5=0) & (dice6=0) & (dummy=0)) | ((p0=3) & (q0=6) & (p1=0) & (q1=0) & (p2=0) & (q2=2) & (p3=0) & (q3=0) & (p4=0) & (q4=0) & (p5=0) & (q5=0) & (p6=0) & (q6=0) & (dice1=0) & (dice2=0) & (dice3=0) & (dice4=0) & (dice5=0) & (dice6=0) & (dummy=0)) | ((p0=3) & (q0=6) & (p1=0) & (q1=0) & (p2=0) & (q2=2) & (p3=0) & (q3=0) & (p4=0) & (q4=0) & (p5=0) & (q5=0) & (p6=4) & (q6=0) & (dice1=0) & (dice2=0) & (dice3=0) & (dice4=0) & (dice5=0) & (dice6=0) & (dummy=0)) | ((p0=3) & (q0=6) & (p1=0) & (q1=0) & (p2=0) & (q2=4) & (p3=0) & (q3=0) & (p4=0) & (q4=0) & (p5=0) & (q5=0) & (p6=0) & (q6=0) & (dice1=0) & (dice2=0) & (dice3=0) & (dice4=0) & (dice5=0) & (dice6=0) & (dummy=0)) | ((p0=3) & (q0=6) & (p1=0) & (q1=0) & (p2=0) & (q2=4) & (p3=0) & (q3=0) & (p4=0) & (q4=0) & (p5=0) & (q5=0) & (p6=4) & (q6=0) & (dice1=0) & (dice2=0) & (dice3=0) & (dice4=0) & (dice5=0) & (dice6=0) & (dummy=0)) | ((p0=3) & (q0=6) & (p1=0) & (q1=0) & (p2=2) & (q2=0) & (p3=0) & (q3=0) & (p4=0) & (q4=0) & (p5=0) & (q5=0) & (p6=0) & (q6=0) & (dice1=0) & (dice2=0) & (dice3=0) & (dice4=0) & (dice5=0) & (dice6=0) & (dummy=0)) | ((p0=3) & (q0=6) & (p1=0) & (q1=0) & (p2=2) & (q2=0) & (p3=0) & (q3=0) & (p4=0) & (q4=0) & (p5=0) & (q5=0) & (p6=4) & (q6=0) & (dice1=0) & (dice2=0) & (dice3=0) & (dice4=0) & (dice5=0) & (dice6=0) & (dummy=0)) | ((p0=3) & (q0=6) & (p1=0) & (q1=0) & (p2=3) & (q2=0) & (p3=0) & (q3=0) & (p4=0) & (q4=0) & (p5=0) & (q5=0) & (p6=0) & (q6=0) & (dice1=0) & (dice2=0) & (dice3=0) & (dice4=0) & (dice5=0) & (dice6=0) & (dummy=0)) | ((p0=3) & (q0=6) & (p1=0) & (q1=0) & (p2=3) & (q2=0) & (p3=0) & (q3=0) & (p4=0) & (q4=0) & (p5=0) & (q5=0) & (p6=4) & (q6=0) & (dice1=0) & (dice2=0) & (dice3=0) & (dice4=0) & (dice5=0) & (dice6=0) & (dummy=0));
   
   // Type safety
   P>=1 [ (G ((("cando_dice1_dummy_repeat_unit" & "cando_dice1_dummy_branch") => "cando_dice1_dummy_repeat_unit_branch") & ((("cando_p0_q0_l1_unit" & "cando_p0_q0_branch") => "cando_p0_q0_l1_unit_branch") & ((("cando_p0_q0_l2_unit" & "cando_p0_q0_branch") => "cando_p0_q0_l2_unit_branch") & ((("cando_p1_q1_l3_unit" & "cando_p1_q1_branch") => "cando_p1_q1_l3_unit_branch") & ((("cando_p1_q1_l4_unit" & "cando_p1_q1_branch") => "cando_p1_q1_l4_unit_branch") & ((("cando_p2_q2_l5_unit" & "cando_p2_q2_branch") => "cando_p2_q2_l5_unit_branch") & ((("cando_p2_q2_l6_unit" & "cando_p2_q2_branch") => "cando_p2_q2_l6_unit_branch") & ((("cando_p3_q3_d1_unit" & "cando_p3_q3_branch") => "cando_p3_q3_d1_unit_branch") & ((("cando_p3_q3_l1_unit" & "cando_p3_q3_branch") => "cando_p3_q3_l1_unit_branch") & ((("cando_p4_q4_d2_unit" & "cando_p4_q4_branch") => "cando_p4_q4_d2_unit_branch") & ((("cando_p4_q4_d3_unit" & "cando_p4_q4_branch") => "cando_p4_q4_d3_unit_branch") & ((("cando_p5_q5_d4_unit" & "cando_p5_q5_branch") => "cando_p5_q5_d4_unit_branch") & ((("cando_p5_q5_d5_unit" & "cando_p5_q5_branch") => "cando_p5_q5_d5_unit_branch") & ((("cando_p6_q6_d6_unit" & "cando_p6_q6_branch") => "cando_p6_q6_d6_unit_branch") & ((("cando_p6_q6_l2_unit" & "cando_p6_q6_branch") => "cando_p6_q6_l2_unit_branch") & ((("cando_q0_p1_go_unit" & "cando_q0_p1_branch") => "cando_q0_p1_go_unit_branch") & ((("cando_q0_p2_go_unit" & "cando_q0_p2_branch") => "cando_q0_p2_go_unit_branch") & ((("cando_q1_p3_go_unit" & "cando_q1_p3_branch") => "cando_q1_p3_go_unit_branch") & ((("cando_q1_p4_go_unit" & "cando_q1_p4_branch") => "cando_q1_p4_go_unit_branch") & ((("cando_q2_p5_go_unit" & "cando_q2_p5_branch") => "cando_q2_p5_go_unit_branch") & ((("cando_q2_p6_go_unit" & "cando_q2_p6_branch") => "cando_q2_p6_go_unit_branch") & ((("cando_q3_dice1_done_unit" & "cando_q3_dice1_branch") => "cando_q3_dice1_done_unit_branch") & ((("cando_q3_q0_redo_unit" & "cando_q3_q0_branch") => "cando_q3_q0_redo_unit_branch") & ((("cando_q4_dice2_done_unit" & "cando_q4_dice2_branch") => "cando_q4_dice2_done_unit_branch") & ((("cando_q4_dice3_done_unit" & "cando_q4_dice3_branch") => "cando_q4_dice3_done_unit_branch") & ((("cando_q5_dice4_done_unit" & "cando_q5_dice4_branch") => "cando_q5_dice4_done_unit_branch") & ((("cando_q5_dice5_done_unit" & "cando_q5_dice5_branch") => "cando_q5_dice5_done_unit_branch") & ((("cando_q6_dice6_done_unit" & "cando_q6_dice6_branch") => "cando_q6_dice6_done_unit_branch") & (("cando_q6_q0_redo_unit" & "cando_q6_q0_branch") => "cando_q6_q0_redo_unit_branch")))))))))))))))))))))))))))))) ]
@@ -538,6 +552,12 @@ For each context file in this directory, run [prose output] to check the model a
   
   // Termination (upper bound)
   Pmax=? [ (F "deadlock") ]
+  
+  // Liveness (lower bound)
+  Pmin=? [ (G (!"wals")) ]
+  
+  // Liveness (upper bound)
+  Pmax=? [ (G (!"wals")) ]
   
    ======= Property checking =======
   
@@ -555,6 +575,12 @@ For each context file in this directory, run [prose output] to check the model a
   
   Termination (upper bound)
   Result: 0.8333330154418945 (+/- 5.960467888147447E-6 estimated; rel err 7.1525641942636435E-6)
+  
+  Liveness (lower bound)
+  Result: 0.0 (exact floating point)
+  
+  Liveness (upper bound)
+  Result: 0.0 (exact floating point)
   
   
   
@@ -597,6 +623,7 @@ For each context file in this directory, run [prose output] to check the model a
   label "cando_p_q_l_int" = p=0;
   label "cando_p_q_l_int_branch" = false;
   label "cando_p_q_branch" = q=0;
+  label "wals" = (p=1) & (q=0);
   
   // Type safety
   P>=1 [ (G ((("cando_p_q_l_bool" & "cando_p_q_branch") => "cando_p_q_l_bool_branch") & (("cando_p_q_l_int" & "cando_p_q_branch") => "cando_p_q_l_int_branch"))) ]
@@ -612,6 +639,12 @@ For each context file in this directory, run [prose output] to check the model a
   
   // Termination (upper bound)
   Pmax=? [ (F "deadlock") ]
+  
+  // Liveness (lower bound)
+  Pmin=? [ (G (!"wals")) ]
+  
+  // Liveness (upper bound)
+  Pmax=? [ (G (!"wals")) ]
   
    ======= Property checking =======
   
@@ -629,6 +662,12 @@ For each context file in this directory, run [prose output] to check the model a
   
   Termination (upper bound)
   Result: 1.0 (exact floating point)
+  
+  Liveness (lower bound)
+  Result: 0.0 (exact floating point)
+  
+  Liveness (upper bound)
+  Result: 0.0 (exact floating point)
   
   
   
@@ -1156,6 +1195,7 @@ For each context file in this directory, run [prose output] to check the model a
   label "cando_p2_f0_branch" = (f0=0) | (f0=3) | (f0=8);
   label "cando_p2_f2_branch" = (f2=0) | (f2=3) | (f2=8);
   label "cando_p2_q_branch" = q=0;
+  label "wals" = false;
   
   // Type safety
   P>=1 [ (G ((("cando_f0_p0_free_unit" & "cando_f0_p0_branch") => "cando_f0_p0_free_unit_branch") & ((("cando_f0_p0_notFree_unit" & "cando_f0_p0_branch") => "cando_f0_p0_notFree_unit_branch") & ((("cando_f0_p2_free_unit" & "cando_f0_p2_branch") => "cando_f0_p2_free_unit_branch") & ((("cando_f0_p2_notFree_unit" & "cando_f0_p2_branch") => "cando_f0_p2_notFree_unit_branch") & ((("cando_f1_p0_free_unit" & "cando_f1_p0_branch") => "cando_f1_p0_free_unit_branch") & ((("cando_f1_p0_notFree_unit" & "cando_f1_p0_branch") => "cando_f1_p0_notFree_unit_branch") & ((("cando_f1_p1_free_unit" & "cando_f1_p1_branch") => "cando_f1_p1_free_unit_branch") & ((("cando_f1_p1_notFree_unit" & "cando_f1_p1_branch") => "cando_f1_p1_notFree_unit_branch") & ((("cando_f2_p1_free_unit" & "cando_f2_p1_branch") => "cando_f2_p1_free_unit_branch") & ((("cando_f2_p1_notFree_unit" & "cando_f2_p1_branch") => "cando_f2_p1_notFree_unit_branch") & ((("cando_f2_p2_free_unit" & "cando_f2_p2_branch") => "cando_f2_p2_free_unit_branch") & ((("cando_f2_p2_notFree_unit" & "cando_f2_p2_branch") => "cando_f2_p2_notFree_unit_branch") & ((("cando_p0_f0_drop_unit" & "cando_p0_f0_branch") => "cando_p0_f0_drop_unit_branch") & ((("cando_p0_f0_pick_unit" & "cando_p0_f0_branch") => "cando_p0_f0_pick_unit_branch") & ((("cando_p0_f1_drop_unit" & "cando_p0_f1_branch") => "cando_p0_f1_drop_unit_branch") & ((("cando_p0_f1_pick_unit" & "cando_p0_f1_branch") => "cando_p0_f1_pick_unit_branch") & ((("cando_p0_q_eat_unit" & "cando_p0_q_branch") => "cando_p0_q_eat_unit_branch") & ((("cando_p1_f1_drop_unit" & "cando_p1_f1_branch") => "cando_p1_f1_drop_unit_branch") & ((("cando_p1_f1_pick_unit" & "cando_p1_f1_branch") => "cando_p1_f1_pick_unit_branch") & ((("cando_p1_f2_drop_unit" & "cando_p1_f2_branch") => "cando_p1_f2_drop_unit_branch") & ((("cando_p1_f2_pick_unit" & "cando_p1_f2_branch") => "cando_p1_f2_pick_unit_branch") & ((("cando_p1_q_eat_unit" & "cando_p1_q_branch") => "cando_p1_q_eat_unit_branch") & ((("cando_p2_f0_drop_unit" & "cando_p2_f0_branch") => "cando_p2_f0_drop_unit_branch") & ((("cando_p2_f0_pick_unit" & "cando_p2_f0_branch") => "cando_p2_f0_pick_unit_branch") & ((("cando_p2_f2_drop_unit" & "cando_p2_f2_branch") => "cando_p2_f2_drop_unit_branch") & ((("cando_p2_f2_pick_unit" & "cando_p2_f2_branch") => "cando_p2_f2_pick_unit_branch") & (("cando_p2_q_eat_unit" & "cando_p2_q_branch") => "cando_p2_q_eat_unit_branch")))))))))))))))))))))))))))) ]
@@ -1171,6 +1211,12 @@ For each context file in this directory, run [prose output] to check the model a
   
   // Termination (upper bound)
   Pmax=? [ (F "deadlock") ]
+  
+  // Liveness (lower bound)
+  Pmin=? [ (G (!"wals")) ]
+  
+  // Liveness (upper bound)
+  Pmax=? [ (G (!"wals")) ]
   
    ======= Property checking =======
   
@@ -1188,6 +1234,12 @@ For each context file in this directory, run [prose output] to check the model a
   
   Termination (upper bound)
   Result: 0.0 (exact floating point)
+  
+  Liveness (lower bound)
+  Result: 1.0 (exact floating point)
+  
+  Liveness (upper bound)
+  Result: 1.0 (exact floating point)
   
   
   
@@ -1311,6 +1363,7 @@ For each context file in this directory, run [prose output] to check the model a
   label "cando_w2_w3_branch" = w3=2;
   label "cando_w3_dummy_branch" = dummy=0;
   label "cando_w3_w2_branch" = w2=0;
+  label "wals" = ((w0=0) & (w1=0) & (w2=0) & (w3=4) & (dummy=0)) | ((w0=0) & (w1=0) & (w2=0) & (w3=5) & (dummy=0)) | ((w0=0) & (w1=0) & (w2=5) & (w3=2) & (dummy=0)) | ((w0=0) & (w1=0) & (w2=6) & (w3=2) & (dummy=0)) | ((w0=0) & (w1=0) & (w2=8) & (w3=2) & (dummy=0)) | ((w0=0) & (w1=5) & (w2=3) & (w3=2) & (dummy=0)) | ((w0=0) & (w1=6) & (w2=3) & (w3=2) & (dummy=0)) | ((w0=0) & (w1=8) & (w2=3) & (w3=2) & (dummy=0)) | ((w0=3) & (w1=3) & (w2=3) & (w3=2) & (dummy=0));
   
   // Type safety
   P>=1 [ (G ((("cando_w0_w1_err_unit" & "cando_w0_w1_branch") => "cando_w0_w1_err_unit_branch") & ((("cando_w0_w1_res_int" & "cando_w0_w1_branch") => "cando_w0_w1_res_int_branch") & ((("cando_w1_w0_req_unit" & "cando_w1_w0_branch") => "cando_w1_w0_req_unit_branch") & ((("cando_w1_w2_err_unit" & "cando_w1_w2_branch") => "cando_w1_w2_err_unit_branch") & ((("cando_w1_w2_res_int" & "cando_w1_w2_branch") => "cando_w1_w2_res_int_branch") & ((("cando_w2_w1_req_unit" & "cando_w2_w1_branch") => "cando_w2_w1_req_unit_branch") & ((("cando_w2_w3_err_unit" & "cando_w2_w3_branch") => "cando_w2_w3_err_unit_branch") & ((("cando_w2_w3_res_int" & "cando_w2_w3_branch") => "cando_w2_w3_res_int_branch") & ((("cando_w3_dummy_done_unit" & "cando_w3_dummy_branch") => "cando_w3_dummy_done_unit_branch") & (("cando_w3_w2_req_unit" & "cando_w3_w2_branch") => "cando_w3_w2_req_unit_branch"))))))))))) ]
@@ -1326,6 +1379,12 @@ For each context file in this directory, run [prose output] to check the model a
   
   // Termination (upper bound)
   Pmax=? [ (F "deadlock") ]
+  
+  // Liveness (lower bound)
+  Pmin=? [ (G (!"wals")) ]
+  
+  // Liveness (upper bound)
+  Pmax=? [ (G (!"wals")) ]
   
    ======= Property checking =======
   
@@ -1343,6 +1402,303 @@ For each context file in this directory, run [prose output] to check the model a
   
   Termination (upper bound)
   Result: 0.748 (exact floating point)
+  
+  Liveness (lower bound)
+  Result: 0.0 (exact floating point)
+  
+  Liveness (upper bound)
+  Result: 0.0 (exact floating point)
+  
+  
+  
+  
+   ======= TEST ../examples/fair-deadlock.ctx =======
+  
+  a : mu t . (+) { b ! 1.0 : rec . t }
+  
+  b : mu t . & {
+                a ? rec . end,
+                c ? rec . & { a ? rec . t }
+              }
+  
+  c : mu t . (+) { b ! 1.0 : rec . t }
+  
+   ======= PRISM output ========
+  
+  
+  module closure
+    closure : bool init false;
+  
+  endmodule
+  
+  module a
+    a : [0..2] init 0;
+  
+    [] a=0 -> 1:(a'=1);
+    [a_b_rec_unit] a=1 -> 1:(a'=0);
+  endmodule
+  
+  module b
+    b : [0..2] init 0;
+  
+    [a_b_rec_unit] b=0 -> 1:(b'=2);
+    [c_b_rec_unit] b=0 -> 1:(b'=1);
+    [a_b_rec_unit] b=1 -> 1:(b'=0);
+  endmodule
+  
+  module c
+    c : [0..2] init 0;
+  
+    [] c=0 -> 1:(c'=1);
+    [c_b_rec_unit] c=1 -> 1:(c'=0);
+  endmodule
+  
+  label "end" = (a=2) & (b=2) & (c=2);
+  label "cando_a_b_rec_unit" = a=0;
+  label "cando_a_b_rec_unit_branch" = (b=0) | (b=1);
+  label "cando_c_b_rec_unit" = c=0;
+  label "cando_c_b_rec_unit_branch" = b=0;
+  label "cando_a_b_branch" = (b=0) | (b=1);
+  label "cando_c_b_branch" = b=0;
+  label "wals" = (a=1) & (b=2) & (c=1);
+  
+  // Type safety
+  P>=1 [ (G ((("cando_a_b_rec_unit" & "cando_a_b_branch") => "cando_a_b_rec_unit_branch") & (("cando_c_b_rec_unit" & "cando_c_b_branch") => "cando_c_b_rec_unit_branch"))) ]
+  
+  // Deadlock freedom (lower bound)
+  Pmin=? [ (G ("deadlock" => "end")) ]
+  
+  // Deadlock freedom (upper bound)
+  Pmax=? [ (G ("deadlock" => "end")) ]
+  
+  // Termination (lower bound)
+  Pmin=? [ (F "deadlock") ]
+  
+  // Termination (upper bound)
+  Pmax=? [ (F "deadlock") ]
+  
+  // Liveness (lower bound)
+  Pmin=? [ (G (!"wals")) ]
+  
+  // Liveness (upper bound)
+  Pmax=? [ (G (!"wals")) ]
+  
+   ======= Property checking =======
+  
+  Type safety
+  Result: true
+  
+  Deadlock freedom (lower bound)
+  Result: 0.0 (exact floating point)
+  
+  Deadlock freedom (upper bound)
+  Result: 1.0 (exact floating point)
+  
+  Termination (lower bound)
+  Result: 0.0 (exact floating point)
+  
+  Termination (upper bound)
+  Result: 1.0 (exact floating point)
+  
+  Liveness (lower bound)
+  Result: 0.0 (exact floating point)
+  
+  Liveness (upper bound)
+  Result: 1.0 (exact floating point)
+  
+  
+  
+  
+   ======= TEST ../examples/fair-merge.ctx =======
+  
+  a : mu t . (+) { c ! 1.0 : msg . t }
+  
+  b : mu t . (+) { c ! 1.0 : msg . t }
+  
+  c : mu t . & {
+                a ? msg . t,
+                b ? msg . t
+              }
+  
+   ======= PRISM output ========
+  
+  
+  module closure
+    closure : bool init false;
+  
+  endmodule
+  
+  module a
+    a : [0..2] init 0;
+  
+    [] a=0 -> 1:(a'=1);
+    [a_c_msg_unit] a=1 -> 1:(a'=0);
+  endmodule
+  
+  module b
+    b : [0..2] init 0;
+  
+    [] b=0 -> 1:(b'=1);
+    [b_c_msg_unit] b=1 -> 1:(b'=0);
+  endmodule
+  
+  module c
+    c : [0..1] init 0;
+  
+    [a_c_msg_unit] c=0 -> 1:(c'=0);
+    [b_c_msg_unit] c=0 -> 1:(c'=0);
+  endmodule
+  
+  label "end" = (a=2) & (b=2) & (c=1);
+  label "cando_a_c_msg_unit" = a=0;
+  label "cando_a_c_msg_unit_branch" = c=0;
+  label "cando_b_c_msg_unit" = b=0;
+  label "cando_b_c_msg_unit_branch" = c=0;
+  label "cando_a_c_branch" = c=0;
+  label "cando_b_c_branch" = c=0;
+  label "wals" = false;
+  
+  // Type safety
+  P>=1 [ (G ((("cando_a_c_msg_unit" & "cando_a_c_branch") => "cando_a_c_msg_unit_branch") & (("cando_b_c_msg_unit" & "cando_b_c_branch") => "cando_b_c_msg_unit_branch"))) ]
+  
+  // Deadlock freedom (lower bound)
+  Pmin=? [ (G ("deadlock" => "end")) ]
+  
+  // Deadlock freedom (upper bound)
+  Pmax=? [ (G ("deadlock" => "end")) ]
+  
+  // Termination (lower bound)
+  Pmin=? [ (F "deadlock") ]
+  
+  // Termination (upper bound)
+  Pmax=? [ (F "deadlock") ]
+  
+  // Liveness (lower bound)
+  Pmin=? [ (G (!"wals")) ]
+  
+  // Liveness (upper bound)
+  Pmax=? [ (G (!"wals")) ]
+  
+   ======= Property checking =======
+  
+  Type safety
+  Result: true
+  
+  Deadlock freedom (lower bound)
+  Result: 1.0 (exact floating point)
+  
+  Deadlock freedom (upper bound)
+  Result: 1.0 (exact floating point)
+  
+  Termination (lower bound)
+  Result: 0.0 (exact floating point)
+  
+  Termination (upper bound)
+  Result: 0.0 (exact floating point)
+  
+  Liveness (lower bound)
+  Result: 1.0 (exact floating point)
+  
+  Liveness (upper bound)
+  Result: 1.0 (exact floating point)
+  
+  
+  
+  
+   ======= TEST ../examples/livelock.ctx =======
+  
+  (* Weak almost-sure livelock: a and b loop forever exchanging [ping], while c
+     waits for a [done] message from a that is never sent. The system never
+     deadlocks (a and b always progress), but c is starved forever, so the
+     context is not almost-surely live. *)
+  
+  a : mu t . (+) { b ! 1.0 : ping . t }
+  
+  b : mu t . & { a ? ping . t }
+  
+  c : & { a ? done . end }
+  
+   ======= PRISM output ========
+  
+  
+  module closure
+    closure : bool init false;
+  
+    [] false -> 1:(closure'=false);
+    [a_c_done_unit] false -> 1:(closure'=false);
+  endmodule
+  
+  module a
+    a : [0..2] init 0;
+  
+    [] a=0 -> 1:(a'=1);
+    [a_b_ping_unit] a=1 -> 1:(a'=0);
+  endmodule
+  
+  module b
+    b : [0..1] init 0;
+  
+    [a_b_ping_unit] b=0 -> 1:(b'=0);
+  endmodule
+  
+  module c
+    c : [0..1] init 0;
+  
+    [a_c_done_unit] c=0 -> 1:(c'=1);
+  endmodule
+  
+  label "end" = (a=2) & (b=1) & (c=1);
+  label "cando_a_b_ping_unit" = a=0;
+  label "cando_a_b_ping_unit_branch" = b=0;
+  label "cando_a_c_done_unit" = false;
+  label "cando_a_c_done_unit_branch" = c=0;
+  label "cando_a_b_branch" = b=0;
+  label "cando_a_c_branch" = c=0;
+  label "wals" = (a=1) & (b=0) & (c=0);
+  
+  // Type safety
+  P>=1 [ (G ((("cando_a_b_ping_unit" & "cando_a_b_branch") => "cando_a_b_ping_unit_branch") & (("cando_a_c_done_unit" & "cando_a_c_branch") => "cando_a_c_done_unit_branch"))) ]
+  
+  // Deadlock freedom (lower bound)
+  Pmin=? [ (G ("deadlock" => "end")) ]
+  
+  // Deadlock freedom (upper bound)
+  Pmax=? [ (G ("deadlock" => "end")) ]
+  
+  // Termination (lower bound)
+  Pmin=? [ (F "deadlock") ]
+  
+  // Termination (upper bound)
+  Pmax=? [ (F "deadlock") ]
+  
+  // Liveness (lower bound)
+  Pmin=? [ (G (!"wals")) ]
+  
+  // Liveness (upper bound)
+  Pmax=? [ (G (!"wals")) ]
+  
+   ======= Property checking =======
+  
+  Type safety
+  Result: true
+  
+  Deadlock freedom (lower bound)
+  Result: 1.0 (exact floating point)
+  
+  Deadlock freedom (upper bound)
+  Result: 1.0 (exact floating point)
+  
+  Termination (lower bound)
+  Result: 0.0 (exact floating point)
+  
+  Termination (upper bound)
+  Result: 0.0 (exact floating point)
+  
+  Liveness (lower bound)
+  Result: 0.0 (exact floating point)
+  
+  Liveness (upper bound)
+  Result: 0.0 (exact floating point)
   
   
   
@@ -1405,6 +1761,7 @@ For each context file in this directory, run [prose output] to check the model a
   label "cando_c_d_l3_unit_branch" = d=0;
   label "cando_a_b_branch" = (b=0) | (b=1);
   label "cando_c_d_branch" = d=0;
+  label "wals" = false;
   
   // Type safety
   P>=1 [ (G ((("cando_a_b_l1_unit" & "cando_a_b_branch") => "cando_a_b_l1_unit_branch") & ((("cando_a_b_l2_unit" & "cando_a_b_branch") => "cando_a_b_l2_unit_branch") & (("cando_c_d_l3_unit" & "cando_c_d_branch") => "cando_c_d_l3_unit_branch")))) ]
@@ -1420,6 +1777,12 @@ For each context file in this directory, run [prose output] to check the model a
   
   // Termination (upper bound)
   Pmax=? [ (F "deadlock") ]
+  
+  // Liveness (lower bound)
+  Pmin=? [ (G (!"wals")) ]
+  
+  // Liveness (upper bound)
+  Pmax=? [ (G (!"wals")) ]
   
    ======= Property checking =======
   
@@ -1437,6 +1800,12 @@ For each context file in this directory, run [prose output] to check the model a
   
   Termination (upper bound)
   Result: 0.4 (exact floating point)
+  
+  Liveness (lower bound)
+  Result: 1.0 (exact floating point)
+  
+  Liveness (upper bound)
+  Result: 1.0 (exact floating point)
   
   
   
@@ -1539,6 +1908,7 @@ For each context file in this directory, run [prose output] to check the model a
   label "cando_car_host_branch" = host=0;
   label "cando_host_player_branch" = player=0;
   label "cando_player_host_branch" = (host=4) | (host=5) | (host=8) | (host=11);
+  label "wals" = ((car=4) & (host=4) & (player=2)) | ((car=4) & (host=5) & (player=4));
   
   // Type safety
   P>=1 [ (G ((("cando_car_host_l1_unit" & "cando_car_host_branch") => "cando_car_host_l1_unit_branch") & ((("cando_car_host_l2_unit" & "cando_car_host_branch") => "cando_car_host_l2_unit_branch") & ((("cando_car_host_l3_unit" & "cando_car_host_branch") => "cando_car_host_l3_unit_branch") & ((("cando_host_player_l2_unit" & "cando_host_player_branch") => "cando_host_player_l2_unit_branch") & ((("cando_host_player_l3_unit" & "cando_host_player_branch") => "cando_host_player_l3_unit_branch") & ((("cando_player_host_l1_unit" & "cando_player_host_branch") => "cando_player_host_l1_unit_branch") & ((("cando_player_host_l2_unit" & "cando_player_host_branch") => "cando_player_host_l2_unit_branch") & (("cando_player_host_l3_unit" & "cando_player_host_branch") => "cando_player_host_l3_unit_branch"))))))))) ]
@@ -1554,6 +1924,12 @@ For each context file in this directory, run [prose output] to check the model a
   
   // Termination (upper bound)
   Pmax=? [ (F "deadlock") ]
+  
+  // Liveness (lower bound)
+  Pmin=? [ (G (!"wals")) ]
+  
+  // Liveness (upper bound)
+  Pmax=? [ (G (!"wals")) ]
   
    ======= Property checking =======
   
@@ -1571,6 +1947,12 @@ For each context file in this directory, run [prose output] to check the model a
   
   Termination (upper bound)
   Result: 1.0 (exact floating point)
+  
+  Liveness (lower bound)
+  Result: 0.6599999999999999 (exact floating point)
+  
+  Liveness (upper bound)
+  Result: 0.6599999999999999 (exact floating point)
   
   
   
@@ -1673,6 +2055,7 @@ For each context file in this directory, run [prose output] to check the model a
   label "cando_car_host_branch" = host=0;
   label "cando_host_player_branch" = player=0;
   label "cando_player_host_branch" = (host=4) | (host=5) | (host=8) | (host=11);
+  label "wals" = ((car=4) & (host=8) & (player=4)) | ((car=4) & (host=11) & (player=2));
   
   // Type safety
   P>=1 [ (G ((("cando_car_host_l1_unit" & "cando_car_host_branch") => "cando_car_host_l1_unit_branch") & ((("cando_car_host_l2_unit" & "cando_car_host_branch") => "cando_car_host_l2_unit_branch") & ((("cando_car_host_l3_unit" & "cando_car_host_branch") => "cando_car_host_l3_unit_branch") & ((("cando_host_player_l2_unit" & "cando_host_player_branch") => "cando_host_player_l2_unit_branch") & ((("cando_host_player_l3_unit" & "cando_host_player_branch") => "cando_host_player_l3_unit_branch") & ((("cando_player_host_l1_unit" & "cando_player_host_branch") => "cando_player_host_l1_unit_branch") & ((("cando_player_host_l2_unit" & "cando_player_host_branch") => "cando_player_host_l2_unit_branch") & (("cando_player_host_l3_unit" & "cando_player_host_branch") => "cando_player_host_l3_unit_branch"))))))))) ]
@@ -1688,6 +2071,12 @@ For each context file in this directory, run [prose output] to check the model a
   
   // Termination (upper bound)
   Pmax=? [ (F "deadlock") ]
+  
+  // Liveness (lower bound)
+  Pmin=? [ (G (!"wals")) ]
+  
+  // Liveness (upper bound)
+  Pmax=? [ (G (!"wals")) ]
   
    ======= Property checking =======
   
@@ -1705,6 +2094,12 @@ For each context file in this directory, run [prose output] to check the model a
   
   Termination (upper bound)
   Result: 1.0 (exact floating point)
+  
+  Liveness (lower bound)
+  Result: 0.33999999999999997 (exact floating point)
+  
+  Liveness (upper bound)
+  Result: 0.33999999999999997 (exact floating point)
   
   
   
@@ -1748,6 +2143,7 @@ For each context file in this directory, run [prose output] to check the model a
   label "cando_p_q_l2_unit" = false;
   label "cando_p_q_l2_unit_branch" = q=0;
   label "cando_p_q_branch" = q=0;
+  label "wals" = false;
   
   // Type safety
   P>=1 [ (G ((("cando_p_q_l1_unit" & "cando_p_q_branch") => "cando_p_q_l1_unit_branch") & (("cando_p_q_l2_unit" & "cando_p_q_branch") => "cando_p_q_l2_unit_branch"))) ]
@@ -1764,6 +2160,12 @@ For each context file in this directory, run [prose output] to check the model a
   // Termination (upper bound)
   Pmax=? [ (F "deadlock") ]
   
+  // Liveness (lower bound)
+  Pmin=? [ (G (!"wals")) ]
+  
+  // Liveness (upper bound)
+  Pmax=? [ (G (!"wals")) ]
+  
    ======= Property checking =======
   
   Type safety
@@ -1779,6 +2181,12 @@ For each context file in this directory, run [prose output] to check the model a
   Result: 1.0 (exact floating point)
   
   Termination (upper bound)
+  Result: 1.0 (exact floating point)
+  
+  Liveness (lower bound)
+  Result: 1.0 (exact floating point)
+  
+  Liveness (upper bound)
   Result: 1.0 (exact floating point)
   
   
@@ -2009,6 +2417,7 @@ For each context file in this directory, run [prose output] to check the model a
   label "cando_workerC1_workerA1_branch" = workerA1=4;
   label "cando_workerC2_workerA2_branch" = workerA2=4;
   label "cando_workerC3_workerA3_branch" = workerA3=4;
+  label "wals" = false;
   
   // Type safety
   P>=1 [ (G ((("cando_starter_workerA1_datum_int" & "cando_starter_workerA1_branch") => "cando_starter_workerA1_datum_int_branch") & ((("cando_starter_workerA2_datum_int" & "cando_starter_workerA2_branch") => "cando_starter_workerA2_datum_int_branch") & ((("cando_starter_workerA3_datum_int" & "cando_starter_workerA3_branch") => "cando_starter_workerA3_datum_int_branch") & ((("cando_workerA1_workerB1_datum_int" & "cando_workerA1_workerB1_branch") => "cando_workerA1_workerB1_datum_int_branch") & ((("cando_workerA1_workerB1_stop_unit" & "cando_workerA1_workerB1_branch") => "cando_workerA1_workerB1_stop_unit_branch") & ((("cando_workerA2_workerB2_datum_int" & "cando_workerA2_workerB2_branch") => "cando_workerA2_workerB2_datum_int_branch") & ((("cando_workerA2_workerB2_stop_unit" & "cando_workerA2_workerB2_branch") => "cando_workerA2_workerB2_stop_unit_branch") & ((("cando_workerA3_workerB3_datum_int" & "cando_workerA3_workerB3_branch") => "cando_workerA3_workerB3_datum_int_branch") & ((("cando_workerA3_workerB3_stop_unit" & "cando_workerA3_workerB3_branch") => "cando_workerA3_workerB3_stop_unit_branch") & ((("cando_workerB1_workerC1_datum_int" & "cando_workerB1_workerC1_branch") => "cando_workerB1_workerC1_datum_int_branch") & ((("cando_workerB1_workerC1_stop_unit" & "cando_workerB1_workerC1_branch") => "cando_workerB1_workerC1_stop_unit_branch") & ((("cando_workerB2_workerC2_datum_int" & "cando_workerB2_workerC2_branch") => "cando_workerB2_workerC2_datum_int_branch") & ((("cando_workerB2_workerC2_stop_unit" & "cando_workerB2_workerC2_branch") => "cando_workerB2_workerC2_stop_unit_branch") & ((("cando_workerB3_workerC3_datum_int" & "cando_workerB3_workerC3_branch") => "cando_workerB3_workerC3_datum_int_branch") & ((("cando_workerB3_workerC3_stop_unit" & "cando_workerB3_workerC3_branch") => "cando_workerB3_workerC3_stop_unit_branch") & ((("cando_workerC1_workerA1_result_int" & "cando_workerC1_workerA1_branch") => "cando_workerC1_workerA1_result_int_branch") & ((("cando_workerC2_workerA2_result_int" & "cando_workerC2_workerA2_branch") => "cando_workerC2_workerA2_result_int_branch") & (("cando_workerC3_workerA3_result_int" & "cando_workerC3_workerA3_branch") => "cando_workerC3_workerA3_result_int_branch"))))))))))))))))))) ]
@@ -2025,6 +2434,12 @@ For each context file in this directory, run [prose output] to check the model a
   // Termination (upper bound)
   Pmax=? [ (F "deadlock") ]
   
+  // Liveness (lower bound)
+  Pmin=? [ (G (!"wals")) ]
+  
+  // Liveness (upper bound)
+  Pmax=? [ (G (!"wals")) ]
+  
    ======= Property checking =======
   
   Type safety
@@ -2040,6 +2455,12 @@ For each context file in this directory, run [prose output] to check the model a
   Result: 1.0 (exact floating point)
   
   Termination (upper bound)
+  Result: 1.0 (exact floating point)
+  
+  Liveness (lower bound)
+  Result: 1.0 (exact floating point)
+  
+  Liveness (upper bound)
   Result: 1.0 (exact floating point)
   
   
@@ -2091,6 +2512,7 @@ For each context file in this directory, run [prose output] to check the model a
   label "cando_a_b_l2_unit" = (a=0) | (a=3);
   label "cando_a_b_l2_unit_branch" = b=0;
   label "cando_a_b_branch" = b=0;
+  label "wals" = false;
   
   // Type safety
   P>=1 [ (G ((("cando_a_b_l1_unit" & "cando_a_b_branch") => "cando_a_b_l1_unit_branch") & (("cando_a_b_l2_unit" & "cando_a_b_branch") => "cando_a_b_l2_unit_branch"))) ]
@@ -2106,6 +2528,12 @@ For each context file in this directory, run [prose output] to check the model a
   
   // Termination (upper bound)
   Pmax=? [ (F "deadlock") ]
+  
+  // Liveness (lower bound)
+  Pmin=? [ (G (!"wals")) ]
+  
+  // Liveness (upper bound)
+  Pmax=? [ (G (!"wals")) ]
   
    ======= Property checking =======
   
@@ -2123,6 +2551,118 @@ For each context file in this directory, run [prose output] to check the model a
   
   Termination (upper bound)
   Result: 0.5 (exact floating point)
+  
+  Liveness (lower bound)
+  Result: 1.0 (exact floating point)
+  
+  Liveness (upper bound)
+  Result: 1.0 (exact floating point)
+  
+  
+  
+  
+   ======= TEST ../examples/nondet-liveness.ctx =======
+  
+  p : (+) { q ! 1.0 : ok . (+) { r ! 1.0 : notify . end } }
+    + (+) { q ! 1.0 : go . mu t . (+) { q ! 1.0 : go . t } }
+  
+  q : & {
+          p ? ok . end,
+          p ? go . mu t . & { p ? go . t }
+        }
+  
+  r : & { p ? notify . end }
+  
+   ======= PRISM output ========
+  
+  
+  module closure
+    closure : bool init false;
+  
+    [] false -> 1:(closure'=false);
+  endmodule
+  
+  module p
+    p : [0..7] init 0;
+  
+    [] p=0 -> 1:(p'=1);
+    [] p=0 -> 1:(p'=2);
+    [p_q_ok_unit] p=1 -> 1:(p'=3);
+    [p_q_go_unit] p=2 -> 1:(p'=5);
+    [] p=3 -> 1:(p'=4);
+    [p_r_notify_unit] p=4 -> 1:(p'=7);
+    [] p=5 -> 1:(p'=6);
+    [p_q_go_unit] p=6 -> 1:(p'=5);
+  endmodule
+  
+  module q
+    q : [0..2] init 0;
+  
+    [p_q_ok_unit] q=0 -> 1:(q'=2);
+    [p_q_go_unit] q=0 -> 1:(q'=1);
+    [p_q_go_unit] q=1 -> 1:(q'=1);
+  endmodule
+  
+  module r
+    r : [0..1] init 0;
+  
+    [p_r_notify_unit] r=0 -> 1:(r'=1);
+  endmodule
+  
+  label "end" = (p=7) & (q=2) & (r=1);
+  label "cando_p_q_go_unit" = (p=0) | (p=5);
+  label "cando_p_q_go_unit_branch" = (q=0) | (q=1);
+  label "cando_p_q_ok_unit" = p=0;
+  label "cando_p_q_ok_unit_branch" = q=0;
+  label "cando_p_r_notify_unit" = p=3;
+  label "cando_p_r_notify_unit_branch" = r=0;
+  label "cando_p_q_branch" = (q=0) | (q=1);
+  label "cando_p_r_branch" = r=0;
+  label "wals" = ((p=2) & (q=0) & (r=0)) | ((p=6) & (q=1) & (r=0));
+  
+  // Type safety
+  P>=1 [ (G ((("cando_p_q_go_unit" & "cando_p_q_branch") => "cando_p_q_go_unit_branch") & ((("cando_p_q_ok_unit" & "cando_p_q_branch") => "cando_p_q_ok_unit_branch") & (("cando_p_r_notify_unit" & "cando_p_r_branch") => "cando_p_r_notify_unit_branch")))) ]
+  
+  // Deadlock freedom (lower bound)
+  Pmin=? [ (G ("deadlock" => "end")) ]
+  
+  // Deadlock freedom (upper bound)
+  Pmax=? [ (G ("deadlock" => "end")) ]
+  
+  // Termination (lower bound)
+  Pmin=? [ (F "deadlock") ]
+  
+  // Termination (upper bound)
+  Pmax=? [ (F "deadlock") ]
+  
+  // Liveness (lower bound)
+  Pmin=? [ (G (!"wals")) ]
+  
+  // Liveness (upper bound)
+  Pmax=? [ (G (!"wals")) ]
+  
+   ======= Property checking =======
+  
+  Type safety
+  Result: true
+  
+  Deadlock freedom (lower bound)
+  Result: 1.0 (exact floating point)
+  
+  Deadlock freedom (upper bound)
+  Result: 1.0 (exact floating point)
+  
+  Termination (lower bound)
+  Result: 0.0 (exact floating point)
+  
+  Termination (upper bound)
+  Result: 1.0 (exact floating point)
+  
+  Liveness (lower bound)
+  Result: 0.0 (exact floating point)
+  
+  Liveness (upper bound)
+  Result: 1.0 (exact floating point)
   
   
   
@@ -2174,6 +2714,7 @@ For each context file in this directory, run [prose output] to check the model a
   label "cando_p_q_l2_unit" = (p=0) | (p=5) | (p=7);
   label "cando_p_q_l2_unit_branch" = (q=0) | (q=1);
   label "cando_p_q_branch" = (q=0) | (q=1);
+  label "wals" = false;
   
   // Type safety
   P>=1 [ (G ((("cando_p_q_l1_unit" & "cando_p_q_branch") => "cando_p_q_l1_unit_branch") & (("cando_p_q_l2_unit" & "cando_p_q_branch") => "cando_p_q_l2_unit_branch"))) ]
@@ -2189,6 +2730,12 @@ For each context file in this directory, run [prose output] to check the model a
   
   // Termination (upper bound)
   Pmax=? [ (F "deadlock") ]
+  
+  // Liveness (lower bound)
+  Pmin=? [ (G (!"wals")) ]
+  
+  // Liveness (upper bound)
+  Pmax=? [ (G (!"wals")) ]
   
    ======= Property checking =======
   
@@ -2206,6 +2753,12 @@ For each context file in this directory, run [prose output] to check the model a
   
   Termination (upper bound)
   Result: 0.6 (exact floating point)
+  
+  Liveness (lower bound)
+  Result: 1.0 (exact floating point)
+  
+  Liveness (upper bound)
+  Result: 1.0 (exact floating point)
   
   
   
@@ -2256,6 +2809,7 @@ For each context file in this directory, run [prose output] to check the model a
   label "cando_alice_carol_c_unit_branch" = false;
   label "cando_alice_bob_branch" = bob=0;
   label "cando_alice_carol_branch" = false;
+  label "wals" = (alice=5) & (bob=1);
   
   // Type safety
   P>=1 [ (G ((("cando_alice_bob_a_unit" & "cando_alice_bob_branch") => "cando_alice_bob_a_unit_branch") & ((("cando_alice_bob_b_unit" & "cando_alice_bob_branch") => "cando_alice_bob_b_unit_branch") & ((("cando_alice_bob_c_unit" & "cando_alice_bob_branch") => "cando_alice_bob_c_unit_branch") & (("cando_alice_carol_c_unit" & "cando_alice_carol_branch") => "cando_alice_carol_c_unit_branch"))))) ]
@@ -2271,6 +2825,12 @@ For each context file in this directory, run [prose output] to check the model a
   
   // Termination (upper bound)
   Pmax=? [ (F "deadlock") ]
+  
+  // Liveness (lower bound)
+  Pmin=? [ (G (!"wals")) ]
+  
+  // Liveness (upper bound)
+  Pmax=? [ (G (!"wals")) ]
   
    ======= Property checking =======
   
@@ -2288,6 +2848,119 @@ For each context file in this directory, run [prose output] to check the model a
   
   Termination (upper bound)
   Result: 1.0 (exact floating point)
+  
+  Liveness (lower bound)
+  Result: 0.6699999999999999 (exact floating point)
+  
+  Liveness (upper bound)
+  Result: 0.6699999999999999 (exact floating point)
+  
+  
+  
+  
+   ======= TEST ../examples/partial-livelock.ctx =======
+  
+  p : (+) {
+          q ! 0.7 : ok . (+) { r ! 1.0 : notify . end },
+          q ! 0.3 : go . mu t . (+) { q ! 1.0 : go . t }
+        }
+  
+  q : & {
+          p ? ok . end,
+          p ? go . mu t . & { p ? go . t }
+        }
+  
+  r : & { p ? notify . end }
+  
+   ======= PRISM output ========
+  
+  
+  module closure
+    closure : bool init false;
+  
+    [] false -> 1:(closure'=false);
+  endmodule
+  
+  module p
+    p : [0..7] init 0;
+  
+    [] p=0 -> 0.7:(p'=1) + 0.3:(p'=2);
+    [p_q_ok_unit] p=1 -> 1:(p'=3);
+    [p_q_go_unit] p=2 -> 1:(p'=5);
+    [] p=3 -> 1:(p'=4);
+    [p_r_notify_unit] p=4 -> 1:(p'=7);
+    [] p=5 -> 1:(p'=6);
+    [p_q_go_unit] p=6 -> 1:(p'=5);
+  endmodule
+  
+  module q
+    q : [0..2] init 0;
+  
+    [p_q_ok_unit] q=0 -> 1:(q'=2);
+    [p_q_go_unit] q=0 -> 1:(q'=1);
+    [p_q_go_unit] q=1 -> 1:(q'=1);
+  endmodule
+  
+  module r
+    r : [0..1] init 0;
+  
+    [p_r_notify_unit] r=0 -> 1:(r'=1);
+  endmodule
+  
+  label "end" = (p=7) & (q=2) & (r=1);
+  label "cando_p_q_go_unit" = (p=0) | (p=5);
+  label "cando_p_q_go_unit_branch" = (q=0) | (q=1);
+  label "cando_p_q_ok_unit" = p=0;
+  label "cando_p_q_ok_unit_branch" = q=0;
+  label "cando_p_r_notify_unit" = p=3;
+  label "cando_p_r_notify_unit_branch" = r=0;
+  label "cando_p_q_branch" = (q=0) | (q=1);
+  label "cando_p_r_branch" = r=0;
+  label "wals" = ((p=2) & (q=0) & (r=0)) | ((p=6) & (q=1) & (r=0));
+  
+  // Type safety
+  P>=1 [ (G ((("cando_p_q_go_unit" & "cando_p_q_branch") => "cando_p_q_go_unit_branch") & ((("cando_p_q_ok_unit" & "cando_p_q_branch") => "cando_p_q_ok_unit_branch") & (("cando_p_r_notify_unit" & "cando_p_r_branch") => "cando_p_r_notify_unit_branch")))) ]
+  
+  // Deadlock freedom (lower bound)
+  Pmin=? [ (G ("deadlock" => "end")) ]
+  
+  // Deadlock freedom (upper bound)
+  Pmax=? [ (G ("deadlock" => "end")) ]
+  
+  // Termination (lower bound)
+  Pmin=? [ (F "deadlock") ]
+  
+  // Termination (upper bound)
+  Pmax=? [ (F "deadlock") ]
+  
+  // Liveness (lower bound)
+  Pmin=? [ (G (!"wals")) ]
+  
+  // Liveness (upper bound)
+  Pmax=? [ (G (!"wals")) ]
+  
+   ======= Property checking =======
+  
+  Type safety
+  Result: true
+  
+  Deadlock freedom (lower bound)
+  Result: 1.0 (exact floating point)
+  
+  Deadlock freedom (upper bound)
+  Result: 1.0 (exact floating point)
+  
+  Termination (lower bound)
+  Result: 0.7 (exact floating point)
+  
+  Termination (upper bound)
+  Result: 0.7 (exact floating point)
+  
+  Liveness (lower bound)
+  Result: 0.7 (exact floating point)
+  
+  Liveness (upper bound)
+  Result: 0.7 (exact floating point)
   
   
   
@@ -2352,6 +3025,7 @@ For each context file in this directory, run [prose output] to check the model a
   label "cando_a_b_branch" = b=0;
   label "cando_b_a_branch" = a=1;
   label "cando_commander_a_branch" = a=0;
+  label "wals" = ((commander=1) & (a=0) & (b=0)) | ((commander=3) & (a=1) & (b=0));
   
   // Type safety
   P>=1 [ (G ((("cando_a_b_msg_unit" & "cando_a_b_branch") => "cando_a_b_msg_unit_branch") & ((("cando_b_a_msg_unit" & "cando_b_a_branch") => "cando_b_a_msg_unit_branch") & ((("cando_commander_a_deadlock_unit" & "cando_commander_a_branch") => "cando_commander_a_deadlock_unit_branch") & (("cando_commander_a_nodeadlock_unit" & "cando_commander_a_branch") => "cando_commander_a_nodeadlock_unit_branch"))))) ]
@@ -2367,6 +3041,12 @@ For each context file in this directory, run [prose output] to check the model a
   
   // Termination (upper bound)
   Pmax=? [ (F "deadlock") ]
+  
+  // Liveness (lower bound)
+  Pmin=? [ (G (!"wals")) ]
+  
+  // Liveness (upper bound)
+  Pmax=? [ (G (!"wals")) ]
   
    ======= Property checking =======
   
@@ -2384,6 +3064,12 @@ For each context file in this directory, run [prose output] to check the model a
   
   Termination (upper bound)
   Result: 1.0 (exact floating point)
+  
+  Liveness (lower bound)
+  Result: 0.30000000000000004 (exact floating point)
+  
+  Liveness (upper bound)
+  Result: 0.30000000000000004 (exact floating point)
   
   
   
@@ -2553,6 +3239,7 @@ For each context file in this directory, run [prose output] to check the model a
   label "cando_worker1_reducer_branch" = reducer=0;
   label "cando_worker2_reducer_branch" = reducer=1;
   label "cando_worker3_reducer_branch" = reducer=2;
+  label "wals" = false;
   
   // Type safety
   P>=1 [ (G ((("cando_mapper_worker1_datum_int" & "cando_mapper_worker1_branch") => "cando_mapper_worker1_datum_int_branch") & ((("cando_mapper_worker1_stop_unit" & "cando_mapper_worker1_branch") => "cando_mapper_worker1_stop_unit_branch") & ((("cando_mapper_worker2_datum_int" & "cando_mapper_worker2_branch") => "cando_mapper_worker2_datum_int_branch") & ((("cando_mapper_worker2_stop_unit" & "cando_mapper_worker2_branch") => "cando_mapper_worker2_stop_unit_branch") & ((("cando_mapper_worker3_datum_int" & "cando_mapper_worker3_branch") => "cando_mapper_worker3_datum_int_branch") & ((("cando_mapper_worker3_stop_unit" & "cando_mapper_worker3_branch") => "cando_mapper_worker3_stop_unit_branch") & ((("cando_reducer_mapper_continue_int" & "cando_reducer_mapper_branch") => "cando_reducer_mapper_continue_int_branch") & ((("cando_reducer_mapper_stop_unit" & "cando_reducer_mapper_branch") => "cando_reducer_mapper_stop_unit_branch") & ((("cando_worker1_reducer_result_int" & "cando_worker1_reducer_branch") => "cando_worker1_reducer_result_int_branch") & ((("cando_worker2_reducer_result_int" & "cando_worker2_reducer_branch") => "cando_worker2_reducer_result_int_branch") & (("cando_worker3_reducer_result_int" & "cando_worker3_reducer_branch") => "cando_worker3_reducer_result_int_branch")))))))))))) ]
@@ -2569,6 +3256,12 @@ For each context file in this directory, run [prose output] to check the model a
   // Termination (upper bound)
   Pmax=? [ (F "deadlock") ]
   
+  // Liveness (lower bound)
+  Pmin=? [ (G (!"wals")) ]
+  
+  // Liveness (upper bound)
+  Pmax=? [ (G (!"wals")) ]
+  
    ======= Property checking =======
   
   Type safety
@@ -2584,6 +3277,12 @@ For each context file in this directory, run [prose output] to check the model a
   Result: 1.0 (exact floating point)
   
   Termination (upper bound)
+  Result: 1.0 (exact floating point)
+  
+  Liveness (lower bound)
+  Result: 1.0 (exact floating point)
+  
+  Liveness (upper bound)
   Result: 1.0 (exact floating point)
   
   
@@ -2674,6 +3373,7 @@ For each context file in this directory, run [prose output] to check the model a
   label "cando_alice_shop_branch" = (shop=0) | (shop=3);
   label "cando_bob_alice_branch" = alice=6;
   label "cando_shop_alice_branch" = alice=2;
+  label "wals" = false;
   
   // Type safety
   P>=1 [ (G ((("cando_alice_bob_cancel_unit" & "cando_alice_bob_branch") => "cando_alice_bob_cancel_unit_branch") & ((("cando_alice_bob_split_int" & "cando_alice_bob_branch") => "cando_alice_bob_split_int_branch") & ((("cando_alice_shop_buy_unit" & "cando_alice_shop_branch") => "cando_alice_shop_buy_unit_branch") & ((("cando_alice_shop_no_unit" & "cando_alice_shop_branch") => "cando_alice_shop_no_unit_branch") & ((("cando_alice_shop_query_str" & "cando_alice_shop_branch") => "cando_alice_shop_query_str_branch") & ((("cando_bob_alice_no_unit" & "cando_bob_alice_branch") => "cando_bob_alice_no_unit_branch") & ((("cando_bob_alice_yes_unit" & "cando_bob_alice_branch") => "cando_bob_alice_yes_unit_branch") & (("cando_shop_alice_price_int" & "cando_shop_alice_branch") => "cando_shop_alice_price_int_branch"))))))))) ]
@@ -2690,6 +3390,12 @@ For each context file in this directory, run [prose output] to check the model a
   // Termination (upper bound)
   Pmax=? [ (F "deadlock") ]
   
+  // Liveness (lower bound)
+  Pmin=? [ (G (!"wals")) ]
+  
+  // Liveness (upper bound)
+  Pmax=? [ (G (!"wals")) ]
+  
    ======= Property checking =======
   
   Type safety
@@ -2705,6 +3411,12 @@ For each context file in this directory, run [prose output] to check the model a
   Result: 1.0 (exact floating point)
   
   Termination (upper bound)
+  Result: 1.0 (exact floating point)
+  
+  Liveness (lower bound)
+  Result: 1.0 (exact floating point)
+  
+  Liveness (upper bound)
   Result: 1.0 (exact floating point)
   
   
@@ -2838,6 +3550,7 @@ For each context file in this directory, run [prose output] to check the model a
   label "cando_p_q_branch" = (q=0) | (q=1);
   label "cando_p1_q1_branch" = (q1=0) | (q1=1);
   label "cando_p2_q2_branch" = (q2=0) | (q2=1);
+  label "wals" = false;
   
   // Type safety
   P>=1 [ (G ((("cando_p_q_l1_unit" & "cando_p_q_branch") => "cando_p_q_l1_unit_branch") & ((("cando_p_q_l2_unit" & "cando_p_q_branch") => "cando_p_q_l2_unit_branch") & ((("cando_p1_q1_l1_unit" & "cando_p1_q1_branch") => "cando_p1_q1_l1_unit_branch") & ((("cando_p1_q1_l2_unit" & "cando_p1_q1_branch") => "cando_p1_q1_l2_unit_branch") & ((("cando_p2_q2_l1_unit" & "cando_p2_q2_branch") => "cando_p2_q2_l1_unit_branch") & (("cando_p2_q2_l2_unit" & "cando_p2_q2_branch") => "cando_p2_q2_l2_unit_branch"))))))) ]
@@ -2854,6 +3567,12 @@ For each context file in this directory, run [prose output] to check the model a
   // Termination (upper bound)
   Pmax=? [ (F "deadlock") ]
   
+  // Liveness (lower bound)
+  Pmin=? [ (G (!"wals")) ]
+  
+  // Liveness (upper bound)
+  Pmax=? [ (G (!"wals")) ]
+  
    ======= Property checking =======
   
   Type safety
@@ -2869,6 +3588,12 @@ For each context file in this directory, run [prose output] to check the model a
   Result: 1.0 (exact floating point)
   
   Termination (upper bound)
+  Result: 1.0 (exact floating point)
+  
+  Liveness (lower bound)
+  Result: 1.0 (exact floating point)
+  
+  Liveness (upper bound)
   Result: 1.0 (exact floating point)
   
   
@@ -2911,6 +3636,7 @@ For each context file in this directory, run [prose output] to check the model a
   label "cando_alice_bob_b_int" = alice=0;
   label "cando_alice_bob_b_int_branch" = bob=0;
   label "cando_alice_bob_branch" = bob=0;
+  label "wals" = false;
   
   // Type safety
   P>=1 [ (G ((("cando_alice_bob_a_unit" & "cando_alice_bob_branch") => "cando_alice_bob_a_unit_branch") & (("cando_alice_bob_b_int" & "cando_alice_bob_branch") => "cando_alice_bob_b_int_branch"))) ]
@@ -2927,6 +3653,12 @@ For each context file in this directory, run [prose output] to check the model a
   // Termination (upper bound)
   Pmax=? [ (F "deadlock") ]
   
+  // Liveness (lower bound)
+  Pmin=? [ (G (!"wals")) ]
+  
+  // Liveness (upper bound)
+  Pmax=? [ (G (!"wals")) ]
+  
    ======= Property checking =======
   
   Type safety
@@ -2942,6 +3674,12 @@ For each context file in this directory, run [prose output] to check the model a
   Result: 1.0 (exact floating point)
   
   Termination (upper bound)
+  Result: 1.0 (exact floating point)
+  
+  Liveness (lower bound)
+  Result: 1.0 (exact floating point)
+  
+  Liveness (upper bound)
   Result: 1.0 (exact floating point)
   
   
@@ -3008,6 +3746,7 @@ For each context file in this directory, run [prose output] to check the model a
   label "cando_a_b_branch" = b=0;
   label "cando_b_a_branch" = a=1;
   label "cando_commander_a_branch" = a=0;
+  label "wals" = ((commander=1) & (a=0) & (b=0)) | ((commander=3) & (a=1) & (b=0));
   
   // Type safety
   P>=1 [ (G ((("cando_a_b_msg_unit" & "cando_a_b_branch") => "cando_a_b_msg_unit_branch") & ((("cando_b_a_msg_unit" & "cando_b_a_branch") => "cando_b_a_msg_unit_branch") & ((("cando_commander_a_deadlock_unit" & "cando_commander_a_branch") => "cando_commander_a_deadlock_unit_branch") & (("cando_commander_a_nodeadlock_unit" & "cando_commander_a_branch") => "cando_commander_a_nodeadlock_unit_branch"))))) ]
@@ -3023,6 +3762,12 @@ For each context file in this directory, run [prose output] to check the model a
   
   // Termination (upper bound)
   Pmax=? [ (F "deadlock") ]
+  
+  // Liveness (lower bound)
+  Pmin=? [ (G (!"wals")) ]
+  
+  // Liveness (upper bound)
+  Pmax=? [ (G (!"wals")) ]
   
    ======= Property checking =======
   
@@ -3040,6 +3785,12 @@ For each context file in this directory, run [prose output] to check the model a
   
   Termination (upper bound)
   Result: 1.0 (exact floating point)
+  
+  Liveness (lower bound)
+  Result: 0.4 (exact floating point)
+  
+  Liveness (upper bound)
+  Result: 0.4 (exact floating point)
   
   
   
@@ -3158,6 +3909,7 @@ For each context file in this directory, run [prose output] to check the model a
   label "cando_b_a_branch" = a=0;
   label "cando_b_c_branch" = c=0;
   label "cando_charlie_bob_branch" = bob=0;
+  label "wals" = ((alice=1) & (bob=0) & (charlie=1) & (a=0) & (b=1) & (c=0)) | ((alice=1) & (bob=0) & (charlie=1) & (a=0) & (b=2) & (c=0)) | ((alice=1) & (bob=0) & (charlie=1) & (a=0) & (b=3) & (c=1)) | ((alice=1) & (bob=0) & (charlie=2) & (a=0) & (b=1) & (c=0)) | ((alice=1) & (bob=0) & (charlie=2) & (a=0) & (b=2) & (c=0)) | ((alice=1) & (bob=0) & (charlie=2) & (a=0) & (b=3) & (c=1)) | ((alice=1) & (bob=1) & (charlie=3) & (a=0) & (b=1) & (c=0)) | ((alice=1) & (bob=1) & (charlie=3) & (a=0) & (b=2) & (c=0)) | ((alice=1) & (bob=1) & (charlie=3) & (a=0) & (b=3) & (c=1)) | ((alice=2) & (bob=0) & (charlie=1) & (a=0) & (b=1) & (c=0)) | ((alice=2) & (bob=0) & (charlie=1) & (a=0) & (b=2) & (c=0)) | ((alice=2) & (bob=0) & (charlie=1) & (a=0) & (b=3) & (c=1)) | ((alice=2) & (bob=0) & (charlie=2) & (a=0) & (b=1) & (c=0)) | ((alice=2) & (bob=0) & (charlie=2) & (a=0) & (b=2) & (c=0)) | ((alice=2) & (bob=0) & (charlie=2) & (a=0) & (b=3) & (c=1)) | ((alice=2) & (bob=1) & (charlie=3) & (a=0) & (b=1) & (c=0)) | ((alice=2) & (bob=1) & (charlie=3) & (a=0) & (b=2) & (c=0)) | ((alice=2) & (bob=1) & (charlie=3) & (a=0) & (b=3) & (c=1));
   
   // Type safety
   P>=1 [ (G ((("cando_alice_bob_l1_unit" & "cando_alice_bob_branch") => "cando_alice_bob_l1_unit_branch") & ((("cando_alice_bob_l2_unit" & "cando_alice_bob_branch") => "cando_alice_bob_l2_unit_branch") & ((("cando_b_a_l1_unit" & "cando_b_a_branch") => "cando_b_a_l1_unit_branch") & ((("cando_b_a_l2_unit" & "cando_b_a_branch") => "cando_b_a_l2_unit_branch") & ((("cando_b_c_l1_unit" & "cando_b_c_branch") => "cando_b_c_l1_unit_branch") & ((("cando_b_c_l2_unit" & "cando_b_c_branch") => "cando_b_c_l2_unit_branch") & ((("cando_charlie_bob_l1_unit" & "cando_charlie_bob_branch") => "cando_charlie_bob_l1_unit_branch") & (("cando_charlie_bob_l2_unit" & "cando_charlie_bob_branch") => "cando_charlie_bob_l2_unit_branch"))))))))) ]
@@ -3173,6 +3925,12 @@ For each context file in this directory, run [prose output] to check the model a
   
   // Termination (upper bound)
   Pmax=? [ (F "deadlock") ]
+  
+  // Liveness (lower bound)
+  Pmin=? [ (G (!"wals")) ]
+  
+  // Liveness (upper bound)
+  Pmax=? [ (G (!"wals")) ]
   
    ======= Property checking =======
   
@@ -3190,6 +3948,12 @@ For each context file in this directory, run [prose output] to check the model a
   
   Termination (upper bound)
   Result: 1.0 (exact floating point)
+  
+  Liveness (lower bound)
+  Result: 0.0 (exact floating point)
+  
+  Liveness (upper bound)
+  Result: 0.0 (exact floating point)
   
   
   
@@ -3250,6 +4014,7 @@ For each context file in this directory, run [prose output] to check the model a
   label "cando_p_q_l3_unit" = p=0;
   label "cando_p_q_l3_unit_branch" = q=0;
   label "cando_p_q_branch" = (q=0) | (q=1) | (q=2);
+  label "wals" = false;
   
   // Type safety
   P>=1 [ (G ((("cando_p_q_l1_unit" & "cando_p_q_branch") => "cando_p_q_l1_unit_branch") & ((("cando_p_q_l2_unit" & "cando_p_q_branch") => "cando_p_q_l2_unit_branch") & (("cando_p_q_l3_unit" & "cando_p_q_branch") => "cando_p_q_l3_unit_branch")))) ]
@@ -3265,6 +4030,12 @@ For each context file in this directory, run [prose output] to check the model a
   
   // Termination (upper bound)
   Pmax=? [ (F "deadlock") ]
+  
+  // Liveness (lower bound)
+  Pmin=? [ (G (!"wals")) ]
+  
+  // Liveness (upper bound)
+  Pmax=? [ (G (!"wals")) ]
   
    ======= Property checking =======
   
@@ -3282,6 +4053,12 @@ For each context file in this directory, run [prose output] to check the model a
   
   Termination (upper bound)
   Result: 0.8 (exact floating point)
+  
+  Liveness (lower bound)
+  Result: 1.0 (exact floating point)
+  
+  Liveness (upper bound)
+  Result: 1.0 (exact floating point)
   
   
   
@@ -3386,6 +4163,7 @@ For each context file in this directory, run [prose output] to check the model a
   label "cando_c_d_l3_unit_branch" = d=0;
   label "cando_a_b_branch" = b=0;
   label "cando_c_d_branch" = d=0;
+  label "wals" = ((a=1) & (b=0) & (c=1) & (d=0)) | ((a=1) & (b=0) & (c=2) & (d=0)) | ((a=1) & (b=0) & (c=3) & (d=1)) | ((a=2) & (b=0) & (c=1) & (d=0)) | ((a=3) & (b=1) & (c=1) & (d=0));
   
   // Type safety
   P>=1 [ (G ((("cando_a_b_l1_unit" & "cando_a_b_branch") => "cando_a_b_l1_unit_branch") & ((("cando_a_b_l2_unit" & "cando_a_b_branch") => "cando_a_b_l2_unit_branch") & ((("cando_a_b_l3_unit" & "cando_a_b_branch") => "cando_a_b_l3_unit_branch") & ((("cando_c_d_l1_unit" & "cando_c_d_branch") => "cando_c_d_l1_unit_branch") & ((("cando_c_d_l2_unit" & "cando_c_d_branch") => "cando_c_d_l2_unit_branch") & (("cando_c_d_l3_unit" & "cando_c_d_branch") => "cando_c_d_l3_unit_branch"))))))) ]
@@ -3401,6 +4179,12 @@ For each context file in this directory, run [prose output] to check the model a
   
   // Termination (upper bound)
   Pmax=? [ (F "deadlock") ]
+  
+  // Liveness (lower bound)
+  Pmin=? [ (G (!"wals")) ]
+  
+  // Liveness (upper bound)
+  Pmax=? [ (G (!"wals")) ]
   
    ======= Property checking =======
   
@@ -3418,6 +4202,12 @@ For each context file in this directory, run [prose output] to check the model a
   
   Termination (upper bound)
   Result: 1.0 (exact floating point)
+  
+  Liveness (lower bound)
+  Result: 0.41999999999999993 (exact floating point)
+  
+  Liveness (upper bound)
+  Result: 0.42000000000000004 (exact floating point)
   
   
   
@@ -3483,6 +4273,7 @@ For each context file in this directory, run [prose output] to check the model a
   label "cando_alice_bob_l5_unit" = alice=0;
   label "cando_alice_bob_l5_unit_branch" = false;
   label "cando_alice_bob_branch" = (bob=0) | (bob=1);
+  label "wals" = ((alice=3) & (bob=0)) | ((alice=6) & (bob=1));
   
   // Type safety
   P>=1 [ (G ((("cando_alice_bob_l1_unit" & "cando_alice_bob_branch") => "cando_alice_bob_l1_unit_branch") & ((("cando_alice_bob_l2_unit" & "cando_alice_bob_branch") => "cando_alice_bob_l2_unit_branch") & ((("cando_alice_bob_l3_unit" & "cando_alice_bob_branch") => "cando_alice_bob_l3_unit_branch") & ((("cando_alice_bob_l4_unit" & "cando_alice_bob_branch") => "cando_alice_bob_l4_unit_branch") & (("cando_alice_bob_l5_unit" & "cando_alice_bob_branch") => "cando_alice_bob_l5_unit_branch")))))) ]
@@ -3498,6 +4289,12 @@ For each context file in this directory, run [prose output] to check the model a
   
   // Termination (upper bound)
   Pmax=? [ (F "deadlock") ]
+  
+  // Liveness (lower bound)
+  Pmin=? [ (G (!"wals")) ]
+  
+  // Liveness (upper bound)
+  Pmax=? [ (G (!"wals")) ]
   
    ======= Property checking =======
   
@@ -3515,6 +4312,12 @@ For each context file in this directory, run [prose output] to check the model a
   
   Termination (upper bound)
   Result: 1.0 (exact floating point)
+  
+  Liveness (lower bound)
+  Result: 0.87 (exact floating point)
+  
+  Liveness (upper bound)
+  Result: 0.87 (exact floating point)
   
   
   
@@ -3563,6 +4366,7 @@ For each context file in this directory, run [prose output] to check the model a
   label "cando_p_q_l3_unit" = p=3;
   label "cando_p_q_l3_unit_branch" = false;
   label "cando_p_q_branch" = q=0;
+  label "wals" = (p=4) & (q=1);
   
   // Type safety
   P>=1 [ (G ((("cando_p_q_l1_unit" & "cando_p_q_branch") => "cando_p_q_l1_unit_branch") & ((("cando_p_q_l2_unit" & "cando_p_q_branch") => "cando_p_q_l2_unit_branch") & (("cando_p_q_l3_unit" & "cando_p_q_branch") => "cando_p_q_l3_unit_branch")))) ]
@@ -3578,6 +4382,12 @@ For each context file in this directory, run [prose output] to check the model a
   
   // Termination (upper bound)
   Pmax=? [ (F "deadlock") ]
+  
+  // Liveness (lower bound)
+  Pmin=? [ (G (!"wals")) ]
+  
+  // Liveness (upper bound)
+  Pmax=? [ (G (!"wals")) ]
   
    ======= Property checking =======
   
@@ -3596,6 +4406,12 @@ For each context file in this directory, run [prose output] to check the model a
   Result: 1.0 (exact floating point)
   
   Termination (upper bound)
+  Result: 1.0 (exact floating point)
+  
+  Liveness (lower bound)
+  Result: 1.0 (exact floating point)
+  
+  Liveness (upper bound)
   Result: 1.0 (exact floating point)
   
   
@@ -3634,6 +4450,7 @@ For each context file in this directory, run [prose output] to check the model a
   label "cando_p_q_l1_unit" = p=0;
   label "cando_p_q_l1_unit_branch" = q=0;
   label "cando_p_q_branch" = q=0;
+  label "wals" = false;
   
   // Type safety
   P>=1 [ (G (("cando_p_q_l1_unit" & "cando_p_q_branch") => "cando_p_q_l1_unit_branch")) ]
@@ -3650,6 +4467,12 @@ For each context file in this directory, run [prose output] to check the model a
   // Termination (upper bound)
   Pmax=? [ (F "deadlock") ]
   
+  // Liveness (lower bound)
+  Pmin=? [ (G (!"wals")) ]
+  
+  // Liveness (upper bound)
+  Pmax=? [ (G (!"wals")) ]
+  
    ======= Property checking =======
   
   Type safety
@@ -3665,6 +4488,12 @@ For each context file in this directory, run [prose output] to check the model a
   Result: 1.0 (exact floating point)
   
   Termination (upper bound)
+  Result: 1.0 (exact floating point)
+  
+  Liveness (lower bound)
+  Result: 1.0 (exact floating point)
+  
+  Liveness (upper bound)
   Result: 1.0 (exact floating point)
   
   
@@ -3715,6 +4544,7 @@ For each context file in this directory, run [prose output] to check the model a
   label "cando_p_q_l3_unit" = p=3;
   label "cando_p_q_l3_unit_branch" = false;
   label "cando_p_q_branch" = (q=0) | (q=1);
+  label "wals" = (p=4) & (q=1);
   
   // Type safety
   P>=1 [ (G ((("cando_p_q_l1_unit" & "cando_p_q_branch") => "cando_p_q_l1_unit_branch") & ((("cando_p_q_l2_unit" & "cando_p_q_branch") => "cando_p_q_l2_unit_branch") & (("cando_p_q_l3_unit" & "cando_p_q_branch") => "cando_p_q_l3_unit_branch")))) ]
@@ -3730,6 +4560,12 @@ For each context file in this directory, run [prose output] to check the model a
   
   // Termination (upper bound)
   Pmax=? [ (F "deadlock") ]
+  
+  // Liveness (lower bound)
+  Pmin=? [ (G (!"wals")) ]
+  
+  // Liveness (upper bound)
+  Pmax=? [ (G (!"wals")) ]
   
    ======= Property checking =======
   
@@ -3748,6 +4584,12 @@ For each context file in this directory, run [prose output] to check the model a
   Result: 1.0 (exact floating point)
   
   Termination (upper bound)
+  Result: 1.0 (exact floating point)
+  
+  Liveness (lower bound)
+  Result: 1.0 (exact floating point)
+  
+  Liveness (upper bound)
   Result: 1.0 (exact floating point)
   
   

@@ -126,6 +126,7 @@ let print_mod ppf { locals; participant; commands } ~use_unbounded_ints =
 let print_label_name ppf = function
   | End -> fprintf ppf "end"
   | Deadlock -> fprintf ppf "deadlock"
+  | Wals -> fprintf ppf "wals"
   | Can_do c -> fprintf ppf "cando_%s" (Action.to_string (Action.communication c))
   | Can_do_branch c ->
     fprintf ppf "cando_%s_branch" (Action.to_string (Action.communication c))

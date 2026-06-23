@@ -8,6 +8,8 @@ let annotation_to_short_string =
   | Deadlock_freedom_upper -> "DF-U"
   | Termination_lower -> "Term-L"
   | Termination_upper -> "Term-U"
+  | Liveness_lower -> "Live-L"
+  | Liveness_upper -> "Live-U"
 ;;
 
 let default_filename_col_width = 30

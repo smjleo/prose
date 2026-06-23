@@ -1,0 +1,8 @@
+a : mu t . (+) { c ! 1.0 : msg . t }
+
+b : mu t . (+) { c ! 1.0 : msg . t }
+
+c : mu t . & {
+              a ? msg . t,
+              b ? msg . t
+            }

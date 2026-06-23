@@ -173,3 +173,15 @@ let generate context =
   in
   List.concat [ [ end_label ]; cando_action; cando_any ]
 ;;
+
+(** The combined weak-almost-sure-livelock label [WASlivelock(Delta)]: a
+    disjunction over the bad global configurations, each a conjunction of
+    per-participant [S_p] equalities. Empty (live) ⇒ [false]. *)
+let wals_label context =
+  let configs = Live.bad_configs context in
+  let clauses =
+    List.map configs ~f:(fun cfg ->
+      conjunction (List.map cfg ~f:(fun (p, n) -> Eq (Var (StringVar p), IntConst n))))
+  in
+  { name = Wals; expr = disjunction clauses }
+;;

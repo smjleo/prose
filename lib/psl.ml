@@ -7,6 +7,8 @@ module Annotation = struct
     | Deadlock_freedom_upper
     | Termination_lower
     | Termination_upper
+    | Liveness_lower
+    | Liveness_upper
   [@@deriving equal, sexp_of]
 
   let all =
@@ -15,6 +17,8 @@ module Annotation = struct
     ; Deadlock_freedom_upper
     ; Termination_lower
     ; Termination_upper
+    ; Liveness_lower
+    ; Liveness_upper
     ]
   ;;
 
@@ -24,6 +28,8 @@ module Annotation = struct
     | Deadlock_freedom_upper -> "Deadlock freedom (upper bound)"
     | Termination_lower -> "Termination (lower bound)"
     | Termination_upper -> "Termination (upper bound)"
+    | Liveness_lower -> "Liveness (lower bound)"
+    | Liveness_upper -> "Liveness (upper bound)"
   ;;
 end
 

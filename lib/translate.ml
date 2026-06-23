@@ -172,7 +172,7 @@ let translate context =
   let modules = List.map ~f:(translate_ctx_item ~id_map) context in
   ( { globals = []
     ; modules = closure modules :: modules
-    ; labels = Gen_labels.generate context
+    ; labels = Gen_labels.generate context @ [ Gen_labels.wals_label context ]
     }
   , Gen_props.generate context )
 ;;
