@@ -42,6 +42,11 @@ let upper_flag =
   flag "-upper" no_arg ~doc:""
 ;;
 
+let fair_flag =
+  let open Command.Param in
+  flag "-fair" no_arg ~doc:" Pass -fair to PRISM to enable fairness in model checking"
+;;
+
 let output_command =
   Command.basic
     ~summary:
@@ -115,10 +120,19 @@ let verify_command =
      and print_translation_time = print_translation_time_flag
      and balance = balance_flag
      and term_only = term_only_flag
-     and upper = upper_flag in
+     and upper = upper_flag
+     and fair = fair_flag in
      if term_only
      then Prose.term_only ~ctx_file ~upper
-     else Prose.verify ~ctx_file ~print_ast ~print_raw_prism ~print_translation_time ~balance ~upper)
+     else
+       Prose.verify
+         ~ctx_file
+         ~print_ast
+         ~print_raw_prism
+         ~print_translation_time
+         ~balance
+         ~upper
+         ~fair)
 ;;
 
 let command =

@@ -174,7 +174,7 @@ let with_prism_files
   res
 ;;
 
-let verify ~ctx_file ~print_ast ~print_raw_prism ~print_translation_time ~balance ~upper () =
+let verify ~ctx_file ~print_ast ~print_raw_prism ~print_translation_time ~balance ~upper ~fair () =
   with_prism_files
     ~ctx_file
     ~print_ast
@@ -191,6 +191,7 @@ let verify ~ctx_file ~print_ast ~print_raw_prism ~print_translation_time ~balanc
           [ "-ex"; model_output_file; prop_output_file ]
         else [ model_output_file; prop_output_file ]
       in
+      let prism_args = if fair then "-fair" :: prism_args else prism_args in
       let prism = Core_unix.create_process ~prog:"prism" ~args:prism_args in
       let stdout = Core_unix.in_channel_of_descr prism.stdout in
       let stderr = Core_unix.in_channel_of_descr prism.stderr in

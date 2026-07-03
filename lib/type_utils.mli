@@ -4,8 +4,21 @@ open! Core
     not including the very last state which denotes the failure state. *)
 val state_space : Ast.session_type -> int
 
-val intermediate_state_offset
-  :  branch_index:int
+(** sel(i) in the paper: the entry state of the [branch_index]-th summand's
+    singleton selection. A singleton sum has no summand step, so the entry of
+    its selection is the state of the sum itself. *)
+val summand_entry_state
+  :  state:int
+  -> branch_index:int
+  -> choice_branches:(Ast.probability * Ast.choice) list list
+  -> int
+
+(** The intermediary state a participant moves to after probabilistically
+    committing to the [choice_index]-th branch of the [branch_index]-th
+    summand. *)
+val intermediate_state_internal
+  :  state:int
+  -> branch_index:int
   -> choice_index:int
   -> choice_branches:(Ast.probability * Ast.choice) list list
   -> int

@@ -1,0 +1,5 @@
+a : mu t . (+) { b ! 1.0 : rec . t }
+
+b : mu t . & { a ? rec . end, c ? rec . & { a ? rec . t } }
+
+c : mu t . (+) { b ! 1.0 : rec . t }

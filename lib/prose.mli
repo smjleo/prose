@@ -23,6 +23,7 @@ val verify
   -> print_translation_time:bool
   -> balance:bool
   -> upper:bool
+  -> fair:bool
   -> unit
   -> unit
 

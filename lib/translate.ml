@@ -21,20 +21,44 @@ let rec translate_type ~id_map ~participant ~state ~state_size ~var_map ty =
       ty
   | Variable _var -> []
   | Internal choice_branches ->
-    let initial_commands =
+    let summand_commands =
+      (* Summand step: for a proper sum (two or more summands), an internal
+         transition with probability 1 nondeterministically picks a summand,
+         moving to the entry state of its singleton selection. A singleton
+         sum is a selection already, so it has no summand step. *)
+      match choice_branches with
+      | [ _ ] -> []
+      | _ ->
+        List.mapi choice_branches ~f:(fun branch_index _branch ->
+          let entry =
+            Type_utils.summand_entry_state ~state ~branch_index ~choice_branches
+          in
+          { action = Action.blank
+          ; guard = Eq (Var state_var, IntConst state)
+          ; updates = [ Prism.Float 1.0, [ IntUpdate (state_var, IntConst entry) ] ]
+          })
+    in
+    let commitment_commands =
+      (* Commitment step: from the entry state of a singleton selection, an
+         internal transition probabilistically picks a branch, moving to its
+         intermediary state. *)
       List.mapi choice_branches ~f:(fun branch_index branch ->
+        let entry =
+          Type_utils.summand_entry_state ~state ~branch_index ~choice_branches
+        in
         let choice_updates =
           List.mapi branch ~f:(fun choice_index (prob, _choice) ->
             let intermediate =
-              Type_utils.intermediate_state_offset
+              Type_utils.intermediate_state_internal
+                ~state
                 ~branch_index
                 ~choice_index
                 ~choice_branches
             in
-            Prism.Float prob, [ IntUpdate (state_var, IntConst (state + 1 + intermediate)) ])
+            Prism.Float prob, [ IntUpdate (state_var, IntConst intermediate) ])
         in
         { action = Action.blank
-        ; guard = Eq (Var state_var, IntConst state)
+        ; guard = Eq (Var state_var, IntConst entry)
         ; updates = choice_updates
         })
     in
@@ -48,7 +72,8 @@ let rec translate_type ~id_map ~participant ~state ~state_size ~var_map ty =
             }
           in
           let intermediate =
-            Type_utils.intermediate_state_offset
+            Type_utils.intermediate_state_internal
+              ~state
               ~branch_index
               ~choice_index
               ~choice_branches
@@ -65,7 +90,7 @@ let rec translate_type ~id_map ~participant ~state ~state_size ~var_map ty =
                 ~choice_branches
           in
           { action = Action.communication communication
-          ; guard = Eq (Var state_var, IntConst (state + 1 + intermediate))
+          ; guard = Eq (Var state_var, IntConst intermediate)
           ; updates = [ Prism.Float 1.0, [ IntUpdate (state_var, IntConst new_state) ] ]
           }))
     in
@@ -81,7 +106,7 @@ let rec translate_type ~id_map ~participant ~state ~state_size ~var_map ty =
           in
           translate_type ch_cont ~id_map ~participant ~state:new_state ~state_size ~var_map))
     in
-    List.concat [ initial_commands; sync_commands; continuations ]
+    List.concat [ summand_commands; commitment_commands; sync_commands; continuations ]
   | External ext_choices ->
     let receive_commands =
       List.mapi ext_choices ~f:(fun choice_index { Ast.ch_part; ch_label; ch_sort; ch_cont } ->

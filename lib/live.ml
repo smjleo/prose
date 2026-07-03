@@ -70,13 +70,13 @@ let compile_role ty =
           List.mapi
             branch
             ~f:(fun choice_index (_prob, { Ast.ch_part; ch_label; ch_sort; ch_cont }) ->
-              let intermediate =
-                Type_utils.intermediate_state_offset
+              let offer_state =
+                Type_utils.intermediate_state_internal
+                  ~state
                   ~branch_index
                   ~choice_index
                   ~choice_branches
               in
-              let offer_state = state + 1 + intermediate in
               let cont =
                 cont_internal
                   ~state

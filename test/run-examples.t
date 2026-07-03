@@ -1605,6 +1605,99 @@ For each context file in this directory, run [prose output] to check the model a
   
   
   
+   ======= TEST ../examples/jake.ctx =======
+  
+  a : mu t . (+) { b ! 1.0 : rec . t }
+  
+  b : mu t . & { a ? rec . end, c ? rec . & { a ? rec . t } }
+  
+  c : mu t . (+) { b ! 1.0 : rec . t }
+   ======= PRISM output ========
+  
+  
+  module closure
+    closure : bool init false;
+  
+  endmodule
+  
+  module a
+    a : [0..2] init 0;
+  
+    [] a=0 -> 1:(a'=1);
+    [a_b_rec_unit] a=1 -> 1:(a'=0);
+  endmodule
+  
+  module b
+    b : [0..2] init 0;
+  
+    [a_b_rec_unit] b=0 -> 1:(b'=2);
+    [c_b_rec_unit] b=0 -> 1:(b'=1);
+    [a_b_rec_unit] b=1 -> 1:(b'=0);
+  endmodule
+  
+  module c
+    c : [0..2] init 0;
+  
+    [] c=0 -> 1:(c'=1);
+    [c_b_rec_unit] c=1 -> 1:(c'=0);
+  endmodule
+  
+  label "end" = (a=2) & (b=2) & (c=2);
+  label "cando_a_b_rec_unit" = a=0;
+  label "cando_a_b_rec_unit_branch" = (b=0) | (b=1);
+  label "cando_c_b_rec_unit" = c=0;
+  label "cando_c_b_rec_unit_branch" = b=0;
+  label "cando_a_b_branch" = (b=0) | (b=1);
+  label "cando_c_b_branch" = b=0;
+  label "wals" = (a=1) & (b=2) & (c=1);
+  
+  // Type safety
+  P>=1 [ (G ((("cando_a_b_rec_unit" & "cando_a_b_branch") => "cando_a_b_rec_unit_branch") & (("cando_c_b_rec_unit" & "cando_c_b_branch") => "cando_c_b_rec_unit_branch"))) ]
+  
+  // Deadlock freedom (lower bound)
+  Pmin=? [ (G ("deadlock" => "end")) ]
+  
+  // Deadlock freedom (upper bound)
+  Pmax=? [ (G ("deadlock" => "end")) ]
+  
+  // Termination (lower bound)
+  Pmin=? [ (F "deadlock") ]
+  
+  // Termination (upper bound)
+  Pmax=? [ (F "deadlock") ]
+  
+  // Liveness (lower bound)
+  Pmin=? [ (G (!"wals")) ]
+  
+  // Liveness (upper bound)
+  Pmax=? [ (G (!"wals")) ]
+  
+   ======= Property checking =======
+  
+  Type safety
+  Result: true
+  
+  Deadlock freedom (lower bound)
+  Result: 0.0 (exact floating point)
+  
+  Deadlock freedom (upper bound)
+  Result: 1.0 (exact floating point)
+  
+  Termination (lower bound)
+  Result: 0.0 (exact floating point)
+  
+  Termination (upper bound)
+  Result: 1.0 (exact floating point)
+  
+  Liveness (lower bound)
+  Result: 0.0 (exact floating point)
+  
+  Liveness (upper bound)
+  Result: 1.0 (exact floating point)
+  
+  
+  
+  
    ======= TEST ../examples/livelock.ctx =======
   
   (* Weak almost-sure livelock: a and b loop forever exchanging [ping], while c
@@ -2583,16 +2676,18 @@ For each context file in this directory, run [prose output] to check the model a
   endmodule
   
   module p
-    p : [0..7] init 0;
+    p : [0..9] init 0;
   
     [] p=0 -> 1:(p'=1);
-    [] p=0 -> 1:(p'=2);
-    [p_q_ok_unit] p=1 -> 1:(p'=3);
-    [p_q_go_unit] p=2 -> 1:(p'=5);
-    [] p=3 -> 1:(p'=4);
-    [p_r_notify_unit] p=4 -> 1:(p'=7);
+    [] p=0 -> 1:(p'=5);
+    [] p=1 -> 1:(p'=2);
     [] p=5 -> 1:(p'=6);
-    [p_q_go_unit] p=6 -> 1:(p'=5);
+    [p_q_ok_unit] p=2 -> 1:(p'=3);
+    [p_q_go_unit] p=6 -> 1:(p'=7);
+    [] p=3 -> 1:(p'=4);
+    [p_r_notify_unit] p=4 -> 1:(p'=9);
+    [] p=7 -> 1:(p'=8);
+    [p_q_go_unit] p=8 -> 1:(p'=7);
   endmodule
   
   module q
@@ -2609,8 +2704,8 @@ For each context file in this directory, run [prose output] to check the model a
     [p_r_notify_unit] r=0 -> 1:(r'=1);
   endmodule
   
-  label "end" = (p=7) & (q=2) & (r=1);
-  label "cando_p_q_go_unit" = (p=0) | (p=5);
+  label "end" = (p=9) & (q=2) & (r=1);
+  label "cando_p_q_go_unit" = (p=0) | (p=7);
   label "cando_p_q_go_unit_branch" = (q=0) | (q=1);
   label "cando_p_q_ok_unit" = p=0;
   label "cando_p_q_ok_unit_branch" = q=0;
@@ -2618,7 +2713,7 @@ For each context file in this directory, run [prose output] to check the model a
   label "cando_p_r_notify_unit_branch" = r=0;
   label "cando_p_q_branch" = (q=0) | (q=1);
   label "cando_p_r_branch" = r=0;
-  label "wals" = ((p=2) & (q=0) & (r=0)) | ((p=6) & (q=1) & (r=0));
+  label "wals" = ((p=6) & (q=0) & (r=0)) | ((p=8) & (q=1) & (r=0));
   
   // Type safety
   P>=1 [ (G ((("cando_p_q_go_unit" & "cando_p_q_branch") => "cando_p_q_go_unit_branch") & ((("cando_p_q_ok_unit" & "cando_p_q_branch") => "cando_p_q_ok_unit_branch") & (("cando_p_r_notify_unit" & "cando_p_r_branch") => "cando_p_r_notify_unit_branch")))) ]
@@ -2686,18 +2781,20 @@ For each context file in this directory, run [prose output] to check the model a
   endmodule
   
   module p
-    p : [0..9] init 0;
+    p : [0..11] init 0;
   
-    [] p=0 -> 0.6:(p'=1) + 0.4:(p'=2);
-    [] p=0 -> 0.4:(p'=3) + 0.6:(p'=4);
-    [p_q_l1_unit] p=1 -> 1:(p'=9);
-    [p_q_l2_unit] p=2 -> 1:(p'=5);
-    [p_q_l1_unit] p=3 -> 1:(p'=9);
-    [p_q_l2_unit] p=4 -> 1:(p'=7);
-    [] p=5 -> 1:(p'=6);
-    [p_q_l2_unit] p=6 -> 1:(p'=5);
-    [] p=7 -> 1:(p'=8);
-    [p_q_l2_unit] p=8 -> 1:(p'=7);
+    [] p=0 -> 1:(p'=1);
+    [] p=0 -> 1:(p'=6);
+    [] p=1 -> 0.6:(p'=2) + 0.4:(p'=3);
+    [] p=6 -> 0.4:(p'=7) + 0.6:(p'=8);
+    [p_q_l1_unit] p=2 -> 1:(p'=11);
+    [p_q_l2_unit] p=3 -> 1:(p'=4);
+    [p_q_l1_unit] p=7 -> 1:(p'=11);
+    [p_q_l2_unit] p=8 -> 1:(p'=9);
+    [] p=4 -> 1:(p'=5);
+    [p_q_l2_unit] p=5 -> 1:(p'=4);
+    [] p=9 -> 1:(p'=10);
+    [p_q_l2_unit] p=10 -> 1:(p'=9);
   endmodule
   
   module q
@@ -2708,10 +2805,10 @@ For each context file in this directory, run [prose output] to check the model a
     [p_q_l2_unit] q=1 -> 1:(q'=1);
   endmodule
   
-  label "end" = (p=9) & (q=2);
+  label "end" = (p=11) & (q=2);
   label "cando_p_q_l1_unit" = p=0;
   label "cando_p_q_l1_unit_branch" = q=0;
-  label "cando_p_q_l2_unit" = (p=0) | (p=5) | (p=7);
+  label "cando_p_q_l2_unit" = (p=0) | (p=4) | (p=9);
   label "cando_p_q_l2_unit_branch" = (q=0) | (q=1);
   label "cando_p_q_branch" = (q=0) | (q=1);
   label "wals" = false;
@@ -3422,6 +3519,188 @@ For each context file in this directory, run [prose output] to check the model a
   
   
   
+   ======= TEST ../examples/running.ctx =======
+  
+  u : (+) { s ! 1.0 : incr<Int> .
+        mu t . & { c ? res(Int) . (+) { s ! 1.0 : incr<Int> . t } } }
+  
+  s : mu t . & {
+    c ? crit . end,
+    c ? disconn . mu r .
+        (+) { c ! 1.0 : retry . r }
+      + (+) { c ! 1.0 : conn .
+          (+) {
+            c ! 0.9 : incr<Int> . t,
+            c ! 0.1 : upgrade . mu u2 . (+) { c ! 1.0 : incr<Int> . & { u ? incr(Int) . u2 } }
+          } },
+    c ? err(Int) .
+      (+) {
+        c ! 0.9 : incr<Int> . t,
+        c ! 0.1 : upgrade . mu u2 . (+) { c ! 1.0 : incr<Int> . & { u ? incr(Int) . u2 } }
+      },
+    u ? incr(Int) .
+      (+) {
+        c ! 0.9 : incr<Int> . t,
+        c ! 0.1 : upgrade . mu u2 . (+) { c ! 1.0 : incr<Int> . & { u ? incr(Int) . u2 } }
+      }
+  }
+  
+  c : mu t . & {
+    s ? upgrade . mu u2 . & { s ? incr(Int) . (+) { u ! 1.0 : res<Int> . u2 } },
+    s ? incr(Int) .
+        (+) {
+          u ! 0.8 : res<Int> . t,
+          s ! 0.1 : err<Int> . t,
+          s ! 0.05 : crit . end,
+          s ! 0.05 : disconn . mu r . & { s ? retry . r, s ? conn . t }
+        }
+      + (+) { u ! 1.0 : res<Int> . t }
+  }
+  
+   ======= PRISM output ========
+  
+  
+  module closure
+    closure : bool init false;
+  
+  endmodule
+  
+  module u
+    u : [0..5] init 0;
+  
+    [] u=0 -> 1:(u'=1);
+    [u_s_incr_int] u=1 -> 1:(u'=2);
+    [c_u_res_int] u=2 -> 1:(u'=3);
+    [] u=3 -> 1:(u'=4);
+    [u_s_incr_int] u=4 -> 1:(u'=2);
+  endmodule
+  
+  module s
+    s : [0..24] init 0;
+  
+    [c_s_crit_unit] s=0 -> 1:(s'=24);
+    [c_s_disconn_unit] s=0 -> 1:(s'=1);
+    [c_s_err_int] s=0 -> 1:(s'=12);
+    [u_s_incr_int] s=0 -> 1:(s'=18);
+    [] s=1 -> 1:(s'=2);
+    [] s=1 -> 1:(s'=4);
+    [] s=2 -> 1:(s'=3);
+    [] s=4 -> 1:(s'=5);
+    [s_c_retry_unit] s=3 -> 1:(s'=1);
+    [s_c_conn_unit] s=5 -> 1:(s'=6);
+    [] s=6 -> 0.9:(s'=7) + 0.1:(s'=8);
+    [s_c_incr_int] s=7 -> 1:(s'=0);
+    [s_c_upgrade_unit] s=8 -> 1:(s'=9);
+    [] s=9 -> 1:(s'=10);
+    [s_c_incr_int] s=10 -> 1:(s'=11);
+    [u_s_incr_int] s=11 -> 1:(s'=9);
+    [] s=12 -> 0.9:(s'=13) + 0.1:(s'=14);
+    [s_c_incr_int] s=13 -> 1:(s'=0);
+    [s_c_upgrade_unit] s=14 -> 1:(s'=15);
+    [] s=15 -> 1:(s'=16);
+    [s_c_incr_int] s=16 -> 1:(s'=17);
+    [u_s_incr_int] s=17 -> 1:(s'=15);
+    [] s=18 -> 0.9:(s'=19) + 0.1:(s'=20);
+    [s_c_incr_int] s=19 -> 1:(s'=0);
+    [s_c_upgrade_unit] s=20 -> 1:(s'=21);
+    [] s=21 -> 1:(s'=22);
+    [s_c_incr_int] s=22 -> 1:(s'=23);
+    [u_s_incr_int] s=23 -> 1:(s'=21);
+  endmodule
+  
+  module c
+    c : [0..13] init 0;
+  
+    [s_c_upgrade_unit] c=0 -> 1:(c'=1);
+    [s_c_incr_int] c=0 -> 1:(c'=4);
+    [s_c_incr_int] c=1 -> 1:(c'=2);
+    [] c=2 -> 1:(c'=3);
+    [c_u_res_int] c=3 -> 1:(c'=1);
+    [] c=4 -> 1:(c'=5);
+    [] c=4 -> 1:(c'=11);
+    [] c=5 -> 0.8:(c'=6) + 0.1:(c'=7) + 0.05:(c'=8) + 0.05:(c'=9);
+    [] c=11 -> 1:(c'=12);
+    [c_u_res_int] c=6 -> 1:(c'=0);
+    [c_s_err_int] c=7 -> 1:(c'=0);
+    [c_s_crit_unit] c=8 -> 1:(c'=13);
+    [c_s_disconn_unit] c=9 -> 1:(c'=10);
+    [c_u_res_int] c=12 -> 1:(c'=0);
+    [s_c_retry_unit] c=10 -> 1:(c'=10);
+    [s_c_conn_unit] c=10 -> 1:(c'=0);
+  endmodule
+  
+  label "end" = (u=5) & (s=24) & (c=13);
+  label "cando_c_s_crit_unit" = c=4;
+  label "cando_c_s_crit_unit_branch" = s=0;
+  label "cando_c_s_disconn_unit" = c=4;
+  label "cando_c_s_disconn_unit_branch" = s=0;
+  label "cando_c_s_err_int" = c=4;
+  label "cando_c_s_err_int_branch" = s=0;
+  label "cando_c_u_res_int" = (c=2) | (c=4);
+  label "cando_c_u_res_int_branch" = u=2;
+  label "cando_s_c_conn_unit" = s=1;
+  label "cando_s_c_conn_unit_branch" = c=10;
+  label "cando_s_c_incr_int" = (s=6) | (s=9) | (s=12) | (s=15) | (s=18) | (s=21);
+  label "cando_s_c_incr_int_branch" = (c=0) | (c=1);
+  label "cando_s_c_retry_unit" = s=1;
+  label "cando_s_c_retry_unit_branch" = c=10;
+  label "cando_s_c_upgrade_unit" = (s=6) | (s=12) | (s=18);
+  label "cando_s_c_upgrade_unit_branch" = c=0;
+  label "cando_u_s_incr_int" = (u=0) | (u=3);
+  label "cando_u_s_incr_int_branch" = (s=0) | (s=11) | (s=17) | (s=23);
+  label "cando_c_s_branch" = s=0;
+  label "cando_c_u_branch" = u=2;
+  label "cando_s_c_branch" = (c=0) | (c=1) | (c=10);
+  label "cando_u_s_branch" = (s=0) | (s=11) | (s=17) | (s=23);
+  label "wals" = ((u=2) & (s=0) & (c=8)) | ((u=2) & (s=0) & (c=9)) | ((u=2) & (s=3) & (c=10)) | ((u=2) & (s=24) & (c=13));
+  
+  // Type safety
+  P>=1 [ (G ((("cando_c_s_crit_unit" & "cando_c_s_branch") => "cando_c_s_crit_unit_branch") & ((("cando_c_s_disconn_unit" & "cando_c_s_branch") => "cando_c_s_disconn_unit_branch") & ((("cando_c_s_err_int" & "cando_c_s_branch") => "cando_c_s_err_int_branch") & ((("cando_c_u_res_int" & "cando_c_u_branch") => "cando_c_u_res_int_branch") & ((("cando_s_c_conn_unit" & "cando_s_c_branch") => "cando_s_c_conn_unit_branch") & ((("cando_s_c_incr_int" & "cando_s_c_branch") => "cando_s_c_incr_int_branch") & ((("cando_s_c_retry_unit" & "cando_s_c_branch") => "cando_s_c_retry_unit_branch") & ((("cando_s_c_upgrade_unit" & "cando_s_c_branch") => "cando_s_c_upgrade_unit_branch") & (("cando_u_s_incr_int" & "cando_u_s_branch") => "cando_u_s_incr_int_branch")))))))))) ]
+  
+  // Deadlock freedom (lower bound)
+  Pmin=? [ (G ("deadlock" => "end")) ]
+  
+  // Deadlock freedom (upper bound)
+  Pmax=? [ (G ("deadlock" => "end")) ]
+  
+  // Termination (lower bound)
+  Pmin=? [ (F "deadlock") ]
+  
+  // Termination (upper bound)
+  Pmax=? [ (F "deadlock") ]
+  
+  // Liveness (lower bound)
+  Pmin=? [ (G (!"wals")) ]
+  
+  // Liveness (upper bound)
+  Pmax=? [ (G (!"wals")) ]
+  
+   ======= Property checking =======
+  
+  Type safety
+  Result: true
+  
+  Deadlock freedom (lower bound)
+  Result: 0.6896675050354955 (+/- 6.79348995065338E-6 estimated; rel err 9.85038428090611E-6)
+  
+  Deadlock freedom (upper bound)
+  Result: 1.0 (exact floating point)
+  
+  Termination (lower bound)
+  Result: 0.0 (exact floating point)
+  
+  Termination (upper bound)
+  Result: 0.3103324949645045 (+/- 3.0568943302527295E-6 estimated; rel err 9.85038428090611E-6)
+  
+  Liveness (lower bound)
+  Result: 0.5263273372547235 (+/- 4.870928780374453E-6 estimated; rel err 9.254561630373948E-6)
+  
+  Liveness (upper bound)
+  Result: 1.0 (exact floating point)
+  
+  
+  
+  
    ======= TEST ../examples/same-labels.ctx =======
   
   (* Previous iterations of the translation used ID(-) to work out the next state.
@@ -4056,6 +4335,107 @@ For each context file in this directory, run [prose output] to check the model a
   
   Liveness (lower bound)
   Result: 1.0 (exact floating point)
+  
+  Liveness (upper bound)
+  Result: 1.0 (exact floating point)
+  
+  
+  
+  
+   ======= TEST ../examples/two-independent.ctx =======
+  
+  a : mu t . (+) { b ! 1 : l . t }
+  b : mu t . & { a ? l . t }
+  
+  c : (+) { d ! 1 : l . end }
+  d : & { c ? l . & { c ? l2 . end } }
+   ======= PRISM output ========
+  
+  
+  module closure
+    closure : bool init false;
+  
+    [c_d_l2_unit] false -> 1:(closure'=false);
+  endmodule
+  
+  module a
+    a : [0..2] init 0;
+  
+    [] a=0 -> 1:(a'=1);
+    [a_b_l_unit] a=1 -> 1:(a'=0);
+  endmodule
+  
+  module b
+    b : [0..1] init 0;
+  
+    [a_b_l_unit] b=0 -> 1:(b'=0);
+  endmodule
+  
+  module c
+    c : [0..2] init 0;
+  
+    [] c=0 -> 1:(c'=1);
+    [c_d_l_unit] c=1 -> 1:(c'=2);
+  endmodule
+  
+  module d
+    d : [0..2] init 0;
+  
+    [c_d_l_unit] d=0 -> 1:(d'=1);
+    [c_d_l2_unit] d=1 -> 1:(d'=2);
+  endmodule
+  
+  label "end" = (a=2) & (b=1) & (c=2) & (d=2);
+  label "cando_a_b_l_unit" = a=0;
+  label "cando_a_b_l_unit_branch" = b=0;
+  label "cando_c_d_l_unit" = c=0;
+  label "cando_c_d_l_unit_branch" = d=0;
+  label "cando_c_d_l2_unit" = false;
+  label "cando_c_d_l2_unit_branch" = d=1;
+  label "cando_a_b_branch" = b=0;
+  label "cando_c_d_branch" = (d=0) | (d=1);
+  label "wals" = (a=1) & (b=0) & (c=2) & (d=1);
+  
+  // Type safety
+  P>=1 [ (G ((("cando_a_b_l_unit" & "cando_a_b_branch") => "cando_a_b_l_unit_branch") & ((("cando_c_d_l_unit" & "cando_c_d_branch") => "cando_c_d_l_unit_branch") & (("cando_c_d_l2_unit" & "cando_c_d_branch") => "cando_c_d_l2_unit_branch")))) ]
+  
+  // Deadlock freedom (lower bound)
+  Pmin=? [ (G ("deadlock" => "end")) ]
+  
+  // Deadlock freedom (upper bound)
+  Pmax=? [ (G ("deadlock" => "end")) ]
+  
+  // Termination (lower bound)
+  Pmin=? [ (F "deadlock") ]
+  
+  // Termination (upper bound)
+  Pmax=? [ (F "deadlock") ]
+  
+  // Liveness (lower bound)
+  Pmin=? [ (G (!"wals")) ]
+  
+  // Liveness (upper bound)
+  Pmax=? [ (G (!"wals")) ]
+  
+   ======= Property checking =======
+  
+  Type safety
+  Result: true
+  
+  Deadlock freedom (lower bound)
+  Result: 1.0 (exact floating point)
+  
+  Deadlock freedom (upper bound)
+  Result: 1.0 (exact floating point)
+  
+  Termination (lower bound)
+  Result: 0.0 (exact floating point)
+  
+  Termination (upper bound)
+  Result: 0.0 (exact floating point)
+  
+  Liveness (lower bound)
+  Result: 0.0 (exact floating point)
   
   Liveness (upper bound)
   Result: 1.0 (exact floating point)
