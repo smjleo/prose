@@ -1698,6 +1698,148 @@ For each context file in this directory, run [prose output] to check the model a
   
   
   
+   ======= TEST ../examples/leader-election.ctx =======
+  
+  (* Randomised leader election.
+     Refer to https://www.prismmodelchecker.org/casestudies/synchronous_leader.php *)
+  
+  n0 : mu t . (+) {
+         n1 ! 0.5 : zero . & {
+           n1 ? zero . t,
+           n1 ? one . end
+         },
+         n1 ! 0.5 : one . & {
+           n1 ? zero . (+) { o ! 1.0 : leader0 . end },
+           n1 ? one . t
+         }
+       }
+  
+  n1 : mu t . & {
+         n0 ? zero . (+) {
+           n0 ! 0.5 : zero . t,
+           n0 ! 0.5 : one . (+) { o ! 1.0 : leader1 . end }
+         },
+         n0 ? one . (+) {
+           n0 ! 0.5 : zero . end,
+           n0 ! 0.5 : one . t
+         }
+       }
+  
+  o : & {
+        n0 ? leader0 . end,
+        n1 ? leader1 . end
+      }
+  
+   ======= PRISM output ========
+  
+  
+  module closure
+    closure : bool init false;
+  
+  endmodule
+  
+  module n0
+    n0 : [0..7] init 0;
+  
+    [] n0=0 -> 0.5:(n0'=1) + 0.5:(n0'=2);
+    [n0_n1_zero_unit] n0=1 -> 1:(n0'=3);
+    [n0_n1_one_unit] n0=2 -> 1:(n0'=4);
+    [n1_n0_zero_unit] n0=3 -> 1:(n0'=0);
+    [n1_n0_one_unit] n0=3 -> 1:(n0'=7);
+    [n1_n0_zero_unit] n0=4 -> 1:(n0'=5);
+    [n1_n0_one_unit] n0=4 -> 1:(n0'=0);
+    [] n0=5 -> 1:(n0'=6);
+    [n0_o_leader0_unit] n0=6 -> 1:(n0'=7);
+  endmodule
+  
+  module n1
+    n1 : [0..9] init 0;
+  
+    [n0_n1_zero_unit] n1=0 -> 1:(n1'=1);
+    [n0_n1_one_unit] n1=0 -> 1:(n1'=6);
+    [] n1=1 -> 0.5:(n1'=2) + 0.5:(n1'=3);
+    [n1_n0_zero_unit] n1=2 -> 1:(n1'=0);
+    [n1_n0_one_unit] n1=3 -> 1:(n1'=4);
+    [] n1=4 -> 1:(n1'=5);
+    [n1_o_leader1_unit] n1=5 -> 1:(n1'=9);
+    [] n1=6 -> 0.5:(n1'=7) + 0.5:(n1'=8);
+    [n1_n0_zero_unit] n1=7 -> 1:(n1'=9);
+    [n1_n0_one_unit] n1=8 -> 1:(n1'=0);
+  endmodule
+  
+  module o
+    o : [0..1] init 0;
+  
+    [n0_o_leader0_unit] o=0 -> 1:(o'=1);
+    [n1_o_leader1_unit] o=0 -> 1:(o'=1);
+  endmodule
+  
+  label "end" = (n0=7) & (n1=9) & (o=1);
+  label "cando_n0_n1_one_unit" = n0=0;
+  label "cando_n0_n1_one_unit_branch" = n1=0;
+  label "cando_n0_n1_zero_unit" = n0=0;
+  label "cando_n0_n1_zero_unit_branch" = n1=0;
+  label "cando_n0_o_leader0_unit" = n0=5;
+  label "cando_n0_o_leader0_unit_branch" = o=0;
+  label "cando_n1_n0_one_unit" = (n1=1) | (n1=6);
+  label "cando_n1_n0_one_unit_branch" = (n0=3) | (n0=4);
+  label "cando_n1_n0_zero_unit" = (n1=1) | (n1=6);
+  label "cando_n1_n0_zero_unit_branch" = (n0=3) | (n0=4);
+  label "cando_n1_o_leader1_unit" = n1=4;
+  label "cando_n1_o_leader1_unit_branch" = o=0;
+  label "cando_n0_n1_branch" = n1=0;
+  label "cando_n0_o_branch" = o=0;
+  label "cando_n1_n0_branch" = (n0=3) | (n0=4);
+  label "cando_n1_o_branch" = o=0;
+  label "wals" = false;
+  
+  // Type safety
+  P>=1 [ (G ((("cando_n0_n1_one_unit" & "cando_n0_n1_branch") => "cando_n0_n1_one_unit_branch") & ((("cando_n0_n1_zero_unit" & "cando_n0_n1_branch") => "cando_n0_n1_zero_unit_branch") & ((("cando_n0_o_leader0_unit" & "cando_n0_o_branch") => "cando_n0_o_leader0_unit_branch") & ((("cando_n1_n0_one_unit" & "cando_n1_n0_branch") => "cando_n1_n0_one_unit_branch") & ((("cando_n1_n0_zero_unit" & "cando_n1_n0_branch") => "cando_n1_n0_zero_unit_branch") & (("cando_n1_o_leader1_unit" & "cando_n1_o_branch") => "cando_n1_o_leader1_unit_branch"))))))) ]
+  
+  // Deadlock freedom (lower bound)
+  Pmin=? [ (G ("deadlock" => "end")) ]
+  
+  // Deadlock freedom (upper bound)
+  Pmax=? [ (G ("deadlock" => "end")) ]
+  
+  // Termination (lower bound)
+  Pmin=? [ (F "deadlock") ]
+  
+  // Termination (upper bound)
+  Pmax=? [ (F "deadlock") ]
+  
+  // Liveness (lower bound)
+  Pmin=? [ (G (!"wals")) ]
+  
+  // Liveness (upper bound)
+  Pmax=? [ (G (!"wals")) ]
+  
+   ======= Property checking =======
+  
+  Type safety
+  Result: true
+  
+  Deadlock freedom (lower bound)
+  Result: 1.0 (exact floating point)
+  
+  Deadlock freedom (upper bound)
+  Result: 1.0 (exact floating point)
+  
+  Termination (lower bound)
+  Result: 1.0 (exact floating point)
+  
+  Termination (upper bound)
+  Result: 1.0 (exact floating point)
+  
+  Liveness (lower bound)
+  Result: 1.0 (exact floating point)
+  
+  Liveness (upper bound)
+  Result: 1.0 (exact floating point)
+  
+  
+  
+  
    ======= TEST ../examples/livelock.ctx =======
   
   (* Weak almost-sure livelock: a and b loop forever exchanging [ping], while c
@@ -1792,6 +1934,132 @@ For each context file in this directory, run [prose output] to check the model a
   
   Liveness (upper bound)
   Result: 0.0 (exact floating point)
+  
+  
+  
+  
+   ======= TEST ../examples/lossy-channel.ctx =======
+  
+  (* Bounded retransmission over a lossy channel.
+     Refer to https://www.prismmodelchecker.org/casestudies/brp.php *)
+  
+  s : (+) { c ! 1.0 : msg . & {
+        c ? ack . end,
+        c ? lost . (+) { c ! 1.0 : msg . & {
+          c ? ack . end,
+          c ? lost . (+) { c ! 1.0 : msg . & {
+            c ? ack . end,
+            c ? lost . end
+          } }
+        } }
+      } }
+  
+  c : mu t . & { s ? msg . (+) {
+        s ! 0.8 : ack . (+) { r ! 1.0 : deliver . end },
+        s ! 0.2 : lost . t
+      } }
+  
+  r : & { c ? deliver . end }
+  
+   ======= PRISM output ========
+  
+  
+  module closure
+    closure : bool init false;
+  
+  endmodule
+  
+  module s
+    s : [0..9] init 0;
+  
+    [] s=0 -> 1:(s'=1);
+    [s_c_msg_unit] s=1 -> 1:(s'=2);
+    [c_s_ack_unit] s=2 -> 1:(s'=9);
+    [c_s_lost_unit] s=2 -> 1:(s'=3);
+    [] s=3 -> 1:(s'=4);
+    [s_c_msg_unit] s=4 -> 1:(s'=5);
+    [c_s_ack_unit] s=5 -> 1:(s'=9);
+    [c_s_lost_unit] s=5 -> 1:(s'=6);
+    [] s=6 -> 1:(s'=7);
+    [s_c_msg_unit] s=7 -> 1:(s'=8);
+    [c_s_ack_unit] s=8 -> 1:(s'=9);
+    [c_s_lost_unit] s=8 -> 1:(s'=9);
+  endmodule
+  
+  module c
+    c : [0..6] init 0;
+  
+    [s_c_msg_unit] c=0 -> 1:(c'=1);
+    [] c=1 -> 0.8:(c'=2) + 0.2:(c'=3);
+    [c_s_ack_unit] c=2 -> 1:(c'=4);
+    [c_s_lost_unit] c=3 -> 1:(c'=0);
+    [] c=4 -> 1:(c'=5);
+    [c_r_deliver_unit] c=5 -> 1:(c'=6);
+  endmodule
+  
+  module r
+    r : [0..1] init 0;
+  
+    [c_r_deliver_unit] r=0 -> 1:(r'=1);
+  endmodule
+  
+  label "end" = (s=9) & (c=6) & (r=1);
+  label "cando_c_r_deliver_unit" = c=4;
+  label "cando_c_r_deliver_unit_branch" = r=0;
+  label "cando_c_s_ack_unit" = c=1;
+  label "cando_c_s_ack_unit_branch" = (s=2) | (s=5) | (s=8);
+  label "cando_c_s_lost_unit" = c=1;
+  label "cando_c_s_lost_unit_branch" = (s=2) | (s=5) | (s=8);
+  label "cando_s_c_msg_unit" = (s=0) | (s=3) | (s=6);
+  label "cando_s_c_msg_unit_branch" = c=0;
+  label "cando_c_r_branch" = r=0;
+  label "cando_c_s_branch" = (s=2) | (s=5) | (s=8);
+  label "cando_s_c_branch" = c=0;
+  label "wals" = ((s=8) & (c=3) & (r=0)) | ((s=9) & (c=0) & (r=0));
+  
+  // Type safety
+  P>=1 [ (G ((("cando_c_r_deliver_unit" & "cando_c_r_branch") => "cando_c_r_deliver_unit_branch") & ((("cando_c_s_ack_unit" & "cando_c_s_branch") => "cando_c_s_ack_unit_branch") & ((("cando_c_s_lost_unit" & "cando_c_s_branch") => "cando_c_s_lost_unit_branch") & (("cando_s_c_msg_unit" & "cando_s_c_branch") => "cando_s_c_msg_unit_branch"))))) ]
+  
+  // Deadlock freedom (lower bound)
+  Pmin=? [ (G ("deadlock" => "end")) ]
+  
+  // Deadlock freedom (upper bound)
+  Pmax=? [ (G ("deadlock" => "end")) ]
+  
+  // Termination (lower bound)
+  Pmin=? [ (F "deadlock") ]
+  
+  // Termination (upper bound)
+  Pmax=? [ (F "deadlock") ]
+  
+  // Liveness (lower bound)
+  Pmin=? [ (G (!"wals")) ]
+  
+  // Liveness (upper bound)
+  Pmax=? [ (G (!"wals")) ]
+  
+   ======= Property checking =======
+  
+  Type safety
+  Result: true
+  
+  Deadlock freedom (lower bound)
+  Result: 0.992 (exact floating point)
+  
+  Deadlock freedom (upper bound)
+  Result: 0.992 (exact floating point)
+  
+  Termination (lower bound)
+  Result: 1.0 (exact floating point)
+  
+  Termination (upper bound)
+  Result: 1.0 (exact floating point)
+  
+  Liveness (lower bound)
+  Result: 0.992 (exact floating point)
+  
+  Liveness (upper bound)
+  Result: 0.992 (exact floating point)
   
   
   
@@ -3186,6 +3454,145 @@ For each context file in this directory, run [prose output] to check the model a
   
   Typing context is not well-formed: probabilities must sum to 1.0. Found 1.100000
   
+  
+  
+  
+  
+   ======= TEST ../examples/random-walk.ctx =======
+  
+  (* Gambler's ruin on positions 0..4, starting at 2, moving up with
+     probability 0.6. Termination probability equals the ruin probability,
+     4/13 ~ 0.3077. *)
+  
+  w : mu t . (+) {
+        q ! 0.4 : down . (+) {
+          q ! 0.4 : down . (+) { o ! 1.0 : ruined . end },
+          q ! 0.6 : up . t
+        },
+        q ! 0.6 : up . (+) {
+          q ! 0.6 : up . mu s . (+) { o ! 1.0 : won . s },
+          q ! 0.4 : down . t
+        }
+      }
+  
+  q : mu t . & {
+        w ? down . & {
+          w ? down . end,
+          w ? up . t
+        },
+        w ? up . & {
+          w ? up . end,
+          w ? down . t
+        }
+      }
+  
+  o : & {
+        w ? ruined . end,
+        w ? won . mu t . & { w ? won . t }
+      }
+  
+   ======= PRISM output ========
+  
+  
+  module closure
+    closure : bool init false;
+  
+    [] false -> 1:(closure'=false);
+  endmodule
+  
+  module w
+    w : [0..13] init 0;
+  
+    [] w=0 -> 0.4:(w'=1) + 0.6:(w'=2);
+    [w_q_down_unit] w=1 -> 1:(w'=3);
+    [w_q_up_unit] w=2 -> 1:(w'=8);
+    [] w=3 -> 0.4:(w'=4) + 0.6:(w'=5);
+    [w_q_down_unit] w=4 -> 1:(w'=6);
+    [w_q_up_unit] w=5 -> 1:(w'=0);
+    [] w=6 -> 1:(w'=7);
+    [w_o_ruined_unit] w=7 -> 1:(w'=13);
+    [] w=8 -> 0.6:(w'=9) + 0.4:(w'=10);
+    [w_q_up_unit] w=9 -> 1:(w'=11);
+    [w_q_down_unit] w=10 -> 1:(w'=0);
+    [] w=11 -> 1:(w'=12);
+    [w_o_won_unit] w=12 -> 1:(w'=11);
+  endmodule
+  
+  module q
+    q : [0..3] init 0;
+  
+    [w_q_down_unit] q=0 -> 1:(q'=1);
+    [w_q_up_unit] q=0 -> 1:(q'=2);
+    [w_q_down_unit] q=1 -> 1:(q'=3);
+    [w_q_up_unit] q=1 -> 1:(q'=0);
+    [w_q_up_unit] q=2 -> 1:(q'=3);
+    [w_q_down_unit] q=2 -> 1:(q'=0);
+  endmodule
+  
+  module o
+    o : [0..2] init 0;
+  
+    [w_o_ruined_unit] o=0 -> 1:(o'=2);
+    [w_o_won_unit] o=0 -> 1:(o'=1);
+    [w_o_won_unit] o=1 -> 1:(o'=1);
+  endmodule
+  
+  label "end" = (w=13) & (q=3) & (o=2);
+  label "cando_w_o_ruined_unit" = w=6;
+  label "cando_w_o_ruined_unit_branch" = o=0;
+  label "cando_w_o_won_unit" = w=11;
+  label "cando_w_o_won_unit_branch" = (o=0) | (o=1);
+  label "cando_w_q_down_unit" = (w=0) | (w=3) | (w=8);
+  label "cando_w_q_down_unit_branch" = (q=0) | (q=1) | (q=2);
+  label "cando_w_q_up_unit" = (w=0) | (w=3) | (w=8);
+  label "cando_w_q_up_unit_branch" = (q=0) | (q=1) | (q=2);
+  label "cando_w_o_branch" = (o=0) | (o=1);
+  label "cando_w_q_branch" = (q=0) | (q=1) | (q=2);
+  label "wals" = false;
+  
+  // Type safety
+  P>=1 [ (G ((("cando_w_o_ruined_unit" & "cando_w_o_branch") => "cando_w_o_ruined_unit_branch") & ((("cando_w_o_won_unit" & "cando_w_o_branch") => "cando_w_o_won_unit_branch") & ((("cando_w_q_down_unit" & "cando_w_q_branch") => "cando_w_q_down_unit_branch") & (("cando_w_q_up_unit" & "cando_w_q_branch") => "cando_w_q_up_unit_branch"))))) ]
+  
+  // Deadlock freedom (lower bound)
+  Pmin=? [ (G ("deadlock" => "end")) ]
+  
+  // Deadlock freedom (upper bound)
+  Pmax=? [ (G ("deadlock" => "end")) ]
+  
+  // Termination (lower bound)
+  Pmin=? [ (F "deadlock") ]
+  
+  // Termination (upper bound)
+  Pmax=? [ (F "deadlock") ]
+  
+  // Liveness (lower bound)
+  Pmin=? [ (G (!"wals")) ]
+  
+  // Liveness (upper bound)
+  Pmax=? [ (G (!"wals")) ]
+  
+   ======= Property checking =======
+  
+  Type safety
+  Result: true
+  
+  Deadlock freedom (lower bound)
+  Result: 1.0 (exact floating point)
+  
+  Deadlock freedom (upper bound)
+  Result: 1.0 (exact floating point)
+  
+  Termination (lower bound)
+  Result: 0.3076920374830968 (+/- 2.9272692363518906E-6 estimated; rel err 9.513633372825585E-6)
+  
+  Termination (upper bound)
+  Result: 0.3076920374830968 (+/- 2.9272692363518906E-6 estimated; rel err 9.513633372825585E-6)
+  
+  Liveness (lower bound)
+  Result: 1.0 (exact floating point)
+  
+  Liveness (upper bound)
+  Result: 1.0 (exact floating point)
   
   
   
@@ -4698,6 +5105,143 @@ For each context file in this directory, run [prose output] to check the model a
   
   Liveness (upper bound)
   Result: 0.87 (exact floating point)
+  
+  
+  
+  
+   ======= TEST ../examples/von-neumann-coin.ctx =======
+  
+  (* Coin debiasing *)
+  
+  f : mu t . (+) {
+        c ! 0.9 : heads . (+) {
+          c ! 0.9 : heads . t,
+          c ! 0.1 : tails . mu s . (+) { o ! 1.0 : heads . s }
+        },
+        c ! 0.1 : tails . (+) {
+          c ! 0.9 : heads . (+) { o ! 1.0 : tails . end },
+          c ! 0.1 : tails . t
+        }
+      }
+  
+  c : mu t . & {
+        f ? heads . & {
+          f ? heads . t,
+          f ? tails . end
+        },
+        f ? tails . & {
+          f ? heads . end,
+          f ? tails . t
+        }
+      }
+  
+  o : & {
+        f ? heads . mu t . & { f ? heads . t },
+        f ? tails . end
+      }
+  
+   ======= PRISM output ========
+  
+  
+  module closure
+    closure : bool init false;
+  
+    [] false -> 1:(closure'=false);
+  endmodule
+  
+  module f
+    f : [0..13] init 0;
+  
+    [] f=0 -> 0.9:(f'=1) + 0.1:(f'=2);
+    [f_c_heads_unit] f=1 -> 1:(f'=3);
+    [f_c_tails_unit] f=2 -> 1:(f'=8);
+    [] f=3 -> 0.9:(f'=4) + 0.1:(f'=5);
+    [f_c_heads_unit] f=4 -> 1:(f'=0);
+    [f_c_tails_unit] f=5 -> 1:(f'=6);
+    [] f=6 -> 1:(f'=7);
+    [f_o_heads_unit] f=7 -> 1:(f'=6);
+    [] f=8 -> 0.9:(f'=9) + 0.1:(f'=10);
+    [f_c_heads_unit] f=9 -> 1:(f'=11);
+    [f_c_tails_unit] f=10 -> 1:(f'=0);
+    [] f=11 -> 1:(f'=12);
+    [f_o_tails_unit] f=12 -> 1:(f'=13);
+  endmodule
+  
+  module c
+    c : [0..3] init 0;
+  
+    [f_c_heads_unit] c=0 -> 1:(c'=1);
+    [f_c_tails_unit] c=0 -> 1:(c'=2);
+    [f_c_heads_unit] c=1 -> 1:(c'=0);
+    [f_c_tails_unit] c=1 -> 1:(c'=3);
+    [f_c_heads_unit] c=2 -> 1:(c'=3);
+    [f_c_tails_unit] c=2 -> 1:(c'=0);
+  endmodule
+  
+  module o
+    o : [0..2] init 0;
+  
+    [f_o_heads_unit] o=0 -> 1:(o'=1);
+    [f_o_tails_unit] o=0 -> 1:(o'=2);
+    [f_o_heads_unit] o=1 -> 1:(o'=1);
+  endmodule
+  
+  label "end" = (f=13) & (c=3) & (o=2);
+  label "cando_f_c_heads_unit" = (f=0) | (f=3) | (f=8);
+  label "cando_f_c_heads_unit_branch" = (c=0) | (c=1) | (c=2);
+  label "cando_f_c_tails_unit" = (f=0) | (f=3) | (f=8);
+  label "cando_f_c_tails_unit_branch" = (c=0) | (c=1) | (c=2);
+  label "cando_f_o_heads_unit" = f=6;
+  label "cando_f_o_heads_unit_branch" = (o=0) | (o=1);
+  label "cando_f_o_tails_unit" = f=11;
+  label "cando_f_o_tails_unit_branch" = o=0;
+  label "cando_f_c_branch" = (c=0) | (c=1) | (c=2);
+  label "cando_f_o_branch" = (o=0) | (o=1);
+  label "wals" = false;
+  
+  // Type safety
+  P>=1 [ (G ((("cando_f_c_heads_unit" & "cando_f_c_branch") => "cando_f_c_heads_unit_branch") & ((("cando_f_c_tails_unit" & "cando_f_c_branch") => "cando_f_c_tails_unit_branch") & ((("cando_f_o_heads_unit" & "cando_f_o_branch") => "cando_f_o_heads_unit_branch") & (("cando_f_o_tails_unit" & "cando_f_o_branch") => "cando_f_o_tails_unit_branch"))))) ]
+  
+  // Deadlock freedom (lower bound)
+  Pmin=? [ (G ("deadlock" => "end")) ]
+  
+  // Deadlock freedom (upper bound)
+  Pmax=? [ (G ("deadlock" => "end")) ]
+  
+  // Termination (lower bound)
+  Pmin=? [ (F "deadlock") ]
+  
+  // Termination (upper bound)
+  Pmax=? [ (F "deadlock") ]
+  
+  // Liveness (lower bound)
+  Pmin=? [ (G (!"wals")) ]
+  
+  // Liveness (upper bound)
+  Pmax=? [ (G (!"wals")) ]
+  
+   ======= Property checking =======
+  
+  Type safety
+  Result: true
+  
+  Deadlock freedom (lower bound)
+  Result: 1.0 (exact floating point)
+  
+  Deadlock freedom (upper bound)
+  Result: 1.0 (exact floating point)
+  
+  Termination (lower bound)
+  Result: 0.4999977331183232 (+/- 4.976086682306783E-6 estimated; rel err 9.952218485617023E-6)
+  
+  Termination (upper bound)
+  Result: 0.4999977331183232 (+/- 4.976086682306783E-6 estimated; rel err 9.952218485617023E-6)
+  
+  Liveness (lower bound)
+  Result: 1.0 (exact floating point)
+  
+  Liveness (upper bound)
+  Result: 1.0 (exact floating point)
   
   
   

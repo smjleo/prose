@@ -192,12 +192,13 @@ let closure modules =
   { locals = [ Bool closure_var ]; participant = "closure"; commands }
 ;;
 
-let translate context =
+let translate ?(liveness = true) context =
   let id_map = Action.Communication.in_context context |> Action.Id_map.of_list in
   let modules = List.map ~f:(translate_ctx_item ~id_map) context in
+  let wals_labels = if liveness then [ Gen_labels.wals_label context ] else [] in
   ( { globals = []
     ; modules = closure modules :: modules
-    ; labels = Gen_labels.generate context @ [ Gen_labels.wals_label context ]
+    ; labels = Gen_labels.generate context @ wals_labels
     }
-  , Gen_props.generate context )
+  , Gen_props.generate ~liveness context )
 ;;

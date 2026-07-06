@@ -1,0 +1,29 @@
+(* Randomised leader election.
+   Refer to https://www.prismmodelchecker.org/casestudies/synchronous_leader.php *)
+
+n0 : mu t . (+) {
+       n1 ! 0.5 : zero . & {
+         n1 ? zero . t,
+         n1 ? one . end
+       },
+       n1 ! 0.5 : one . & {
+         n1 ? zero . (+) { o ! 1.0 : leader0 . end },
+         n1 ? one . t
+       }
+     }
+
+n1 : mu t . & {
+       n0 ? zero . (+) {
+         n0 ! 0.5 : zero . t,
+         n0 ! 0.5 : one . (+) { o ! 1.0 : leader1 . end }
+       },
+       n0 ? one . (+) {
+         n0 ! 0.5 : zero . end,
+         n0 ! 0.5 : one . t
+       }
+     }
+
+o : & {
+      n0 ? leader0 . end,
+      n1 ? leader1 . end
+    }

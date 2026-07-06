@@ -20,7 +20,7 @@ let parse_session lexbuf =
     error_s [%message "Session syntax error" (line : int) (column : int)] |> ok_exn
 ;;
 
-let parse_and_translate ~on_error ~on_warning ~ctx_file ~balance ~upper ~print_ast =
+let parse_and_translate ~on_error ~on_warning ~ctx_file ~balance ~upper ~liveness ~print_ast =
   let dbg_print_s = dbg_print_s ~print_ast in
   let inx = In_channel.create ctx_file in
   let lexbuf = Lexing.from_channel inx in
@@ -38,7 +38,7 @@ let parse_and_translate ~on_error ~on_warning ~ctx_file ~balance ~upper ~print_a
     let context = parse lexbuf in
     In_channel.close inx;
     Well_formed.check_context ~on_error ~on_warning context;
-    let translated, properties = Translate.translate context in
+    let translated, properties = Translate.translate ~liveness context in
     let translated =
       match balance with
       | false -> translated
@@ -56,6 +56,7 @@ let output_and_return_annotations
       ~on_warning
       ~balance
       ~upper
+      ~liveness
       ?model_output_file
       ?prop_output_file
       ?only_annotation
@@ -64,7 +65,7 @@ let output_and_return_annotations
   let dbg_print_s = dbg_print_s ~print_ast in
   let t0 = Time_float.now () in
   let (translated, properties), is_session_file =
-    parse_and_translate ~on_error ~on_warning ~ctx_file ~balance ~upper ~print_ast
+    parse_and_translate ~on_error ~on_warning ~ctx_file ~balance ~upper ~liveness ~print_ast
   in
   let t1 = Time_float.now () in
   let translation_time = Time_float.diff t1 t0 in
@@ -91,6 +92,7 @@ let output
       ~print_translation_time
       ~balance
       ~upper
+      ~liveness
       ?model_output_file
       ?prop_output_file
       ()
@@ -103,6 +105,7 @@ let output
     ~print_translation_time
     ~balance
     ~upper
+    ~liveness
     ~on_error:`Print_and_exit
     ~on_warning:`Print
     ()
@@ -147,6 +150,7 @@ let with_prism_files
       ~on_warning
       ~balance
       ~upper
+      ~liveness
       ~f
       ?only_annotation
       ()
@@ -165,6 +169,7 @@ let with_prism_files
       ~on_warning
       ~balance
       ~upper
+      ~liveness
       ?only_annotation
       ()
   in
@@ -174,7 +179,17 @@ let with_prism_files
   res
 ;;
 
-let verify ~ctx_file ~print_ast ~print_raw_prism ~print_translation_time ~balance ~upper ~fair () =
+let verify
+      ~ctx_file
+      ~print_ast
+      ~print_raw_prism
+      ~print_translation_time
+      ~balance
+      ~upper
+      ~liveness
+      ~fair
+      ()
+  =
   with_prism_files
     ~ctx_file
     ~print_ast
@@ -183,6 +198,7 @@ let verify ~ctx_file ~print_ast ~print_raw_prism ~print_translation_time ~balanc
     ~on_warning:`Print
     ~balance
     ~upper
+    ~liveness
     ~f:(fun ~model_output_file ~prop_output_file ~annotations ~is_session_file ->
       let prism_args =
         if is_session_file
@@ -215,6 +231,7 @@ let benchmark_translation ~iterations ~ctx_file ~batch_size =
         ~on_warning:`Ignore
         ~balance:false
         ~upper:false
+        ~liveness:true
         ~ctx_file
         ~print_ast:false)
     ()
@@ -230,6 +247,7 @@ let benchmark_prism ~annotations ~iterations ~ctx_file =
       ~on_warning:`Ignore
       ~balance:false
       ~upper:false
+      ~liveness:true
       ~f:(fun ~model_output_file ~prop_output_file ~annotations:_ ~is_session_file ->
         Microbenchmark.measure
           ~iterations
@@ -281,6 +299,7 @@ let term_only ~ctx_file ~upper () =
     ~on_warning:`Ignore
     ~balance:false
     ~upper
+    ~liveness:true
     ~f:(fun ~model_output_file ~prop_output_file ~annotations ~is_session_file ->
       let prism_runtimes =
         Microbenchmark.measure

@@ -42,6 +42,17 @@ let upper_flag =
   flag "-upper" no_arg ~doc:""
 ;;
 
+let no_liveness_flag =
+  let open Command.Param in
+  flag
+    "-no-liveness"
+    no_arg
+    ~doc:
+      " Skip liveness checking: don't compute the weak-almost-sure-livelock label or \
+       check the liveness properties. Useful since the livelock region computation \
+       enumerates global states and can dominate runtime on large contexts."
+;;
+
 let fair_flag =
   let open Command.Param in
   flag "-fair" no_arg ~doc:" Pass -fair to PRISM to enable fairness in model checking"
@@ -66,7 +77,8 @@ let output_command =
      and print_ast = print_ast_flag
      and print_translation_time = print_translation_time_flag
      and balance = balance_flag
-     and upper = upper_flag in
+     and upper = upper_flag
+     and no_liveness = no_liveness_flag in
      Prose.output
        ~ctx_file
        ?model_output_file
@@ -74,7 +86,8 @@ let output_command =
        ~print_ast
        ~print_translation_time
        ~balance
-       ~upper)
+       ~upper
+       ~liveness:(not no_liveness))
 ;;
 
 let benchmark_command =
@@ -121,6 +134,7 @@ let verify_command =
      and balance = balance_flag
      and term_only = term_only_flag
      and upper = upper_flag
+     and no_liveness = no_liveness_flag
      and fair = fair_flag in
      if term_only
      then Prose.term_only ~ctx_file ~upper
@@ -132,6 +146,7 @@ let verify_command =
          ~print_translation_time
          ~balance
          ~upper
+         ~liveness:(not no_liveness)
          ~fair)
 ;;
 

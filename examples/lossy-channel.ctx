@@ -1,0 +1,20 @@
+(* Bounded retransmission over a lossy channel.
+   Refer to https://www.prismmodelchecker.org/casestudies/brp.php *)
+
+s : (+) { c ! 1.0 : msg . & {
+      c ? ack . end,
+      c ? lost . (+) { c ! 1.0 : msg . & {
+        c ? ack . end,
+        c ? lost . (+) { c ! 1.0 : msg . & {
+          c ? ack . end,
+          c ? lost . end
+        } }
+      } }
+    } }
+
+c : mu t . & { s ? msg . (+) {
+      s ! 0.8 : ack . (+) { r ! 1.0 : deliver . end },
+      s ! 0.2 : lost . t
+    } }
+
+r : & { c ? deliver . end }
