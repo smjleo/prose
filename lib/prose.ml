@@ -255,11 +255,32 @@ let benchmark_translation ~iterations ~ctx_file ~batch_size =
         ~on_warning:`Ignore
         ~balance:false
         ~upper:false
-        ~liveness:true
+        ~liveness:false
         ~all_props:true
         ~ctx_file
         ~print_ast:false)
     ()
+;;
+
+(* The weak-almost-sure-livelock region is computed during translation, not by
+   PRISM, so it is measured separately from both the (liveness-free) translation
+   and the PRISM invocations. *)
+let benchmark_wals ~iterations ~ctx_file =
+  let inx = In_channel.create ctx_file in
+  let lexbuf = Lexing.from_channel inx in
+  lexbuf.lex_curr_p <- { lexbuf.lex_curr_p with pos_fname = ctx_file };
+  let context = parse lexbuf in
+  In_channel.close inx;
+  Microbenchmark.measure ~iterations ~f:(fun () -> Gen_labels.wals_label context) ()
+;;
+
+let is_liveness_annotation = function
+  | Psl.Annotation.Liveness_lower | Psl.Annotation.Liveness_upper -> true
+  | Psl.Annotation.Type_safety
+  | Psl.Annotation.Deadlock_freedom_lower
+  | Psl.Annotation.Deadlock_freedom_upper
+  | Psl.Annotation.Termination_lower
+  | Psl.Annotation.Termination_upper -> false
 ;;
 
 let benchmark_prism ~annotations ~iterations ~ctx_file =
@@ -272,18 +293,13 @@ let benchmark_prism ~annotations ~iterations ~ctx_file =
       ~on_warning:`Ignore
       ~balance:false
       ~upper:false
-      ~liveness:true
+      ~liveness:(is_liveness_annotation annotation)
       ~all_props:true
-      ~f:(fun ~model_output_file ~prop_output_file ~annotations:_ ~is_session_file ->
+      ~f:(fun ~model_output_file ~prop_output_file ~annotations:_ ~is_session_file:_ ->
         Microbenchmark.measure
           ~iterations
           ~f:(fun () ->
-            let cmd =
-              if is_session_file
-              then
-                sprintf "prism -ex %s %s > /dev/null" model_output_file prop_output_file
-              else sprintf "prism %s %s > /dev/null" model_output_file prop_output_file
-            in
+            let cmd = sprintf "prism %s %s > /dev/null" model_output_file prop_output_file in
             Sys_unix.command_exn cmd)
           ())
       ~only_annotation:annotation
@@ -359,9 +375,18 @@ let term_only ~ctx_file ~upper () =
 ;;
 
 let benchmark ~iterations ~directory ~translation_batch_size ~latex () =
-  let annotations = Psl.Annotation.all in
+  let annotations =
+    [ Psl.Annotation.Type_safety
+    ; Psl.Annotation.Deadlock_freedom_lower
+    ; Psl.Annotation.Liveness_lower
+    ]
+  in
   Display_stats.print_header annotations;
-  let filenames = Sys_unix.ls_dir directory |> List.sort ~compare:String.compare in
+  let filenames =
+    Sys_unix.ls_dir directory
+    |> List.filter ~f:(String.is_suffix ~suffix:".ctx")
+    |> List.sort ~compare:String.compare
+  in
   let skipped =
     List.filter_map filenames ~f:(fun basename ->
       let ctx_file = Filename.concat directory basename in
@@ -373,8 +398,12 @@ let benchmark ~iterations ~directory ~translation_batch_size ~latex () =
             (* TODO: We take the sample mean for now, not sure if we should *)
             time / Float.of_int translation_batch_size)
         in
+        let wals_runtimes = benchmark_wals ~iterations ~ctx_file in
         let prism_runtimes = benchmark_prism ~annotations ~iterations ~ctx_file in
-        Display_stats.print_row basename (translation_runtimes :: prism_runtimes) ~latex;
+        Display_stats.print_row
+          basename
+          (translation_runtimes :: wals_runtimes :: prism_runtimes)
+          ~latex;
         None
       with
       | _ -> Some ctx_file)
