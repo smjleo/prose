@@ -116,20 +116,8 @@ For each context file in this directory, run [prose output] to check the model a
   // Deadlock freedom (lower bound)
   Pmin=? [ (G ("deadlock" => "end")) ]
   
-  // Deadlock freedom (upper bound)
-  Pmax=? [ (G ("deadlock" => "end")) ]
-  
-  // Termination (lower bound)
-  Pmin=? [ (F "deadlock") ]
-  
-  // Termination (upper bound)
-  Pmax=? [ (F "deadlock") ]
-  
   // Liveness (lower bound)
   Pmin=? [ (G (!"wals")) ]
-  
-  // Liveness (upper bound)
-  Pmax=? [ (G (!"wals")) ]
   
    ======= Property checking =======
   
@@ -139,19 +127,7 @@ For each context file in this directory, run [prose output] to check the model a
   Deadlock freedom (lower bound)
   Result: 0.76 (exact floating point)
   
-  Deadlock freedom (upper bound)
-  Result: 0.76 (exact floating point)
-  
-  Termination (lower bound)
-  Result: 0.6 (exact floating point)
-  
-  Termination (upper bound)
-  Result: 0.6 (exact floating point)
-  
   Liveness (lower bound)
-  Result: 0.36 (exact floating point)
-  
-  Liveness (upper bound)
   Result: 0.36 (exact floating point)
   
   
@@ -544,20 +520,8 @@ For each context file in this directory, run [prose output] to check the model a
   // Deadlock freedom (lower bound)
   Pmin=? [ (G ("deadlock" => "end")) ]
   
-  // Deadlock freedom (upper bound)
-  Pmax=? [ (G ("deadlock" => "end")) ]
-  
-  // Termination (lower bound)
-  Pmin=? [ (F "deadlock") ]
-  
-  // Termination (upper bound)
-  Pmax=? [ (F "deadlock") ]
-  
   // Liveness (lower bound)
   Pmin=? [ (G (!"wals")) ]
-  
-  // Liveness (upper bound)
-  Pmax=? [ (G (!"wals")) ]
   
    ======= Property checking =======
   
@@ -567,19 +531,7 @@ For each context file in this directory, run [prose output] to check the model a
   Deadlock freedom (lower bound)
   Result: 0.16666698455810547 (+/- 1.1920963061161968E-6 estimated; rel err 7.1525641942636435E-6)
   
-  Deadlock freedom (upper bound)
-  Result: 0.16666698455810547 (+/- 1.1920963061161968E-6 estimated; rel err 7.1525641942636435E-6)
-  
-  Termination (lower bound)
-  Result: 0.8333330154418945 (+/- 5.960467888147447E-6 estimated; rel err 7.1525641942636435E-6)
-  
-  Termination (upper bound)
-  Result: 0.8333330154418945 (+/- 5.960467888147447E-6 estimated; rel err 7.1525641942636435E-6)
-  
   Liveness (lower bound)
-  Result: 0.0 (exact floating point)
-  
-  Liveness (upper bound)
   Result: 0.0 (exact floating point)
   
   
@@ -631,20 +583,8 @@ For each context file in this directory, run [prose output] to check the model a
   // Deadlock freedom (lower bound)
   Pmin=? [ (G ("deadlock" => "end")) ]
   
-  // Deadlock freedom (upper bound)
-  Pmax=? [ (G ("deadlock" => "end")) ]
-  
-  // Termination (lower bound)
-  Pmin=? [ (F "deadlock") ]
-  
-  // Termination (upper bound)
-  Pmax=? [ (F "deadlock") ]
-  
   // Liveness (lower bound)
   Pmin=? [ (G (!"wals")) ]
-  
-  // Liveness (upper bound)
-  Pmax=? [ (G (!"wals")) ]
   
    ======= Property checking =======
   
@@ -654,19 +594,7 @@ For each context file in this directory, run [prose output] to check the model a
   Deadlock freedom (lower bound)
   Result: 0.0 (exact floating point)
   
-  Deadlock freedom (upper bound)
-  Result: 0.0 (exact floating point)
-  
-  Termination (lower bound)
-  Result: 1.0 (exact floating point)
-  
-  Termination (upper bound)
-  Result: 1.0 (exact floating point)
-  
   Liveness (lower bound)
-  Result: 0.0 (exact floating point)
-  
-  Liveness (upper bound)
   Result: 0.0 (exact floating point)
   
   
@@ -1203,20 +1131,8 @@ For each context file in this directory, run [prose output] to check the model a
   // Deadlock freedom (lower bound)
   Pmin=? [ (G ("deadlock" => "end")) ]
   
-  // Deadlock freedom (upper bound)
-  Pmax=? [ (G ("deadlock" => "end")) ]
-  
-  // Termination (lower bound)
-  Pmin=? [ (F "deadlock") ]
-  
-  // Termination (upper bound)
-  Pmax=? [ (F "deadlock") ]
-  
   // Liveness (lower bound)
   Pmin=? [ (G (!"wals")) ]
-  
-  // Liveness (upper bound)
-  Pmax=? [ (G (!"wals")) ]
   
    ======= Property checking =======
   
@@ -1226,19 +1142,7 @@ For each context file in this directory, run [prose output] to check the model a
   Deadlock freedom (lower bound)
   Result: 1.0 (exact floating point)
   
-  Deadlock freedom (upper bound)
-  Result: 1.0 (exact floating point)
-  
-  Termination (lower bound)
-  Result: 0.0 (exact floating point)
-  
-  Termination (upper bound)
-  Result: 0.0 (exact floating point)
-  
   Liveness (lower bound)
-  Result: 1.0 (exact floating point)
-  
-  Liveness (upper bound)
   Result: 1.0 (exact floating point)
   
   
@@ -1371,20 +1275,8 @@ For each context file in this directory, run [prose output] to check the model a
   // Deadlock freedom (lower bound)
   Pmin=? [ (G ("deadlock" => "end")) ]
   
-  // Deadlock freedom (upper bound)
-  Pmax=? [ (G ("deadlock" => "end")) ]
-  
-  // Termination (lower bound)
-  Pmin=? [ (F "deadlock") ]
-  
-  // Termination (upper bound)
-  Pmax=? [ (F "deadlock") ]
-  
   // Liveness (lower bound)
   Pmin=? [ (G (!"wals")) ]
-  
-  // Liveness (upper bound)
-  Pmax=? [ (G (!"wals")) ]
   
    ======= Property checking =======
   
@@ -1394,19 +1286,7 @@ For each context file in this directory, run [prose output] to check the model a
   Deadlock freedom (lower bound)
   Result: 0.252 (exact floating point)
   
-  Deadlock freedom (upper bound)
-  Result: 0.252 (exact floating point)
-  
-  Termination (lower bound)
-  Result: 0.748 (exact floating point)
-  
-  Termination (upper bound)
-  Result: 0.748 (exact floating point)
-  
   Liveness (lower bound)
-  Result: 0.0 (exact floating point)
-  
-  Liveness (upper bound)
   Result: 0.0 (exact floating point)
   
   
@@ -1468,20 +1348,8 @@ For each context file in this directory, run [prose output] to check the model a
   // Deadlock freedom (lower bound)
   Pmin=? [ (G ("deadlock" => "end")) ]
   
-  // Deadlock freedom (upper bound)
-  Pmax=? [ (G ("deadlock" => "end")) ]
-  
-  // Termination (lower bound)
-  Pmin=? [ (F "deadlock") ]
-  
-  // Termination (upper bound)
-  Pmax=? [ (F "deadlock") ]
-  
   // Liveness (lower bound)
   Pmin=? [ (G (!"wals")) ]
-  
-  // Liveness (upper bound)
-  Pmax=? [ (G (!"wals")) ]
   
    ======= Property checking =======
   
@@ -1491,20 +1359,8 @@ For each context file in this directory, run [prose output] to check the model a
   Deadlock freedom (lower bound)
   Result: 0.0 (exact floating point)
   
-  Deadlock freedom (upper bound)
-  Result: 1.0 (exact floating point)
-  
-  Termination (lower bound)
-  Result: 0.0 (exact floating point)
-  
-  Termination (upper bound)
-  Result: 1.0 (exact floating point)
-  
   Liveness (lower bound)
   Result: 0.0 (exact floating point)
-  
-  Liveness (upper bound)
-  Result: 1.0 (exact floating point)
   
   
   
@@ -1564,20 +1420,8 @@ For each context file in this directory, run [prose output] to check the model a
   // Deadlock freedom (lower bound)
   Pmin=? [ (G ("deadlock" => "end")) ]
   
-  // Deadlock freedom (upper bound)
-  Pmax=? [ (G ("deadlock" => "end")) ]
-  
-  // Termination (lower bound)
-  Pmin=? [ (F "deadlock") ]
-  
-  // Termination (upper bound)
-  Pmax=? [ (F "deadlock") ]
-  
   // Liveness (lower bound)
   Pmin=? [ (G (!"wals")) ]
-  
-  // Liveness (upper bound)
-  Pmax=? [ (G (!"wals")) ]
   
    ======= Property checking =======
   
@@ -1587,19 +1431,7 @@ For each context file in this directory, run [prose output] to check the model a
   Deadlock freedom (lower bound)
   Result: 1.0 (exact floating point)
   
-  Deadlock freedom (upper bound)
-  Result: 1.0 (exact floating point)
-  
-  Termination (lower bound)
-  Result: 0.0 (exact floating point)
-  
-  Termination (upper bound)
-  Result: 0.0 (exact floating point)
-  
   Liveness (lower bound)
-  Result: 1.0 (exact floating point)
-  
-  Liveness (upper bound)
   Result: 1.0 (exact floating point)
   
   
@@ -1657,20 +1489,8 @@ For each context file in this directory, run [prose output] to check the model a
   // Deadlock freedom (lower bound)
   Pmin=? [ (G ("deadlock" => "end")) ]
   
-  // Deadlock freedom (upper bound)
-  Pmax=? [ (G ("deadlock" => "end")) ]
-  
-  // Termination (lower bound)
-  Pmin=? [ (F "deadlock") ]
-  
-  // Termination (upper bound)
-  Pmax=? [ (F "deadlock") ]
-  
   // Liveness (lower bound)
   Pmin=? [ (G (!"wals")) ]
-  
-  // Liveness (upper bound)
-  Pmax=? [ (G (!"wals")) ]
   
    ======= Property checking =======
   
@@ -1680,20 +1500,8 @@ For each context file in this directory, run [prose output] to check the model a
   Deadlock freedom (lower bound)
   Result: 0.0 (exact floating point)
   
-  Deadlock freedom (upper bound)
-  Result: 1.0 (exact floating point)
-  
-  Termination (lower bound)
-  Result: 0.0 (exact floating point)
-  
-  Termination (upper bound)
-  Result: 1.0 (exact floating point)
-  
   Liveness (lower bound)
   Result: 0.0 (exact floating point)
-  
-  Liveness (upper bound)
-  Result: 1.0 (exact floating point)
   
   
   
@@ -1799,20 +1607,8 @@ For each context file in this directory, run [prose output] to check the model a
   // Deadlock freedom (lower bound)
   Pmin=? [ (G ("deadlock" => "end")) ]
   
-  // Deadlock freedom (upper bound)
-  Pmax=? [ (G ("deadlock" => "end")) ]
-  
-  // Termination (lower bound)
-  Pmin=? [ (F "deadlock") ]
-  
-  // Termination (upper bound)
-  Pmax=? [ (F "deadlock") ]
-  
   // Liveness (lower bound)
   Pmin=? [ (G (!"wals")) ]
-  
-  // Liveness (upper bound)
-  Pmax=? [ (G (!"wals")) ]
   
    ======= Property checking =======
   
@@ -1822,19 +1618,7 @@ For each context file in this directory, run [prose output] to check the model a
   Deadlock freedom (lower bound)
   Result: 1.0 (exact floating point)
   
-  Deadlock freedom (upper bound)
-  Result: 1.0 (exact floating point)
-  
-  Termination (lower bound)
-  Result: 1.0 (exact floating point)
-  
-  Termination (upper bound)
-  Result: 1.0 (exact floating point)
-  
   Liveness (lower bound)
-  Result: 1.0 (exact floating point)
-  
-  Liveness (upper bound)
   Result: 1.0 (exact floating point)
   
   
@@ -1897,20 +1681,8 @@ For each context file in this directory, run [prose output] to check the model a
   // Deadlock freedom (lower bound)
   Pmin=? [ (G ("deadlock" => "end")) ]
   
-  // Deadlock freedom (upper bound)
-  Pmax=? [ (G ("deadlock" => "end")) ]
-  
-  // Termination (lower bound)
-  Pmin=? [ (F "deadlock") ]
-  
-  // Termination (upper bound)
-  Pmax=? [ (F "deadlock") ]
-  
   // Liveness (lower bound)
   Pmin=? [ (G (!"wals")) ]
-  
-  // Liveness (upper bound)
-  Pmax=? [ (G (!"wals")) ]
   
    ======= Property checking =======
   
@@ -1920,19 +1692,7 @@ For each context file in this directory, run [prose output] to check the model a
   Deadlock freedom (lower bound)
   Result: 1.0 (exact floating point)
   
-  Deadlock freedom (upper bound)
-  Result: 1.0 (exact floating point)
-  
-  Termination (lower bound)
-  Result: 0.0 (exact floating point)
-  
-  Termination (upper bound)
-  Result: 0.0 (exact floating point)
-  
   Liveness (lower bound)
-  Result: 0.0 (exact floating point)
-  
-  Liveness (upper bound)
   Result: 0.0 (exact floating point)
   
   
@@ -2023,20 +1783,8 @@ For each context file in this directory, run [prose output] to check the model a
   // Deadlock freedom (lower bound)
   Pmin=? [ (G ("deadlock" => "end")) ]
   
-  // Deadlock freedom (upper bound)
-  Pmax=? [ (G ("deadlock" => "end")) ]
-  
-  // Termination (lower bound)
-  Pmin=? [ (F "deadlock") ]
-  
-  // Termination (upper bound)
-  Pmax=? [ (F "deadlock") ]
-  
   // Liveness (lower bound)
   Pmin=? [ (G (!"wals")) ]
-  
-  // Liveness (upper bound)
-  Pmax=? [ (G (!"wals")) ]
   
    ======= Property checking =======
   
@@ -2046,19 +1794,7 @@ For each context file in this directory, run [prose output] to check the model a
   Deadlock freedom (lower bound)
   Result: 0.992 (exact floating point)
   
-  Deadlock freedom (upper bound)
-  Result: 0.992 (exact floating point)
-  
-  Termination (lower bound)
-  Result: 1.0 (exact floating point)
-  
-  Termination (upper bound)
-  Result: 1.0 (exact floating point)
-  
   Liveness (lower bound)
-  Result: 0.992 (exact floating point)
-  
-  Liveness (upper bound)
   Result: 0.992 (exact floating point)
   
   
@@ -2130,20 +1866,8 @@ For each context file in this directory, run [prose output] to check the model a
   // Deadlock freedom (lower bound)
   Pmin=? [ (G ("deadlock" => "end")) ]
   
-  // Deadlock freedom (upper bound)
-  Pmax=? [ (G ("deadlock" => "end")) ]
-  
-  // Termination (lower bound)
-  Pmin=? [ (F "deadlock") ]
-  
-  // Termination (upper bound)
-  Pmax=? [ (F "deadlock") ]
-  
   // Liveness (lower bound)
   Pmin=? [ (G (!"wals")) ]
-  
-  // Liveness (upper bound)
-  Pmax=? [ (G (!"wals")) ]
   
    ======= Property checking =======
   
@@ -2153,19 +1877,7 @@ For each context file in this directory, run [prose output] to check the model a
   Deadlock freedom (lower bound)
   Result: 1.0 (exact floating point)
   
-  Deadlock freedom (upper bound)
-  Result: 1.0 (exact floating point)
-  
-  Termination (lower bound)
-  Result: 0.4 (exact floating point)
-  
-  Termination (upper bound)
-  Result: 0.4 (exact floating point)
-  
   Liveness (lower bound)
-  Result: 1.0 (exact floating point)
-  
-  Liveness (upper bound)
   Result: 1.0 (exact floating point)
   
   
@@ -2277,20 +1989,8 @@ For each context file in this directory, run [prose output] to check the model a
   // Deadlock freedom (lower bound)
   Pmin=? [ (G ("deadlock" => "end")) ]
   
-  // Deadlock freedom (upper bound)
-  Pmax=? [ (G ("deadlock" => "end")) ]
-  
-  // Termination (lower bound)
-  Pmin=? [ (F "deadlock") ]
-  
-  // Termination (upper bound)
-  Pmax=? [ (F "deadlock") ]
-  
   // Liveness (lower bound)
   Pmin=? [ (G (!"wals")) ]
-  
-  // Liveness (upper bound)
-  Pmax=? [ (G (!"wals")) ]
   
    ======= Property checking =======
   
@@ -2300,19 +2000,7 @@ For each context file in this directory, run [prose output] to check the model a
   Deadlock freedom (lower bound)
   Result: 0.6599999999999999 (exact floating point)
   
-  Deadlock freedom (upper bound)
-  Result: 0.6599999999999999 (exact floating point)
-  
-  Termination (lower bound)
-  Result: 1.0 (exact floating point)
-  
-  Termination (upper bound)
-  Result: 1.0 (exact floating point)
-  
   Liveness (lower bound)
-  Result: 0.6599999999999999 (exact floating point)
-  
-  Liveness (upper bound)
   Result: 0.6599999999999999 (exact floating point)
   
   
@@ -2424,20 +2112,8 @@ For each context file in this directory, run [prose output] to check the model a
   // Deadlock freedom (lower bound)
   Pmin=? [ (G ("deadlock" => "end")) ]
   
-  // Deadlock freedom (upper bound)
-  Pmax=? [ (G ("deadlock" => "end")) ]
-  
-  // Termination (lower bound)
-  Pmin=? [ (F "deadlock") ]
-  
-  // Termination (upper bound)
-  Pmax=? [ (F "deadlock") ]
-  
   // Liveness (lower bound)
   Pmin=? [ (G (!"wals")) ]
-  
-  // Liveness (upper bound)
-  Pmax=? [ (G (!"wals")) ]
   
    ======= Property checking =======
   
@@ -2447,19 +2123,7 @@ For each context file in this directory, run [prose output] to check the model a
   Deadlock freedom (lower bound)
   Result: 0.33999999999999997 (exact floating point)
   
-  Deadlock freedom (upper bound)
-  Result: 0.33999999999999997 (exact floating point)
-  
-  Termination (lower bound)
-  Result: 1.0 (exact floating point)
-  
-  Termination (upper bound)
-  Result: 1.0 (exact floating point)
-  
   Liveness (lower bound)
-  Result: 0.33999999999999997 (exact floating point)
-  
-  Liveness (upper bound)
   Result: 0.33999999999999997 (exact floating point)
   
   
@@ -2512,20 +2176,8 @@ For each context file in this directory, run [prose output] to check the model a
   // Deadlock freedom (lower bound)
   Pmin=? [ (G ("deadlock" => "end")) ]
   
-  // Deadlock freedom (upper bound)
-  Pmax=? [ (G ("deadlock" => "end")) ]
-  
-  // Termination (lower bound)
-  Pmin=? [ (F "deadlock") ]
-  
-  // Termination (upper bound)
-  Pmax=? [ (F "deadlock") ]
-  
   // Liveness (lower bound)
   Pmin=? [ (G (!"wals")) ]
-  
-  // Liveness (upper bound)
-  Pmax=? [ (G (!"wals")) ]
   
    ======= Property checking =======
   
@@ -2535,19 +2187,7 @@ For each context file in this directory, run [prose output] to check the model a
   Deadlock freedom (lower bound)
   Result: 1.0 (exact floating point)
   
-  Deadlock freedom (upper bound)
-  Result: 1.0 (exact floating point)
-  
-  Termination (lower bound)
-  Result: 1.0 (exact floating point)
-  
-  Termination (upper bound)
-  Result: 1.0 (exact floating point)
-  
   Liveness (lower bound)
-  Result: 1.0 (exact floating point)
-  
-  Liveness (upper bound)
   Result: 1.0 (exact floating point)
   
   
@@ -2786,20 +2426,8 @@ For each context file in this directory, run [prose output] to check the model a
   // Deadlock freedom (lower bound)
   Pmin=? [ (G ("deadlock" => "end")) ]
   
-  // Deadlock freedom (upper bound)
-  Pmax=? [ (G ("deadlock" => "end")) ]
-  
-  // Termination (lower bound)
-  Pmin=? [ (F "deadlock") ]
-  
-  // Termination (upper bound)
-  Pmax=? [ (F "deadlock") ]
-  
   // Liveness (lower bound)
   Pmin=? [ (G (!"wals")) ]
-  
-  // Liveness (upper bound)
-  Pmax=? [ (G (!"wals")) ]
   
    ======= Property checking =======
   
@@ -2809,19 +2437,7 @@ For each context file in this directory, run [prose output] to check the model a
   Deadlock freedom (lower bound)
   Result: 1.0 (exact floating point)
   
-  Deadlock freedom (upper bound)
-  Result: 1.0 (exact floating point)
-  
-  Termination (lower bound)
-  Result: 1.0 (exact floating point)
-  
-  Termination (upper bound)
-  Result: 1.0 (exact floating point)
-  
   Liveness (lower bound)
-  Result: 1.0 (exact floating point)
-  
-  Liveness (upper bound)
   Result: 1.0 (exact floating point)
   
   
@@ -2881,20 +2497,8 @@ For each context file in this directory, run [prose output] to check the model a
   // Deadlock freedom (lower bound)
   Pmin=? [ (G ("deadlock" => "end")) ]
   
-  // Deadlock freedom (upper bound)
-  Pmax=? [ (G ("deadlock" => "end")) ]
-  
-  // Termination (lower bound)
-  Pmin=? [ (F "deadlock") ]
-  
-  // Termination (upper bound)
-  Pmax=? [ (F "deadlock") ]
-  
   // Liveness (lower bound)
   Pmin=? [ (G (!"wals")) ]
-  
-  // Liveness (upper bound)
-  Pmax=? [ (G (!"wals")) ]
   
    ======= Property checking =======
   
@@ -2904,19 +2508,7 @@ For each context file in this directory, run [prose output] to check the model a
   Deadlock freedom (lower bound)
   Result: 1.0 (exact floating point)
   
-  Deadlock freedom (upper bound)
-  Result: 1.0 (exact floating point)
-  
-  Termination (lower bound)
-  Result: 0.5 (exact floating point)
-  
-  Termination (upper bound)
-  Result: 0.5 (exact floating point)
-  
   Liveness (lower bound)
-  Result: 1.0 (exact floating point)
-  
-  Liveness (upper bound)
   Result: 1.0 (exact floating point)
   
   
@@ -2989,20 +2581,8 @@ For each context file in this directory, run [prose output] to check the model a
   // Deadlock freedom (lower bound)
   Pmin=? [ (G ("deadlock" => "end")) ]
   
-  // Deadlock freedom (upper bound)
-  Pmax=? [ (G ("deadlock" => "end")) ]
-  
-  // Termination (lower bound)
-  Pmin=? [ (F "deadlock") ]
-  
-  // Termination (upper bound)
-  Pmax=? [ (F "deadlock") ]
-  
   // Liveness (lower bound)
   Pmin=? [ (G (!"wals")) ]
-  
-  // Liveness (upper bound)
-  Pmax=? [ (G (!"wals")) ]
   
    ======= Property checking =======
   
@@ -3012,20 +2592,8 @@ For each context file in this directory, run [prose output] to check the model a
   Deadlock freedom (lower bound)
   Result: 1.0 (exact floating point)
   
-  Deadlock freedom (upper bound)
-  Result: 1.0 (exact floating point)
-  
-  Termination (lower bound)
-  Result: 0.0 (exact floating point)
-  
-  Termination (upper bound)
-  Result: 1.0 (exact floating point)
-  
   Liveness (lower bound)
   Result: 0.0 (exact floating point)
-  
-  Liveness (upper bound)
-  Result: 1.0 (exact floating point)
   
   
   
@@ -3087,20 +2655,8 @@ For each context file in this directory, run [prose output] to check the model a
   // Deadlock freedom (lower bound)
   Pmin=? [ (G ("deadlock" => "end")) ]
   
-  // Deadlock freedom (upper bound)
-  Pmax=? [ (G ("deadlock" => "end")) ]
-  
-  // Termination (lower bound)
-  Pmin=? [ (F "deadlock") ]
-  
-  // Termination (upper bound)
-  Pmax=? [ (F "deadlock") ]
-  
   // Liveness (lower bound)
   Pmin=? [ (G (!"wals")) ]
-  
-  // Liveness (upper bound)
-  Pmax=? [ (G (!"wals")) ]
   
    ======= Property checking =======
   
@@ -3110,19 +2666,7 @@ For each context file in this directory, run [prose output] to check the model a
   Deadlock freedom (lower bound)
   Result: 1.0 (exact floating point)
   
-  Deadlock freedom (upper bound)
-  Result: 1.0 (exact floating point)
-  
-  Termination (lower bound)
-  Result: 0.4 (exact floating point)
-  
-  Termination (upper bound)
-  Result: 0.6 (exact floating point)
-  
   Liveness (lower bound)
-  Result: 1.0 (exact floating point)
-  
-  Liveness (upper bound)
   Result: 1.0 (exact floating point)
   
   
@@ -3182,20 +2726,8 @@ For each context file in this directory, run [prose output] to check the model a
   // Deadlock freedom (lower bound)
   Pmin=? [ (G ("deadlock" => "end")) ]
   
-  // Deadlock freedom (upper bound)
-  Pmax=? [ (G ("deadlock" => "end")) ]
-  
-  // Termination (lower bound)
-  Pmin=? [ (F "deadlock") ]
-  
-  // Termination (upper bound)
-  Pmax=? [ (F "deadlock") ]
-  
   // Liveness (lower bound)
   Pmin=? [ (G (!"wals")) ]
-  
-  // Liveness (upper bound)
-  Pmax=? [ (G (!"wals")) ]
   
    ======= Property checking =======
   
@@ -3205,19 +2737,7 @@ For each context file in this directory, run [prose output] to check the model a
   Deadlock freedom (lower bound)
   Result: 0.6699999999999999 (exact floating point)
   
-  Deadlock freedom (upper bound)
-  Result: 0.6699999999999999 (exact floating point)
-  
-  Termination (lower bound)
-  Result: 1.0 (exact floating point)
-  
-  Termination (upper bound)
-  Result: 1.0 (exact floating point)
-  
   Liveness (lower bound)
-  Result: 0.6699999999999999 (exact floating point)
-  
-  Liveness (upper bound)
   Result: 0.6699999999999999 (exact floating point)
   
   
@@ -3289,20 +2809,8 @@ For each context file in this directory, run [prose output] to check the model a
   // Deadlock freedom (lower bound)
   Pmin=? [ (G ("deadlock" => "end")) ]
   
-  // Deadlock freedom (upper bound)
-  Pmax=? [ (G ("deadlock" => "end")) ]
-  
-  // Termination (lower bound)
-  Pmin=? [ (F "deadlock") ]
-  
-  // Termination (upper bound)
-  Pmax=? [ (F "deadlock") ]
-  
   // Liveness (lower bound)
   Pmin=? [ (G (!"wals")) ]
-  
-  // Liveness (upper bound)
-  Pmax=? [ (G (!"wals")) ]
   
    ======= Property checking =======
   
@@ -3312,19 +2820,7 @@ For each context file in this directory, run [prose output] to check the model a
   Deadlock freedom (lower bound)
   Result: 1.0 (exact floating point)
   
-  Deadlock freedom (upper bound)
-  Result: 1.0 (exact floating point)
-  
-  Termination (lower bound)
-  Result: 0.7 (exact floating point)
-  
-  Termination (upper bound)
-  Result: 0.7 (exact floating point)
-  
   Liveness (lower bound)
-  Result: 0.7 (exact floating point)
-  
-  Liveness (upper bound)
   Result: 0.7 (exact floating point)
   
   
@@ -3398,20 +2894,8 @@ For each context file in this directory, run [prose output] to check the model a
   // Deadlock freedom (lower bound)
   Pmin=? [ (G ("deadlock" => "end")) ]
   
-  // Deadlock freedom (upper bound)
-  Pmax=? [ (G ("deadlock" => "end")) ]
-  
-  // Termination (lower bound)
-  Pmin=? [ (F "deadlock") ]
-  
-  // Termination (upper bound)
-  Pmax=? [ (F "deadlock") ]
-  
   // Liveness (lower bound)
   Pmin=? [ (G (!"wals")) ]
-  
-  // Liveness (upper bound)
-  Pmax=? [ (G (!"wals")) ]
   
    ======= Property checking =======
   
@@ -3421,19 +2905,7 @@ For each context file in this directory, run [prose output] to check the model a
   Deadlock freedom (lower bound)
   Result: 0.30000000000000004 (exact floating point)
   
-  Deadlock freedom (upper bound)
-  Result: 0.30000000000000004 (exact floating point)
-  
-  Termination (lower bound)
-  Result: 1.0 (exact floating point)
-  
-  Termination (upper bound)
-  Result: 1.0 (exact floating point)
-  
   Liveness (lower bound)
-  Result: 0.30000000000000004 (exact floating point)
-  
-  Liveness (upper bound)
   Result: 0.30000000000000004 (exact floating point)
   
   
@@ -3556,20 +3028,8 @@ For each context file in this directory, run [prose output] to check the model a
   // Deadlock freedom (lower bound)
   Pmin=? [ (G ("deadlock" => "end")) ]
   
-  // Deadlock freedom (upper bound)
-  Pmax=? [ (G ("deadlock" => "end")) ]
-  
-  // Termination (lower bound)
-  Pmin=? [ (F "deadlock") ]
-  
-  // Termination (upper bound)
-  Pmax=? [ (F "deadlock") ]
-  
   // Liveness (lower bound)
   Pmin=? [ (G (!"wals")) ]
-  
-  // Liveness (upper bound)
-  Pmax=? [ (G (!"wals")) ]
   
    ======= Property checking =======
   
@@ -3579,19 +3039,7 @@ For each context file in this directory, run [prose output] to check the model a
   Deadlock freedom (lower bound)
   Result: 1.0 (exact floating point)
   
-  Deadlock freedom (upper bound)
-  Result: 1.0 (exact floating point)
-  
-  Termination (lower bound)
-  Result: 0.3076920374830968 (+/- 2.9272692363518906E-6 estimated; rel err 9.513633372825585E-6)
-  
-  Termination (upper bound)
-  Result: 0.3076920374830968 (+/- 2.9272692363518906E-6 estimated; rel err 9.513633372825585E-6)
-  
   Liveness (lower bound)
-  Result: 1.0 (exact floating point)
-  
-  Liveness (upper bound)
   Result: 1.0 (exact floating point)
   
   
@@ -3751,20 +3199,8 @@ For each context file in this directory, run [prose output] to check the model a
   // Deadlock freedom (lower bound)
   Pmin=? [ (G ("deadlock" => "end")) ]
   
-  // Deadlock freedom (upper bound)
-  Pmax=? [ (G ("deadlock" => "end")) ]
-  
-  // Termination (lower bound)
-  Pmin=? [ (F "deadlock") ]
-  
-  // Termination (upper bound)
-  Pmax=? [ (F "deadlock") ]
-  
   // Liveness (lower bound)
   Pmin=? [ (G (!"wals")) ]
-  
-  // Liveness (upper bound)
-  Pmax=? [ (G (!"wals")) ]
   
    ======= Property checking =======
   
@@ -3774,19 +3210,7 @@ For each context file in this directory, run [prose output] to check the model a
   Deadlock freedom (lower bound)
   Result: 1.0 (exact floating point)
   
-  Deadlock freedom (upper bound)
-  Result: 1.0 (exact floating point)
-  
-  Termination (lower bound)
-  Result: 1.0 (exact floating point)
-  
-  Termination (upper bound)
-  Result: 1.0 (exact floating point)
-  
   Liveness (lower bound)
-  Result: 1.0 (exact floating point)
-  
-  Liveness (upper bound)
   Result: 1.0 (exact floating point)
   
   
@@ -3885,20 +3309,8 @@ For each context file in this directory, run [prose output] to check the model a
   // Deadlock freedom (lower bound)
   Pmin=? [ (G ("deadlock" => "end")) ]
   
-  // Deadlock freedom (upper bound)
-  Pmax=? [ (G ("deadlock" => "end")) ]
-  
-  // Termination (lower bound)
-  Pmin=? [ (F "deadlock") ]
-  
-  // Termination (upper bound)
-  Pmax=? [ (F "deadlock") ]
-  
   // Liveness (lower bound)
   Pmin=? [ (G (!"wals")) ]
-  
-  // Liveness (upper bound)
-  Pmax=? [ (G (!"wals")) ]
   
    ======= Property checking =======
   
@@ -3908,19 +3320,7 @@ For each context file in this directory, run [prose output] to check the model a
   Deadlock freedom (lower bound)
   Result: 1.0 (exact floating point)
   
-  Deadlock freedom (upper bound)
-  Result: 1.0 (exact floating point)
-  
-  Termination (lower bound)
-  Result: 1.0 (exact floating point)
-  
-  Termination (upper bound)
-  Result: 1.0 (exact floating point)
-  
   Liveness (lower bound)
-  Result: 1.0 (exact floating point)
-  
-  Liveness (upper bound)
   Result: 1.0 (exact floating point)
   
   
@@ -4067,20 +3467,8 @@ For each context file in this directory, run [prose output] to check the model a
   // Deadlock freedom (lower bound)
   Pmin=? [ (G ("deadlock" => "end")) ]
   
-  // Deadlock freedom (upper bound)
-  Pmax=? [ (G ("deadlock" => "end")) ]
-  
-  // Termination (lower bound)
-  Pmin=? [ (F "deadlock") ]
-  
-  // Termination (upper bound)
-  Pmax=? [ (F "deadlock") ]
-  
   // Liveness (lower bound)
   Pmin=? [ (G (!"wals")) ]
-  
-  // Liveness (upper bound)
-  Pmax=? [ (G (!"wals")) ]
   
    ======= Property checking =======
   
@@ -4090,20 +3478,8 @@ For each context file in this directory, run [prose output] to check the model a
   Deadlock freedom (lower bound)
   Result: 0.6896675050354955 (+/- 6.79348995065338E-6 estimated; rel err 9.85038428090611E-6)
   
-  Deadlock freedom (upper bound)
-  Result: 1.0 (exact floating point)
-  
-  Termination (lower bound)
-  Result: 0.0 (exact floating point)
-  
-  Termination (upper bound)
-  Result: 0.3103324949645045 (+/- 3.0568943302527295E-6 estimated; rel err 9.85038428090611E-6)
-  
   Liveness (lower bound)
   Result: 0.5263273372547235 (+/- 4.870928780374453E-6 estimated; rel err 9.254561630373948E-6)
-  
-  Liveness (upper bound)
-  Result: 1.0 (exact floating point)
   
   
   
@@ -4244,20 +3620,8 @@ For each context file in this directory, run [prose output] to check the model a
   // Deadlock freedom (lower bound)
   Pmin=? [ (G ("deadlock" => "end")) ]
   
-  // Deadlock freedom (upper bound)
-  Pmax=? [ (G ("deadlock" => "end")) ]
-  
-  // Termination (lower bound)
-  Pmin=? [ (F "deadlock") ]
-  
-  // Termination (upper bound)
-  Pmax=? [ (F "deadlock") ]
-  
   // Liveness (lower bound)
   Pmin=? [ (G (!"wals")) ]
-  
-  // Liveness (upper bound)
-  Pmax=? [ (G (!"wals")) ]
   
    ======= Property checking =======
   
@@ -4267,19 +3631,7 @@ For each context file in this directory, run [prose output] to check the model a
   Deadlock freedom (lower bound)
   Result: 1.0 (exact floating point)
   
-  Deadlock freedom (upper bound)
-  Result: 1.0 (exact floating point)
-  
-  Termination (lower bound)
-  Result: 1.0 (exact floating point)
-  
-  Termination (upper bound)
-  Result: 1.0 (exact floating point)
-  
   Liveness (lower bound)
-  Result: 1.0 (exact floating point)
-  
-  Liveness (upper bound)
   Result: 1.0 (exact floating point)
   
   
@@ -4330,20 +3682,8 @@ For each context file in this directory, run [prose output] to check the model a
   // Deadlock freedom (lower bound)
   Pmin=? [ (G ("deadlock" => "end")) ]
   
-  // Deadlock freedom (upper bound)
-  Pmax=? [ (G ("deadlock" => "end")) ]
-  
-  // Termination (lower bound)
-  Pmin=? [ (F "deadlock") ]
-  
-  // Termination (upper bound)
-  Pmax=? [ (F "deadlock") ]
-  
   // Liveness (lower bound)
   Pmin=? [ (G (!"wals")) ]
-  
-  // Liveness (upper bound)
-  Pmax=? [ (G (!"wals")) ]
   
    ======= Property checking =======
   
@@ -4353,19 +3693,7 @@ For each context file in this directory, run [prose output] to check the model a
   Deadlock freedom (lower bound)
   Result: 1.0 (exact floating point)
   
-  Deadlock freedom (upper bound)
-  Result: 1.0 (exact floating point)
-  
-  Termination (lower bound)
-  Result: 1.0 (exact floating point)
-  
-  Termination (upper bound)
-  Result: 1.0 (exact floating point)
-  
   Liveness (lower bound)
-  Result: 1.0 (exact floating point)
-  
-  Liveness (upper bound)
   Result: 1.0 (exact floating point)
   
   
@@ -4440,20 +3768,8 @@ For each context file in this directory, run [prose output] to check the model a
   // Deadlock freedom (lower bound)
   Pmin=? [ (G ("deadlock" => "end")) ]
   
-  // Deadlock freedom (upper bound)
-  Pmax=? [ (G ("deadlock" => "end")) ]
-  
-  // Termination (lower bound)
-  Pmin=? [ (F "deadlock") ]
-  
-  // Termination (upper bound)
-  Pmax=? [ (F "deadlock") ]
-  
   // Liveness (lower bound)
   Pmin=? [ (G (!"wals")) ]
-  
-  // Liveness (upper bound)
-  Pmax=? [ (G (!"wals")) ]
   
    ======= Property checking =======
   
@@ -4463,19 +3779,7 @@ For each context file in this directory, run [prose output] to check the model a
   Deadlock freedom (lower bound)
   Result: 0.4 (exact floating point)
   
-  Deadlock freedom (upper bound)
-  Result: 0.4 (exact floating point)
-  
-  Termination (lower bound)
-  Result: 1.0 (exact floating point)
-  
-  Termination (upper bound)
-  Result: 1.0 (exact floating point)
-  
   Liveness (lower bound)
-  Result: 0.4 (exact floating point)
-  
-  Liveness (upper bound)
   Result: 0.4 (exact floating point)
   
   
@@ -4603,20 +3907,8 @@ For each context file in this directory, run [prose output] to check the model a
   // Deadlock freedom (lower bound)
   Pmin=? [ (G ("deadlock" => "end")) ]
   
-  // Deadlock freedom (upper bound)
-  Pmax=? [ (G ("deadlock" => "end")) ]
-  
-  // Termination (lower bound)
-  Pmin=? [ (F "deadlock") ]
-  
-  // Termination (upper bound)
-  Pmax=? [ (F "deadlock") ]
-  
   // Liveness (lower bound)
   Pmin=? [ (G (!"wals")) ]
-  
-  // Liveness (upper bound)
-  Pmax=? [ (G (!"wals")) ]
   
    ======= Property checking =======
   
@@ -4626,19 +3918,7 @@ For each context file in this directory, run [prose output] to check the model a
   Deadlock freedom (lower bound)
   Result: 0.0 (exact floating point)
   
-  Deadlock freedom (upper bound)
-  Result: 0.0 (exact floating point)
-  
-  Termination (lower bound)
-  Result: 1.0 (exact floating point)
-  
-  Termination (upper bound)
-  Result: 1.0 (exact floating point)
-  
   Liveness (lower bound)
-  Result: 0.0 (exact floating point)
-  
-  Liveness (upper bound)
   Result: 0.0 (exact floating point)
   
   
@@ -4708,20 +3988,8 @@ For each context file in this directory, run [prose output] to check the model a
   // Deadlock freedom (lower bound)
   Pmin=? [ (G ("deadlock" => "end")) ]
   
-  // Deadlock freedom (upper bound)
-  Pmax=? [ (G ("deadlock" => "end")) ]
-  
-  // Termination (lower bound)
-  Pmin=? [ (F "deadlock") ]
-  
-  // Termination (upper bound)
-  Pmax=? [ (F "deadlock") ]
-  
   // Liveness (lower bound)
   Pmin=? [ (G (!"wals")) ]
-  
-  // Liveness (upper bound)
-  Pmax=? [ (G (!"wals")) ]
   
    ======= Property checking =======
   
@@ -4731,19 +3999,7 @@ For each context file in this directory, run [prose output] to check the model a
   Deadlock freedom (lower bound)
   Result: 1.0 (exact floating point)
   
-  Deadlock freedom (upper bound)
-  Result: 1.0 (exact floating point)
-  
-  Termination (lower bound)
-  Result: 0.8 (exact floating point)
-  
-  Termination (upper bound)
-  Result: 0.8 (exact floating point)
-  
   Liveness (lower bound)
-  Result: 1.0 (exact floating point)
-  
-  Liveness (upper bound)
   Result: 1.0 (exact floating point)
   
   
@@ -4809,20 +4065,8 @@ For each context file in this directory, run [prose output] to check the model a
   // Deadlock freedom (lower bound)
   Pmin=? [ (G ("deadlock" => "end")) ]
   
-  // Deadlock freedom (upper bound)
-  Pmax=? [ (G ("deadlock" => "end")) ]
-  
-  // Termination (lower bound)
-  Pmin=? [ (F "deadlock") ]
-  
-  // Termination (upper bound)
-  Pmax=? [ (F "deadlock") ]
-  
   // Liveness (lower bound)
   Pmin=? [ (G (!"wals")) ]
-  
-  // Liveness (upper bound)
-  Pmax=? [ (G (!"wals")) ]
   
    ======= Property checking =======
   
@@ -4832,20 +4076,8 @@ For each context file in this directory, run [prose output] to check the model a
   Deadlock freedom (lower bound)
   Result: 1.0 (exact floating point)
   
-  Deadlock freedom (upper bound)
-  Result: 1.0 (exact floating point)
-  
-  Termination (lower bound)
-  Result: 0.0 (exact floating point)
-  
-  Termination (upper bound)
-  Result: 0.0 (exact floating point)
-  
   Liveness (lower bound)
   Result: 0.0 (exact floating point)
-  
-  Liveness (upper bound)
-  Result: 1.0 (exact floating point)
   
   
   
@@ -4958,20 +4190,8 @@ For each context file in this directory, run [prose output] to check the model a
   // Deadlock freedom (lower bound)
   Pmin=? [ (G ("deadlock" => "end")) ]
   
-  // Deadlock freedom (upper bound)
-  Pmax=? [ (G ("deadlock" => "end")) ]
-  
-  // Termination (lower bound)
-  Pmin=? [ (F "deadlock") ]
-  
-  // Termination (upper bound)
-  Pmax=? [ (F "deadlock") ]
-  
   // Liveness (lower bound)
   Pmin=? [ (G (!"wals")) ]
-  
-  // Liveness (upper bound)
-  Pmax=? [ (G (!"wals")) ]
   
    ======= Property checking =======
   
@@ -4981,20 +4201,8 @@ For each context file in this directory, run [prose output] to check the model a
   Deadlock freedom (lower bound)
   Result: 0.41999999999999993 (exact floating point)
   
-  Deadlock freedom (upper bound)
-  Result: 0.42000000000000004 (exact floating point)
-  
-  Termination (lower bound)
-  Result: 1.0 (exact floating point)
-  
-  Termination (upper bound)
-  Result: 1.0 (exact floating point)
-  
   Liveness (lower bound)
   Result: 0.41999999999999993 (exact floating point)
-  
-  Liveness (upper bound)
-  Result: 0.42000000000000004 (exact floating point)
   
   
   
@@ -5068,20 +4276,8 @@ For each context file in this directory, run [prose output] to check the model a
   // Deadlock freedom (lower bound)
   Pmin=? [ (G ("deadlock" => "end")) ]
   
-  // Deadlock freedom (upper bound)
-  Pmax=? [ (G ("deadlock" => "end")) ]
-  
-  // Termination (lower bound)
-  Pmin=? [ (F "deadlock") ]
-  
-  // Termination (upper bound)
-  Pmax=? [ (F "deadlock") ]
-  
   // Liveness (lower bound)
   Pmin=? [ (G (!"wals")) ]
-  
-  // Liveness (upper bound)
-  Pmax=? [ (G (!"wals")) ]
   
    ======= Property checking =======
   
@@ -5091,19 +4287,7 @@ For each context file in this directory, run [prose output] to check the model a
   Deadlock freedom (lower bound)
   Result: 0.87 (exact floating point)
   
-  Deadlock freedom (upper bound)
-  Result: 0.87 (exact floating point)
-  
-  Termination (lower bound)
-  Result: 1.0 (exact floating point)
-  
-  Termination (upper bound)
-  Result: 1.0 (exact floating point)
-  
   Liveness (lower bound)
-  Result: 0.87 (exact floating point)
-  
-  Liveness (upper bound)
   Result: 0.87 (exact floating point)
   
   
@@ -5205,20 +4389,8 @@ For each context file in this directory, run [prose output] to check the model a
   // Deadlock freedom (lower bound)
   Pmin=? [ (G ("deadlock" => "end")) ]
   
-  // Deadlock freedom (upper bound)
-  Pmax=? [ (G ("deadlock" => "end")) ]
-  
-  // Termination (lower bound)
-  Pmin=? [ (F "deadlock") ]
-  
-  // Termination (upper bound)
-  Pmax=? [ (F "deadlock") ]
-  
   // Liveness (lower bound)
   Pmin=? [ (G (!"wals")) ]
-  
-  // Liveness (upper bound)
-  Pmax=? [ (G (!"wals")) ]
   
    ======= Property checking =======
   
@@ -5228,19 +4400,7 @@ For each context file in this directory, run [prose output] to check the model a
   Deadlock freedom (lower bound)
   Result: 1.0 (exact floating point)
   
-  Deadlock freedom (upper bound)
-  Result: 1.0 (exact floating point)
-  
-  Termination (lower bound)
-  Result: 0.4999977331183232 (+/- 4.976086682306783E-6 estimated; rel err 9.952218485617023E-6)
-  
-  Termination (upper bound)
-  Result: 0.4999977331183232 (+/- 4.976086682306783E-6 estimated; rel err 9.952218485617023E-6)
-  
   Liveness (lower bound)
-  Result: 1.0 (exact floating point)
-  
-  Liveness (upper bound)
   Result: 1.0 (exact floating point)
   
   
@@ -5298,20 +4458,8 @@ For each context file in this directory, run [prose output] to check the model a
   // Deadlock freedom (lower bound)
   Pmin=? [ (G ("deadlock" => "end")) ]
   
-  // Deadlock freedom (upper bound)
-  Pmax=? [ (G ("deadlock" => "end")) ]
-  
-  // Termination (lower bound)
-  Pmin=? [ (F "deadlock") ]
-  
-  // Termination (upper bound)
-  Pmax=? [ (F "deadlock") ]
-  
   // Liveness (lower bound)
   Pmin=? [ (G (!"wals")) ]
-  
-  // Liveness (upper bound)
-  Pmax=? [ (G (!"wals")) ]
   
    ======= Property checking =======
   
@@ -5323,19 +4471,7 @@ For each context file in this directory, run [prose output] to check the model a
   Deadlock freedom (lower bound)
   Result: 1.0 (exact floating point)
   
-  Deadlock freedom (upper bound)
-  Result: 1.0 (exact floating point)
-  
-  Termination (lower bound)
-  Result: 1.0 (exact floating point)
-  
-  Termination (upper bound)
-  Result: 1.0 (exact floating point)
-  
   Liveness (lower bound)
-  Result: 1.0 (exact floating point)
-  
-  Liveness (upper bound)
   Result: 1.0 (exact floating point)
   
   
@@ -5382,20 +4518,8 @@ For each context file in this directory, run [prose output] to check the model a
   // Deadlock freedom (lower bound)
   Pmin=? [ (G ("deadlock" => "end")) ]
   
-  // Deadlock freedom (upper bound)
-  Pmax=? [ (G ("deadlock" => "end")) ]
-  
-  // Termination (lower bound)
-  Pmin=? [ (F "deadlock") ]
-  
-  // Termination (upper bound)
-  Pmax=? [ (F "deadlock") ]
-  
   // Liveness (lower bound)
   Pmin=? [ (G (!"wals")) ]
-  
-  // Liveness (upper bound)
-  Pmax=? [ (G (!"wals")) ]
   
    ======= Property checking =======
   
@@ -5405,19 +4529,7 @@ For each context file in this directory, run [prose output] to check the model a
   Deadlock freedom (lower bound)
   Result: 1.0 (exact floating point)
   
-  Deadlock freedom (upper bound)
-  Result: 1.0 (exact floating point)
-  
-  Termination (lower bound)
-  Result: 1.0 (exact floating point)
-  
-  Termination (upper bound)
-  Result: 1.0 (exact floating point)
-  
   Liveness (lower bound)
-  Result: 1.0 (exact floating point)
-  
-  Liveness (upper bound)
   Result: 1.0 (exact floating point)
   
   
@@ -5476,20 +4588,8 @@ For each context file in this directory, run [prose output] to check the model a
   // Deadlock freedom (lower bound)
   Pmin=? [ (G ("deadlock" => "end")) ]
   
-  // Deadlock freedom (upper bound)
-  Pmax=? [ (G ("deadlock" => "end")) ]
-  
-  // Termination (lower bound)
-  Pmin=? [ (F "deadlock") ]
-  
-  // Termination (upper bound)
-  Pmax=? [ (F "deadlock") ]
-  
   // Liveness (lower bound)
   Pmin=? [ (G (!"wals")) ]
-  
-  // Liveness (upper bound)
-  Pmax=? [ (G (!"wals")) ]
   
    ======= Property checking =======
   
@@ -5501,19 +4601,7 @@ For each context file in this directory, run [prose output] to check the model a
   Deadlock freedom (lower bound)
   Result: 1.0 (exact floating point)
   
-  Deadlock freedom (upper bound)
-  Result: 1.0 (exact floating point)
-  
-  Termination (lower bound)
-  Result: 1.0 (exact floating point)
-  
-  Termination (upper bound)
-  Result: 1.0 (exact floating point)
-  
   Liveness (lower bound)
-  Result: 1.0 (exact floating point)
-  
-  Liveness (upper bound)
   Result: 1.0 (exact floating point)
   
   

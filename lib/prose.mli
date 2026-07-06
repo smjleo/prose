@@ -10,6 +10,7 @@ val output
   -> balance:bool
   -> upper:bool
   -> liveness:bool
+  -> all_props:bool
   -> ?model_output_file:string
   -> ?prop_output_file:string
   -> unit
@@ -25,6 +26,7 @@ val verify
   -> balance:bool
   -> upper:bool
   -> liveness:bool
+  -> all_props:bool
   -> fair:bool
   -> unit
   -> unit

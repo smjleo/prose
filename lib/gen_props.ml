@@ -33,18 +33,25 @@ let safety context =
   P (Ge 1.0, G (conjunction clauses))
 ;;
 
-let generate ?(liveness = true) context =
-  [ Annotation.Type_safety, safety context
-  ; Annotation.Deadlock_freedom_lower, deadlock_freedom_lower
-  ; Annotation.Deadlock_freedom_upper, deadlock_freedom_upper
-  ; Annotation.Termination_lower, termination_lower
-  ; Annotation.Termination_upper, termination_upper
-  ]
-  @
-  if liveness
-  then
-    [ Annotation.Liveness_lower, liveness_lower
-    ; Annotation.Liveness_upper, liveness_upper
+let generate ?(liveness = true) ?(all_props = false) context =
+  match all_props with
+  | false ->
+    [ Annotation.Type_safety, safety context
+    ; Annotation.Deadlock_freedom_lower, deadlock_freedom_lower
     ]
-  else []
+    @ if liveness then [ Annotation.Liveness_lower, liveness_lower ] else []
+  | true ->
+    [ Annotation.Type_safety, safety context
+    ; Annotation.Deadlock_freedom_lower, deadlock_freedom_lower
+    ; Annotation.Deadlock_freedom_upper, deadlock_freedom_upper
+    ; Annotation.Termination_lower, termination_lower
+    ; Annotation.Termination_upper, termination_upper
+    ]
+    @
+    if liveness
+    then
+      [ Annotation.Liveness_lower, liveness_lower
+      ; Annotation.Liveness_upper, liveness_upper
+      ]
+    else []
 ;;
