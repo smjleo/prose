@@ -19,85 +19,67 @@ let type_from_context context ~participant =
     | true -> Some ctx_type)
 ;;
 
-(* TODO: come up with a better name - this is not descriptive of the fact that
-   [label] is an [option], and that it returns true when [label] = [None]. *)
-let choices_contain_tag choices tag =
-  match tag with
-  | None -> true
-  | Some tag ->
-    List.exists choices ~f:(fun { Ast.ch_label; ch_sort; _ } ->
-      Action.Communication.Tag.equal (Action.Communication.Tag.tag ch_label ch_sort) tag)
-;;
-
 (** EBL/EOL(p, q, l, ctx) from the paper. *)
-let enabled_states ~id_map ~direction ~from_participant ~to_participant ~tag context =
-  (* EBL/EOL(q, type, l, n) from the paper. Participants and [label] remain the
-     same during recursion, so we omit from the arguments. *)
+let enabled_states ~direction ~from_participant ~to_participant ~tag context =
   let participant =
     match direction with
     | `Branching -> to_participant
     | `Output -> from_participant
   in
   let rec enabled_states' ~state ty =
-    let communication_rest ~from_participant ~to_participant ~direction choices =
-      let communications =
-        List.map choices ~f:(fun { Ast.ch_label; ch_sort; _ } ->
-          { Action.Communication.from_participant
-          ; to_participant
-          ; tag = Some (Action.Communication.Tag.tag ch_label ch_sort)
-          })
-      in
-      List.map choices ~f:(fun { ch_cont; ch_label; ch_sort } ->
-        let communication =
-          { Action.Communication.from_participant
-          ; to_participant
-          ; tag = Some (Action.Communication.Tag.tag ch_label ch_sort)
-          }
-        in
-        let new_state =
-          Type_utils.next_state
-            ~direction
-            ~state
-            ~communication
-            ~communications
-            ~choices
-            ~id_map
-        in
-        enabled_states' ~state:new_state ch_cont)
-      |> Int.Set.union_list
-    in
     match ty with
     | Ast.End -> Int.Set.empty
     | Mu (_var, t) -> enabled_states' ~state t
     | Variable _var -> Int.Set.empty
-    | Internal { int_part; int_choices } ->
-      let bald_choices = List.map int_choices ~f:(fun (_p, c) -> c) in
+    | Internal choice_branches ->
       let rest =
-        communication_rest
-          bald_choices
-          ~direction:`Internal
-          ~from_participant:participant
-          ~to_participant:int_part
+        List.concat_mapi choice_branches ~f:(fun branch_index branch ->
+          List.mapi branch ~f:(fun choice_index (_p, { Ast.ch_cont; _ }) ->
+            let new_state =
+              Type_utils.next_state_internal_nd
+                ~state
+                ~branch_index
+                ~choice_index
+                ~choice_branches
+            in
+            enabled_states' ~state:new_state ch_cont))
+        |> Int.Set.union_list
       in
-      (match
-         ( direction
-         , String.equal int_part to_participant && choices_contain_tag bald_choices tag )
-       with
+      let all_choices = List.concat_map choice_branches ~f:(List.map ~f:snd) in
+      let matches =
+        List.exists all_choices ~f:(fun { Ast.ch_part; ch_label; ch_sort; _ } ->
+          String.equal ch_part to_participant
+          && (match tag with
+              | None -> true
+              | Some t ->
+                Action.Communication.Tag.equal
+                  (Action.Communication.Tag.tag ch_label ch_sort)
+                  t))
+      in
+      (match direction, matches with
        | `Branching, _ -> rest
        | _, false -> rest
        | `Output, true -> Set.union rest (Int.Set.singleton state))
-    | External { ext_part; ext_choices } ->
+    | External ext_choices ->
       let rest =
-        communication_rest
-          ext_choices
-          ~direction:`External
-          ~from_participant:ext_part
-          ~to_participant:participant
+        List.mapi ext_choices ~f:(fun choice_index { Ast.ch_cont; _ } ->
+          let new_state =
+            Type_utils.next_state_external ~state ~choice_index ~ext_choices
+          in
+          enabled_states' ~state:new_state ch_cont)
+        |> Int.Set.union_list
       in
-      (match
-         ( direction
-         , String.equal ext_part from_participant && choices_contain_tag ext_choices tag )
-       with
+      let matches =
+        List.exists ext_choices ~f:(fun { Ast.ch_part; ch_label; ch_sort; _ } ->
+          String.equal ch_part from_participant
+          && (match tag with
+              | None -> true
+              | Some t ->
+                Action.Communication.Tag.equal
+                  (Action.Communication.Tag.tag ch_label ch_sort)
+                  t))
+      in
+      (match direction, matches with
        | `Output, _ -> rest
        | _, false -> rest
        | `Branching, true -> Set.union rest (Int.Set.singleton state))
@@ -107,7 +89,7 @@ let enabled_states ~id_map ~direction ~from_participant ~to_participant ~tag con
   | Some ty -> enabled_states' ty ~state:0
 ;;
 
-let generate ~id_map context =
+let generate context =
   let end_label =
     let clauses =
       List.map context ~f:(fun { Ast.ctx_part; ctx_type } ->
@@ -137,7 +119,6 @@ let generate ~id_map context =
       in
       let eol =
         enabled_states
-          ~id_map
           ~direction:`Output
           ~from_participant
           ~to_participant
@@ -147,7 +128,6 @@ let generate ~id_map context =
       in
       let ebl =
         enabled_states
-          ~id_map
           ~direction:`Branching
           ~from_participant
           ~to_participant
@@ -179,7 +159,6 @@ let generate ~id_map context =
       in
       let eb =
         enabled_states
-          ~id_map
           ~direction:`Branching
           ~from_participant
           ~to_participant
@@ -193,4 +172,16 @@ let generate ~id_map context =
       { name = Can_do_branch communication; expr = disjunction branching_clauses })
   in
   List.concat [ [ end_label ]; cando_action; cando_any ]
+;;
+
+(** The combined weak-almost-sure-livelock label [WASlivelock(Delta)]: a
+    disjunction over the bad global configurations, each a conjunction of
+    per-participant [S_p] equalities. Empty (live) ⇒ [false]. *)
+let wals_label context =
+  let configs = Live.bad_configs context in
+  let clauses =
+    List.map configs ~f:(fun cfg ->
+      conjunction (List.map cfg ~f:(fun (p, n) -> Eq (Var (StringVar p), IntConst n))))
+  in
+  { name = Wals; expr = disjunction clauses }
 ;;

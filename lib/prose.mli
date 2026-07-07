@@ -9,6 +9,8 @@ val output
   -> print_translation_time:bool
   -> balance:bool
   -> upper:bool
+  -> liveness:bool
+  -> all_props:bool
   -> ?model_output_file:string
   -> ?prop_output_file:string
   -> unit
@@ -23,6 +25,9 @@ val verify
   -> print_translation_time:bool
   -> balance:bool
   -> upper:bool
+  -> liveness:bool
+  -> all_props:bool
+  -> fair:bool
   -> unit
   -> unit
 

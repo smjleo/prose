@@ -1,25 +1,25 @@
 (* Running example from the paper *)
 
-s : b & {
-      connect . c (+) {
-                 0.3 : login . a & authorise . end,
-                 0.2 : cancel . e (+) stop . end
+s : & {
+      b ? connect . (+) {
+                 c ! 0.6 : login . & { a ? authorise . end },
+                 c ! 0.4 : cancel . (+) { e ! 1.0 : stop . end }
                },
-      err . mu t . b & retry . t
+      b ? err . mu t . & { b ? retry . t }
     }
 
-c : s & {
-      login . a (+) pass . end,
-      cancel . a (+) quit . end
+c : & {
+      s ? login . (+) { a ! 1.0 : pass . end },
+      s ? cancel . (+) { a ! 1.0 : quit . end }
     }
 
-a : c & {
-      pass . s (+) authorise . end,
-      quit . end
+a : & {
+      c ? pass . (+) { s ! 1.0 : authorise . end },
+      c ? quit . end
     }
 
-b : s (+) {
-      0.6 : connect . end,
-      0.4 : err . mu t . s (+) retry . t
+b : (+) {
+      s ! 0.6 : connect . end,
+      s ! 0.4 : err . mu t . (+) { s ! 1.0 : retry . t }
     }
 

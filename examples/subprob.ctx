@@ -1,13 +1,13 @@
 (* Case where PDF is different from NPDF, due to unknown behaviour *)
 
-commander : a (+) {
-              0.5 : deadlock . end,
-              0.3 : nodeadlock . end
+commander : (+) {
+              a ! 0.6 : deadlock . end,
+              a ! 0.4 : nodeadlock . end
             }
 
-a : commander & {
-      deadlock . b & msg . end,
-      nodeadlock . b (+) msg . end
+a : & {
+      commander ? deadlock . & { b ? msg . end },
+      commander ? nodeadlock . (+) { b ! 1.0 : msg . end }
     }
 
-b : a & msg . end
+b : & { a ? msg . end }

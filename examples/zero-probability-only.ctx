@@ -1,4 +1,4 @@
-(* This context has only zero-probability reductions, making normalised properties undefined. *)
+(* Simple test context *)
 
-p : q (+) { 0 : l1 . end }
-q : p & l1 . end
+p : (+) { q ! 1.0 : l1 . end }
+q : & { p ? l1 . end }

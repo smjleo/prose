@@ -1,12 +1,12 @@
-commander : a (+) {
-              0.7 : deadlock . end,
-              0.3 : nodeadlock . end
+commander : (+) {
+              a ! 0.7 : deadlock . end,
+              a ! 0.3 : nodeadlock . end
             }
 
-a : commander & {
-      deadlock . b & msg . end,
-      nodeadlock . b (+) msg . end
+a : & {
+      commander ? deadlock . & { b ? msg . end },
+      commander ? nodeadlock . (+) { b ! 1.0 : msg . end }
     }
 
-b : a & msg . end
+b : & { a ? msg . end }
 

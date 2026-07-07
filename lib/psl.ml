@@ -3,28 +3,33 @@ open! Core
 module Annotation = struct
   type t =
     | Type_safety
-    | Probabilistic_deadlock_freedom
-    | Normalised_probabilistic_deadlock_freedom
-    | Probabilisic_termination
-    | Normalised_probabilistic_termination
+    | Deadlock_freedom_lower
+    | Deadlock_freedom_upper
+    | Termination_lower
+    | Termination_upper
+    | Liveness_lower
+    | Liveness_upper
   [@@deriving equal, sexp_of]
 
   let all =
     [ Type_safety
-    ; Probabilistic_deadlock_freedom
-    ; Normalised_probabilistic_deadlock_freedom
-    ; Probabilisic_termination
-    ; Normalised_probabilistic_termination
+    ; Deadlock_freedom_lower
+    ; Deadlock_freedom_upper
+    ; Termination_lower
+    ; Termination_upper
+    ; Liveness_lower
+    ; Liveness_upper
     ]
   ;;
 
   let to_string = function
     | Type_safety -> "Type safety"
-    | Probabilistic_deadlock_freedom -> "Probabilistic deadlock freedom"
-    | Normalised_probabilistic_deadlock_freedom ->
-      "Normalised probabilistic deadlock freedom"
-    | Probabilisic_termination -> "Probabilistic termination"
-    | Normalised_probabilistic_termination -> "Normalised probabilistic termination"
+    | Deadlock_freedom_lower -> "Deadlock freedom (lower bound)"
+    | Deadlock_freedom_upper -> "Deadlock freedom (upper bound)"
+    | Termination_lower -> "Termination (lower bound)"
+    | Termination_upper -> "Termination (upper bound)"
+    | Liveness_lower -> "Liveness (lower bound)"
+    | Liveness_upper -> "Liveness (upper bound)"
   ;;
 end
 
@@ -35,7 +40,8 @@ and property =
   | Divide of property * property
 
 and bound =
-  | Exact
+  | ExactMin
+  | ExactMax
   | Lt of float
   | Le of float
   | Gt of float

@@ -1,0 +1,5 @@
+a : mu t . (+) { b ! 1 : l . t }
+b : mu t . & { a ? l . t }
+
+c : (+) { d ! 1 : l . end }
+d : & { c ? l . & { c ? l2 . end } }

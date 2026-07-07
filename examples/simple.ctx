@@ -1,4 +1,4 @@
-alice : bob (+) { 0.33 : a.end, 0.67 : b(Int).end }
-bob : alice & { a.end, b(Int).end }
+alice : (+) { bob ! 0.33 : a.end, bob ! 0.67 : b<Int>.end }
+bob : & { alice ? a.end, alice ? b(Int).end }
 
 

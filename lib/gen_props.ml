@@ -7,18 +7,19 @@ let rec conjunction = function
   | c :: cs -> And (c, conjunction cs)
 ;;
 
-(* Helpers *)
-let fail = Variable "fail"
-let non_failing_path = P (Exact, G (Not fail))
-let normalise prop = Divide (prop, non_failing_path)
 let deadlock = Label Prism.Deadlock
-let non_fail_deadlock = And (Label Prism.Deadlock, Not fail)
 
-(* Properties *)
-let deadlock_freedom = P (Exact, G (Implies (deadlock, Label Prism.End)))
-let normalised_deadlock_freedom = normalise deadlock_freedom
-let termination = P (Exact, F non_fail_deadlock)
-let normalised_termination = normalise termination
+let deadlock_freedom_lower = P (ExactMin, G (Implies (deadlock, Label Prism.End)))
+let deadlock_freedom_upper = P (ExactMax, G (Implies (deadlock, Label Prism.End)))
+let termination_lower = P (ExactMin, F deadlock)
+let termination_upper = P (ExactMax, F deadlock)
+
+(* Almost-sure liveness (Thm 4.26): a context is live iff the weak-almost-sure-
+   livelock region is unreachable. The liveness probability is [G !"wals"]
+   ([= 1 - F "wals"]); minimising/maximising over schedulers gives the bounds. *)
+let wals = Label Prism.Wals
+let liveness_lower = P (ExactMin, G (Not wals))
+let liveness_upper = P (ExactMax, G (Not wals))
 
 let safety context =
   let communications = Action.Communication.in_context context in
@@ -32,13 +33,25 @@ let safety context =
   P (Ge 1.0, G (conjunction clauses))
 ;;
 
-let generate context =
-  List.zip_exn
-    Annotation.all
-    [ safety context
-    ; deadlock_freedom
-    ; normalised_deadlock_freedom
-    ; termination
-    ; normalised_termination
+let generate ?(liveness = true) ?(all_props = false) context =
+  match all_props with
+  | false ->
+    [ Annotation.Type_safety, safety context
+    ; Annotation.Deadlock_freedom_lower, deadlock_freedom_lower
     ]
+    @ if liveness then [ Annotation.Liveness_lower, liveness_lower ] else []
+  | true ->
+    [ Annotation.Type_safety, safety context
+    ; Annotation.Deadlock_freedom_lower, deadlock_freedom_lower
+    ; Annotation.Deadlock_freedom_upper, deadlock_freedom_upper
+    ; Annotation.Termination_lower, termination_lower
+    ; Annotation.Termination_upper, termination_upper
+    ]
+    @
+    if liveness
+    then
+      [ Annotation.Liveness_lower, liveness_lower
+      ; Annotation.Liveness_upper, liveness_upper
+      ]
+    else []
 ;;

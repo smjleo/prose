@@ -55,5 +55,6 @@ and label =
 and label_name =
   | End
   | Deadlock
+  | Wals
   | Can_do of Action.Communication.t
   | Can_do_branch of Action.Communication.t

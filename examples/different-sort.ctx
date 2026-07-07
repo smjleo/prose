@@ -1,5 +1,5 @@
 (* What happens if two participants try to communicate on the same label but different sorts? *)
 
-p : q (+) l(Int) . end
+p : (+) { q ! 1.0 : l<Int> . end }
 
-q : p & l(Bool) . end
+q : & { p ? l(Bool) . end }

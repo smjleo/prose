@@ -4,10 +4,12 @@ let annotation_to_short_string =
   let open Psl.Annotation in
   function
   | Type_safety -> "Safe"
-  | Probabilistic_deadlock_freedom -> "PDF"
-  | Normalised_probabilistic_deadlock_freedom -> "NPDF"
-  | Probabilisic_termination -> "PTerm"
-  | Normalised_probabilistic_termination -> "NTerm"
+  | Deadlock_freedom_lower -> "DF"
+  | Deadlock_freedom_upper -> "DF-U"
+  | Termination_lower -> "Term"
+  | Termination_upper -> "Term-U"
+  | Liveness_lower -> "Live"
+  | Liveness_upper -> "Live-U"
 ;;
 
 let default_filename_col_width = 30
@@ -20,11 +22,12 @@ let print_header
   =
   printf "%-*s" filename_col_width "Filename";
   printf "%-*s" data_col_width "Tran (ms)";
+  printf "%-*s" data_col_width "Wals (ms)";
   List.iter annotations ~f:(fun annotation ->
     printf "%-*s" data_col_width (annotation_to_short_string annotation ^ " (ms)"));
   printf "\n";
   let total_width =
-    filename_col_width + (data_col_width * (List.length annotations + 1))
+    filename_col_width + (data_col_width * (List.length annotations + 2))
   in
   let divider = String.make total_width '-' in
   printf "%s\n" divider;

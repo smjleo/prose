@@ -3,10 +3,12 @@ open! Core
 module Annotation : sig
   type t =
     | Type_safety
-    | Probabilistic_deadlock_freedom
-    | Normalised_probabilistic_deadlock_freedom
-    | Probabilisic_termination
-    | Normalised_probabilistic_termination
+    | Deadlock_freedom_lower
+    | Deadlock_freedom_upper
+    | Termination_lower
+    | Termination_upper
+    | Liveness_lower
+    | Liveness_upper
   [@@deriving equal, sexp_of]
 
   val all : t list
@@ -20,7 +22,8 @@ and property =
   | Divide of property * property
 
 and bound =
-  | Exact
+  | ExactMin
+  | ExactMax
   | Lt of float
   | Le of float
   | Gt of float

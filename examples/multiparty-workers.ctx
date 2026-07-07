@@ -1,64 +1,64 @@
-starter : workerA1 (+) datum(Int) .
-          workerA2 (+) datum(Int) .
-          workerA3 (+) datum(Int) .
-          end
+starter : (+) { workerA1 ! 1.0 : datum<Int> .
+          (+) { workerA2 ! 1.0 : datum<Int> .
+          (+) { workerA3 ! 1.0 : datum<Int> .
+          end } } }
 
-workerA1 : starter & datum(Int) .
+workerA1 : & { starter ? datum(Int) .
            mu t .
-             workerB1 (+) {
-               0.5 : datum(Int) . workerC1 & result(Int) . t,
-               0.5 : stop . end
-             }
+             (+) {
+               workerB1 ! 0.5 : datum<Int> . & { workerC1 ? result(Int) . t },
+               workerB1 ! 0.5 : stop . end
+             } }
 
-workerB1 : mu t . 
-             workerA1 & {
-               datum(Int) . workerC1 (+) datum(Int) . t,
-               stop . workerC1 (+) stop . end
+workerB1 : mu t .
+             & {
+               workerA1 ? datum(Int) . (+) { workerC1 ! 1.0 : datum<Int> . t },
+               workerA1 ? stop . (+) { workerC1 ! 1.0 : stop . end }
              }
 
 workerC1 : mu t .
-             workerB1 & {
-               datum(Int) . workerA1 (+) result(Int) . t,
-               stop . end
+             & {
+               workerB1 ? datum(Int) . (+) { workerA1 ! 1.0 : result<Int> . t },
+               workerB1 ? stop . end
              }
 
 
-workerA2 : starter & datum(Int) .
+workerA2 : & { starter ? datum(Int) .
            mu t .
-             workerB2 (+) {
-               0.5 : datum(Int) . workerC2 & result(Int) . t,
-               0.5 : stop . end
-             }
+             (+) {
+               workerB2 ! 0.5 : datum<Int> . & { workerC2 ? result(Int) . t },
+               workerB2 ! 0.5 : stop . end
+             } }
 
-workerB2 : mu t . 
-             workerA2 & {
-               datum(Int) . workerC2 (+) datum(Int) . t,
-               stop . workerC2 (+) stop . end
+workerB2 : mu t .
+             & {
+               workerA2 ? datum(Int) . (+) { workerC2 ! 1.0 : datum<Int> . t },
+               workerA2 ? stop . (+) { workerC2 ! 1.0 : stop . end }
              }
 
 workerC2 : mu t .
-             workerB2 & {
-               datum(Int) . workerA2 (+) result(Int) . t,
-               stop . end
+             & {
+               workerB2 ? datum(Int) . (+) { workerA2 ! 1.0 : result<Int> . t },
+               workerB2 ? stop . end
              }
 
 
-workerA3 : starter & datum(Int) .
+workerA3 : & { starter ? datum(Int) .
            mu t .
-             workerB3 (+) {
-               0.5 : datum(Int) . workerC3 & result(Int) . t,
-               0.5 : stop . end
-             }
+             (+) {
+               workerB3 ! 0.5 : datum<Int> . & { workerC3 ? result(Int) . t },
+               workerB3 ! 0.5 : stop . end
+             } }
 
-workerB3 : mu t . 
-             workerA3 & {
-               datum(Int) . workerC3 (+) datum(Int) . t,
-               stop . workerC3 (+) stop . end
+workerB3 : mu t .
+             & {
+               workerA3 ? datum(Int) . (+) { workerC3 ! 1.0 : datum<Int> . t },
+               workerA3 ? stop . (+) { workerC3 ! 1.0 : stop . end }
              }
 
 workerC3 : mu t .
-             workerB3 & {
-               datum(Int) . workerA3 (+) result(Int) . t,
-               stop . end
+             & {
+               workerB3 ? datum(Int) . (+) { workerA3 ! 1.0 : result<Int> . t },
+               workerB3 ? stop . end
              }
 

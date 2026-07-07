@@ -42,6 +42,33 @@ let upper_flag =
   flag "-upper" no_arg ~doc:""
 ;;
 
+let no_liveness_flag =
+  let open Command.Param in
+  flag
+    "-no-liveness"
+    no_arg
+    ~doc:
+      " Skip liveness checking: don't compute the weak-almost-sure-livelock label or \
+       check the liveness properties. Useful since the livelock region computation \
+       enumerates global states and can dominate runtime on large contexts."
+;;
+
+let all_props_flag =
+  let open Command.Param in
+  flag
+    "-allprops"
+    no_arg
+    ~doc:
+      " Check all properties (type safety, deadlock freedom, termination and liveness, \
+       with both lower and upper bounds). By default, only type safety and the deadlock \
+       freedom and liveness lower bounds are checked."
+;;
+
+let fair_flag =
+  let open Command.Param in
+  flag "-fair" no_arg ~doc:" Pass -fair to PRISM to enable fairness in model checking"
+;;
+
 let output_command =
   Command.basic
     ~summary:
@@ -61,7 +88,9 @@ let output_command =
      and print_ast = print_ast_flag
      and print_translation_time = print_translation_time_flag
      and balance = balance_flag
-     and upper = upper_flag in
+     and upper = upper_flag
+     and no_liveness = no_liveness_flag
+     and all_props = all_props_flag in
      Prose.output
        ~ctx_file
        ?model_output_file
@@ -69,7 +98,9 @@ let output_command =
        ~print_ast
        ~print_translation_time
        ~balance
-       ~upper)
+       ~upper
+       ~liveness:(not no_liveness)
+       ~all_props)
 ;;
 
 let benchmark_command =
@@ -115,10 +146,23 @@ let verify_command =
      and print_translation_time = print_translation_time_flag
      and balance = balance_flag
      and term_only = term_only_flag
-     and upper = upper_flag in
+     and upper = upper_flag
+     and no_liveness = no_liveness_flag
+     and all_props = all_props_flag
+     and fair = fair_flag in
      if term_only
      then Prose.term_only ~ctx_file ~upper
-     else Prose.verify ~ctx_file ~print_ast ~print_raw_prism ~print_translation_time ~balance ~upper)
+     else
+       Prose.verify
+         ~ctx_file
+         ~print_ast
+         ~print_raw_prism
+         ~print_translation_time
+         ~balance
+         ~upper
+         ~liveness:(not no_liveness)
+         ~all_props
+         ~fair)
 ;;
 
 let command =
