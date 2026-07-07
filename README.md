@@ -1,7 +1,18 @@
-# Prose
-Prose is a compiler from sub-**pro**babilistic multiparty **se**ssion types into [PRISM](https://www.prismmodelchecker.org/), which enables model checking of probabilitic properties on the types.
+# Promt & Prose
+Prose is a compiler from **pro**babilistic multiparty **se**ssion types into [PRISM](https://www.prismmodelchecker.org/), which enables model checking of probabilitic properties on the types.
 
-## Getting started
+Promt is the probabilistic programming language supported by Prose.
+
+The [promt/](promt/) directory contains the Haskell implementation of the Promt
+process type inference and checking tool.
+
+This tool can be used to infer types from Promt process definitions, optionally
+check inferred types against user-provided specifications, and generate types in
+the input format expected by Prose.
+
+We refer to the separate **README.md** in that folder for usage instructions on promt.
+
+## Getting started (Prose)
 ### Prerequisites
 * [OCaml and `opam`](https://ocaml.org/install)
 * [Dune](https://dune.build/install)

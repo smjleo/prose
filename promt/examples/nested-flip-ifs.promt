@@ -1,0 +1,8 @@
+p = if true then flip 0.5 (q ! l1 . 0, q ! l2 . 0)
+            else flip 0.5 (q ! l1 . 0, q ! l2 . 0)
+
+q = flip 0.5 ( if true then r ! l1 . 0 else r ! l2 . 0
+             , if true then r ! l1 . 0 else r ! l2 . 0 )
+
+q = flip 0.5 ( if true then {r ! l1 .if true then r ! l1 . 0 else r ! l2 . 0} else r ! l2 . 0
+             , if true then {r ! l1 .if true then r ! l1 . 0 else r ! l2 . 0} else r ! l2 . 0 )

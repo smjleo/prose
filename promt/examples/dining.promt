@@ -1,0 +1,72 @@
+(* ----------------------------------------------------------------- *)
+(*  Three dining philosophers                                        *)
+(*  Forks: f0 shared by p0,p2 ; f1 by p1,p0 ; f2 by p2,p1.           *)
+(*  Run:  promt --prose dining.promt                                 *)
+(* ----------------------------------------------------------------- *)
+
+(* philosopher 0: flip 0.5 on which fork first; folded retry loop Y *)
+p0 = mu t .
+     flip 0.5 (
+       (* H: try f0 first; retry on notFree, else go for f1 *)
+       mu s . f0 ! pick . ( f0 ? notFree . s
+               + f0 ? free . f1 ! pick . ( f1 ? notFree . f0 ! drop . t
+                         + f1 ? free . q ! eat . f0 ! drop . f1 ! drop . t ) )
+       ,
+       (* T: try f1 first; retry on notFree, else go for f0 *)
+       mu s . f1 ! pick . ( f1 ? notFree . s
+               + f1 ? free . f0 ! pick . ( f0 ? notFree . f1 ! drop . t
+                         + f0 ? free . q ! eat . f1 ! drop . f0 ! drop . t ) )
+     )
+
+(* philosopher 1: flip 0.5 on which fork first; folded retry loop Y *)
+p1 = mu t .
+  flip 0.5 (
+    (* H: try f1 first; retry on notFree, else go for f2 *)
+    mu s . f1 ! pick . ( f1 ? notFree . s
+             + f1 ? free . f2 ! pick . ( f2 ? notFree . f1 ! drop . t
+                       + f2 ? free . q ! eat . f1 ! drop . f2 ! drop . t ) )
+    ,
+    (* T: try f2 first; retry on notFree, else go for f1 *)
+    mu s . f2 ! pick . ( f2 ? notFree . s
+             + f2 ? free . f1 ! pick . ( f1 ? notFree . f2 ! drop . t
+                       + f1 ? free . q ! eat . f2 ! drop . f1 ! drop . t ) )
+  )
+
+(* philosopher 2: flip 0.5 on which fork first; folded retry loop Y *)
+p2 = mu t .
+  flip 0.5 (
+    (* H: try f2 first; retry on notFree, else go for f0 *)
+    mu s . f2 ! pick . ( f2 ? notFree . s
+             + f2 ? free . f0 ! pick . ( f0 ? notFree . f2 ! drop . t
+                       + f0 ? free . q ! eat . f2 ! drop . f0 ! drop . t ) )
+    ,
+    (* T: try f0 first; retry on notFree, else go for f2 *)
+    mu s . f0 ! pick . ( f0 ? notFree . s
+             + f0 ? free . f2 ! pick . ( f2 ? notFree . f0 ! drop . t
+                       + f2 ? free . q ! eat . f0 ! drop . f2 ! drop . t ) )
+  )
+
+(* fork 0: shared by p0 and p2; grant free / deny notFree *)
+f0 = mu t .
+    p0 ? pick . p0 ! free . ( mu s . ( p0 ? drop . t
+                                     + p2 ? pick . p2 ! notFree . s ) )
+  + p2 ? pick . p2 ! free . ( mu s . ( p2 ? drop . t
+                                     + p0 ? pick . p0 ! notFree . s ) )
+
+(* fork 1: shared by p1 and p0; grant free / deny notFree *)
+f1 = mu t .
+    p1 ? pick . p1 ! free . ( mu s . ( p1 ? drop . t
+                                     + p0 ? pick . p0 ! notFree . s ) )
+  + p0 ? pick . p0 ! free . ( mu s . ( p0 ? drop . t
+                                     + p1 ? pick . p1 ! notFree . s ) )
+
+(* fork 2: shared by p2 and p1; grant free / deny notFree *)
+f2 = mu t .
+    p2 ? pick . p2 ! free . ( mu s . ( p2 ? drop . t
+                                     + p1 ? pick . p1 ! notFree . s ) )
+  + p1 ? pick . p1 ! free . ( mu s . ( p1 ? drop . t
+                                     + p2 ? pick . p2 ! notFree . s ) )
+
+(* observer: each philosopher reports when it eats *)
+q = mu t . p0 ? eat . t + p1 ? eat . t + p2 ? eat . t
+

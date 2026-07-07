@@ -1,0 +1,20 @@
+(* Worker pipeline: starter fans out, each worker loops with a flip,
+   then either forwards a datum (and waits for a result) or stops.
+   Optional { } group the flip branches for clarity. *)
+
+starter = workerA1 ! datum<0> . end
+
+workerA1 = starter ? datum(x : Int) .
+           mu X .
+             flip 0.5 (
+               { workerB1 ! datum<x> . workerC1 ? result(y : Int) . X } ,
+               { workerB1 ! stop . end }
+             )
+
+workerB1 = mu X .
+             workerA1 ? datum(x : Int) . workerC1 ! datum<x> . X
+           + workerA1 ? stop . workerC1 ! stop . end
+
+workerC1 = mu X .
+             workerB1 ? datum(x : Int) . workerA1 ! result<x> . X
+           + workerB1 ? stop . end

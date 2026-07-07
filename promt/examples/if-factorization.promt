@@ -1,0 +1,19 @@
+(* an if checked against an exact type *)
+if_shared_pfx = if true then { s ! yes . s ! bye . end } else { s ! yes . s ! hi . end }
+if_shared_pfx : (+) { s ! 1.0 : yes . (+) { s ! 1.0 : bye . end } }
+              + (+) { s ! 1.0 : yes . (+) { s ! 1.0 : hi  . end } }
+
+(* an if checked against a supertype *)
+if_shared_pfx_super = if true then { s ! yes . s ! bye . end } else { s ! yes . s ! hi . end }
+if_shared_pfx_super : (+) { s ! 1.0 : yes . (+) { s ! 1.0 : bye . end } 
+                                          + (+) { s ! 1.0 : hi  . end } }
+
+(* common send prefix extracted from if *)
+if_extracted_pfx = s ! yes . if true then { s ! bye . end } else { s ! hi . end }
+if_extracted_pfx : (+) { s ! 1.0 : yes . (+) { s ! 1.0 : bye . end } 
+                                       + (+) { s ! 1.0 : hi  . end } }
+
+(* SHOULD FAIL: common send prefix extracted from if checked against non-factored form *)
+if_extracted_pfx_sub = s ! yes . if true then { s ! bye . end } else { s ! hi . end }
+if_extracted_pfx_sub : (+) { s ! 1.0 : yes . (+) { s ! 1.0 : bye . end } }
+                     + (+) { s ! 2.0 : yes . (+) { s ! 1.0 : hi  . end } }

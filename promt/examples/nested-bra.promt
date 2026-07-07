@@ -1,0 +1,11 @@
+testFlip = mu t . flip 0.5 (
+              { workerA1 ? datum(x : Int) . workerC1 ! datum<x> . t},
+              { workerA1 ? datum(x : Int) . workerC1 ! datum<x> . t 
+              + workerA1 ? stop . workerC1 ! stop . end}
+           )
+
+testIf = mu t . if true then
+                    { workerA1 ? datum(x : Int) . workerC1 ! datum<x> . t}
+                else
+                    { workerA1 ? datum(x : Int) . workerC1 ! datum<x> . t 
+                    + workerA1 ? stop . workerC1 ! stop . end}
