@@ -1,0 +1,45 @@
+cabal-version:      2.4
+name:               promt
+version:            0.1.0.0
+synopsis:           Normalization to canonical form for PROMT-calculus processes,
+                    with contractivity checking, type inference, and subtyping.
+build-type:         Simple
+
+common warnings
+    ghc-options: -Wall -Wno-unused-matches -Wno-name-shadowing
+
+library
+    import:           warnings
+    hs-source-dirs:   src
+    default-language: Haskell2010
+    build-depends:    base >=4.14 && <5
+                    , containers
+    exposed-modules:  Syntax.Process
+                    , Syntax.Binder
+                    , Syntax.RegularTree
+                    , Syntax.WellFormed
+                    , Normalize.Passes
+                    , Typing.Check
+                    , Typing.Types
+                    , Typing.Infer
+                    , Typing.Subtype
+                    , Typing.Pretty
+                    , Output.Prose
+                    , Frontend.Parser
+
+executable promt
+    import:           warnings
+    hs-source-dirs:   app
+    main-is:          Main.hs
+    default-language: Haskell2010
+    build-depends:    base, containers, promt
+
+test-suite spec
+    import:           warnings
+    type:             exitcode-stdio-1.0
+    hs-source-dirs:   test
+    main-is:          Spec.hs
+    other-modules:    Examples.DiningPhilosophers
+                    , Examples.Tricky
+    default-language: Haskell2010
+    build-depends:    base, containers, promt

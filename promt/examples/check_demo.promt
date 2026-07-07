@@ -1,0 +1,15 @@
+(* exact match: spec is the Prose form of the inferred type *)
+pinger = mu t . b ! ping . t
+pinger : mu t . (+) { b ! 1.0 : ping . t }
+
+(* selection subtype: impl only ever sends a; spec allows a OR b *)
+producer = s ! a . end
+producer : (+) { s ! 1.0 : a . end } + (+) { s ! 1.0 : b . end }
+
+(* branching subtype: impl handles a AND b; spec only requires a *)
+server = r ? a . end + r ? b . end
+server : & { r ? a . end }
+
+(* a probabilistic sender checked against an exact distribution *)
+coin = flip 0.5 ( s ! heads . end , s ! tails . end )
+coin : (+) { s ! 0.5 : heads . end , s ! 0.5 : tails . end }
