@@ -374,7 +374,7 @@ let term_only ~ctx_file ~upper () =
     ()
 ;;
 
-let benchmark ~iterations ~directory ~translation_batch_size ~latex () =
+let benchmark ~iterations ~directory ~translation_batch_size ~latex ?list_file () =
   let annotations =
     [ Psl.Annotation.Type_safety
     ; Psl.Annotation.Deadlock_freedom_lower
@@ -386,6 +386,18 @@ let benchmark ~iterations ~directory ~translation_batch_size ~latex () =
     Sys_unix.ls_dir directory
     |> List.filter ~f:(String.is_suffix ~suffix:".ctx")
     |> List.sort ~compare:String.compare
+  in
+  let filenames =
+    match list_file with
+    | None -> filenames
+    | Some list_file ->
+      let listed =
+        In_channel.read_lines list_file
+        |> List.map ~f:String.strip
+        |> List.filter ~f:(Fn.non String.is_empty)
+        |> String.Set.of_list
+      in
+      List.filter filenames ~f:(Set.mem listed)
   in
   let skipped =
     List.filter_map filenames ~f:(fun basename ->
