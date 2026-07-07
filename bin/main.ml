@@ -124,8 +124,16 @@ let benchmark_command =
             100
             int)
          ~doc:"int Batch size for translation benchmarking measurements (default: 100)"
-     and latex = flag "-latex" no_arg ~doc:"bool Output table in LaTeX format" in
-     Prose.benchmark ~iterations ~directory ~translation_batch_size ~latex)
+     and latex = flag "-latex" no_arg ~doc:"bool Output table in LaTeX format"
+     and list_file =
+       flag
+         "-list"
+         (optional string)
+         ~doc:
+           "file Only benchmark the .ctx files whose names are listed (one per line) in \
+            the given txt file"
+     in
+     Prose.benchmark ~iterations ~directory ~translation_batch_size ~latex ?list_file)
 ;;
 
 let term_only_flag =

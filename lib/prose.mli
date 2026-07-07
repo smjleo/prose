@@ -44,6 +44,7 @@ val benchmark
   -> directory:string
   -> translation_batch_size:int
   -> latex:bool
+  -> ?list_file:string
   -> unit
   -> unit
 
