@@ -1,4 +1,4 @@
-# Promt & Prose
+# Prose
 Prose is a compiler from **pro**babilistic multiparty **se**ssion types into [PRISM](https://www.prismmodelchecker.org/), which enables model checking of probabilitic properties on the types.
 
 Promt is the probabilistic programming language supported by Prose.
@@ -12,7 +12,7 @@ the input format expected by Prose.
 
 We refer to the separate **README.md** in that folder for usage instructions on promt.
 
-## Getting started (Prose)
+## Getting started
 ### Prerequisites
 * [OCaml and `opam`](https://ocaml.org/install)
 * [Dune](https://dune.build/install)
