@@ -1,4 +1,5 @@
 open! Core
+module Table_format = Display_stats.Format
 
 let dbg_print_s ~print_ast sexp = if print_ast then print_s sexp
 
@@ -43,7 +44,9 @@ let parse_and_translate
     (translated, properties), is_session_file)
   else (
     if upper
-    then failwith "The experimental upper-bound translation is only for translating sessions.";
+    then
+      failwith
+        "The experimental upper-bound translation is only for translating sessions.";
     let context = parse lexbuf in
     In_channel.close inx;
     Well_formed.check_context ~on_error ~on_warning context;
@@ -299,7 +302,9 @@ let benchmark_prism ~annotations ~iterations ~ctx_file =
         Microbenchmark.measure
           ~iterations
           ~f:(fun () ->
-            let cmd = sprintf "prism %s %s > /dev/null" model_output_file prop_output_file in
+            let cmd =
+              sprintf "prism %s %s > /dev/null" model_output_file prop_output_file
+            in
             Sys_unix.command_exn cmd)
           ())
       ~only_annotation:annotation
@@ -314,7 +319,7 @@ let extract_probability_from_result result_line =
   | [] -> error_s [%message "Could not parse probability from PRISM output"] |> ok_exn
 ;;
 
-let run_prism_and_get_output ~model_output_file ~prop_output_file ~is_session_file =
+let run_prism_lines ~model_output_file ~prop_output_file ~is_session_file =
   let prism_args =
     if is_session_file
     then [ "-ex"; model_output_file; prop_output_file ]
@@ -327,7 +332,12 @@ let run_prism_and_get_output ~model_output_file ~prop_output_file ~is_session_fi
   let stderr_output = In_channel.input_all stderr in
   if String.length stderr_output <> 0
   then error_s [%message "PRISM returned error when verifying" stderr_output] |> ok_exn;
-  parse_prism_output lines
+  lines
+;;
+
+let run_prism_and_get_output ~model_output_file ~prop_output_file ~is_session_file =
+  run_prism_lines ~model_output_file ~prop_output_file ~is_session_file
+  |> parse_prism_output
 ;;
 
 let term_only ~ctx_file ~upper () =
@@ -350,55 +360,68 @@ let term_only ~ctx_file ~upper () =
           ~f:(fun () ->
             let cmd =
               if is_session_file
-              then sprintf "prism -ex %s %s > /dev/null" model_output_file prop_output_file
+              then
+                sprintf "prism -ex %s %s > /dev/null" model_output_file prop_output_file
               else sprintf "prism %s %s > /dev/null" model_output_file prop_output_file
             in
             Sys_unix.command_exn cmd)
           ()
       in
       let mean_runtime =
-        List.fold prism_runtimes ~init:(Time_float.Span.of_sec 0.0) ~f:Time_float.Span.(+)
+        List.fold
+          prism_runtimes
+          ~init:(Time_float.Span.of_sec 0.0)
+          ~f:Time_float.Span.( + )
         |> fun total -> Time_float.Span.(total / Float.of_int iterations)
       in
-      let output = run_prism_and_get_output ~model_output_file ~prop_output_file ~is_session_file in
+      let output =
+        run_prism_and_get_output ~model_output_file ~prop_output_file ~is_session_file
+      in
       let termination_result =
-        match List.findi annotations ~f:(fun _i a -> Psl.Annotation.equal a termination_annotation) with
-        | None -> error_s [%message "Probabilistic termination property not found"] |> ok_exn
+        match
+          List.findi annotations ~f:(fun _i a ->
+            Psl.Annotation.equal a termination_annotation)
+        with
+        | None ->
+          error_s [%message "Probabilistic termination property not found"] |> ok_exn
         | Some (index, _) ->
-          match List.nth output index with
-          | None -> error_s [%message "PRISM output missing termination result"] |> ok_exn
-          | Some result_line -> extract_probability_from_result result_line
+          (match List.nth output index with
+           | None ->
+             error_s [%message "PRISM output missing termination result"] |> ok_exn
+           | Some result_line -> extract_probability_from_result result_line)
       in
       printf "%s %f\n" termination_result (Time_float.Span.to_sec mean_runtime))
     ~only_annotation:termination_annotation
     ()
 ;;
 
-let benchmark ~iterations ~directory ~translation_batch_size ~latex ?list_file () =
+let list_ctx_files ~directory ?list_file () =
+  let filenames =
+    Sys_unix.ls_dir directory
+    |> List.filter ~f:(String.is_suffix ~suffix:".ctx")
+    |> List.sort ~compare:String.compare
+  in
+  match list_file with
+  | None -> filenames
+  | Some list_file ->
+    let listed =
+      In_channel.read_lines list_file
+      |> List.map ~f:String.strip
+      |> List.filter ~f:(Fn.non String.is_empty)
+      |> String.Set.of_list
+    in
+    List.filter filenames ~f:(Set.mem listed)
+;;
+
+let benchmark ~iterations ~directory ~translation_batch_size ~format ?list_file () =
   let annotations =
     [ Psl.Annotation.Type_safety
     ; Psl.Annotation.Deadlock_freedom_lower
     ; Psl.Annotation.Liveness_lower
     ]
   in
-  Display_stats.print_header annotations;
-  let filenames =
-    Sys_unix.ls_dir directory
-    |> List.filter ~f:(String.is_suffix ~suffix:".ctx")
-    |> List.sort ~compare:String.compare
-  in
-  let filenames =
-    match list_file with
-    | None -> filenames
-    | Some list_file ->
-      let listed =
-        In_channel.read_lines list_file
-        |> List.map ~f:String.strip
-        |> List.filter ~f:(Fn.non String.is_empty)
-        |> String.Set.of_list
-      in
-      List.filter filenames ~f:(Set.mem listed)
-  in
+  Display_stats.print_header annotations ~format;
+  let filenames = list_ctx_files ~directory ?list_file () in
   let skipped =
     List.filter_map filenames ~f:(fun basename ->
       let ctx_file = Filename.concat directory basename in
@@ -415,10 +438,73 @@ let benchmark ~iterations ~directory ~translation_batch_size ~latex ?list_file (
         Display_stats.print_row
           basename
           (translation_runtimes :: wals_runtimes :: prism_runtimes)
-          ~latex;
+          ~format;
         None
       with
       | _ -> Some ctx_file)
   in
   print_s [%message "benchmark complete with skipped files" (skipped : string list)]
+;;
+
+(* PRISM reports the size of the constructed model as lines of the form
+   "States:      87475 (1 initial)", "Transitions: 254580" and (for MDPs)
+   "Choices:     246117". *)
+let parse_model_size lines =
+  let find prefix =
+    List.find_map lines ~f:(fun line ->
+      match String.chop_prefix line ~prefix with
+      | None -> None
+      | Some rest ->
+        String.strip rest
+        |> String.split ~on:' '
+        |> List.hd
+        |> Option.map ~f:Int.of_string)
+  in
+  let required prefix =
+    match find prefix with
+    | Some n -> n
+    | None ->
+      error_s [%message "PRISM output is missing model size line" prefix] |> ok_exn
+  in
+  { Display_stats.states = required "States:"
+  ; transitions = required "Transitions:"
+  ; choices = find "Choices:"
+  }
+;;
+
+(* Labels (including the livelock label) do not affect the reachable state
+   space, so we skip the livelock computation and only check type safety to
+   keep the single PRISM invocation as cheap as possible. *)
+let model_size ~ctx_file =
+  with_prism_files
+    ~ctx_file
+    ~print_ast:false
+    ~print_translation_time:false
+    ~on_error:`Raise
+    ~on_warning:`Ignore
+    ~balance:false
+    ~upper:false
+    ~liveness:false
+    ~all_props:true
+    ~f:(fun ~model_output_file ~prop_output_file ~annotations:_ ~is_session_file ->
+      run_prism_lines ~model_output_file ~prop_output_file ~is_session_file
+      |> parse_model_size)
+    ~only_annotation:Psl.Annotation.Type_safety
+    ()
+;;
+
+let benchmark_states ~directory ~format ?list_file () =
+  Display_stats.print_size_header ~format ();
+  let filenames = list_ctx_files ~directory ?list_file () in
+  let skipped =
+    List.filter_map filenames ~f:(fun basename ->
+      let ctx_file = Filename.concat directory basename in
+      try
+        let size = model_size ~ctx_file in
+        Display_stats.print_size_row basename size ~format;
+        None
+      with
+      | _ -> Some ctx_file)
+  in
+  print_s [%message "state benchmark complete with skipped files" (skipped : string list)]
 ;;

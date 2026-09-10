@@ -1,5 +1,9 @@
 open! Core
 
+(** Output format for the benchmark tables: plain text, LaTeX [tabular] rows
+    or a Markdown table. *)
+module Table_format = Display_stats.Format
+
 (** Output the PRISM model and property translations of the given context.
     The results are printed to stdout by default, but can be output to a file
     if [model_output_file] or [prop_output_file] are set. *)
@@ -43,7 +47,18 @@ val benchmark
   :  iterations:int
   -> directory:string
   -> translation_batch_size:int
-  -> latex:bool
+  -> format:Table_format.t
+  -> ?list_file:string
+  -> unit
+  -> unit
+
+(** Collect the size (states, transitions and, for MDPs, choices) of the
+    PRISM model built for each file in [directory], as reported by PRISM.
+    The results are printed to stdout as a table, or as LaTeX [tabular]
+    rows or a Markdown table depending on [format]. *)
+val benchmark_states
+  :  directory:string
+  -> format:Table_format.t
   -> ?list_file:string
   -> unit
   -> unit

@@ -103,6 +103,27 @@ let output_command =
        ~all_props)
 ;;
 
+let format_flag =
+  let open Command.Param in
+  choose_one
+    ~if_nothing_chosen:(Default_to Prose.Table_format.Plain)
+    [ flag "-latex" no_arg ~doc:" Output table rows in LaTeX tabular format"
+      |> map ~f:(fun b -> Option.some_if b Prose.Table_format.Latex)
+    ; flag "-markdown" no_arg ~doc:" Output table in Markdown format"
+      |> map ~f:(fun b -> Option.some_if b Prose.Table_format.Markdown)
+    ]
+;;
+
+let list_file_flag =
+  let open Command.Param in
+  flag
+    "-list"
+    (optional string)
+    ~doc:
+      "file Only benchmark the .ctx files whose names are listed (one per line) in the \
+       given txt file"
+;;
+
 let benchmark_command =
   Command.basic
     ~summary:
@@ -124,16 +145,20 @@ let benchmark_command =
             100
             int)
          ~doc:"int Batch size for translation benchmarking measurements (default: 100)"
-     and latex = flag "-latex" no_arg ~doc:"bool Output table in LaTeX format"
-     and list_file =
-       flag
-         "-list"
-         (optional string)
-         ~doc:
-           "file Only benchmark the .ctx files whose names are listed (one per line) in \
-            the given txt file"
-     in
-     Prose.benchmark ~iterations ~directory ~translation_batch_size ~latex ?list_file)
+     and format = format_flag
+     and list_file = list_file_flag in
+     Prose.benchmark ~iterations ~directory ~translation_batch_size ~format ?list_file)
+;;
+
+let states_command =
+  Command.basic
+    ~summary:
+      "Collect the number of PRISM states (and transitions/choices) of the model built \
+       for each file in the given directory."
+    (let%map_open.Command directory = anon ("directory" %: string)
+     and format = format_flag
+     and list_file = list_file_flag in
+     Prose.benchmark_states ~directory ~format ?list_file)
 ;;
 
 let term_only_flag =
@@ -141,7 +166,8 @@ let term_only_flag =
   flag
     "-term-only"
     no_arg
-    ~doc:" Only check probabilistic termination and output probability and verification time"
+    ~doc:
+      " Only check probabilistic termination and output probability and verification time"
 ;;
 
 let verify_command =
@@ -178,7 +204,11 @@ let command =
     ~summary:
       "Commands to either verify the probilistic session type or output PRISM files for \
        inspection."
-    [ "output", output_command; "verify", verify_command; "benchmark", benchmark_command ]
+    [ "output", output_command
+    ; "verify", verify_command
+    ; "benchmark", benchmark_command
+    ; "states", states_command
+    ]
 ;;
 
 let () = Command_unix.run command

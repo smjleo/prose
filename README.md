@@ -43,7 +43,9 @@ The granular benchmark measures the time taken for the translation and the PRISM
 
 For example, use the [examples/](examples/) directory: `dune exec prose -- benchmark examples`.
 
-The granular benchmark also supports LaTeX `tabular` output (to reproduce the table in the paper): `dune exec prose -- benchmark examples -latex`.
+The granular benchmark also supports LaTeX `tabular` output (to reproduce the table in the paper): `dune exec prose -- benchmark examples -latex`, as well as Markdown table output: `dune exec prose -- benchmark examples -markdown`.
+
+The model size benchmark collects the number of states, transitions and choices of the PRISM model built for each context file, as reported by PRISM: `dune exec prose -- states examples`. It supports the same `-latex`, `-markdown` and `-list` flags as the granular benchmark, e.g. `dune exec prose -- states examples -list examples/benchmark.txt -latex`.
 
 ### Testing
 `dune test test/run-examples.t` (alternatively, just `dune test`)
