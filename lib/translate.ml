@@ -195,10 +195,10 @@ let closure modules =
 let translate ?(liveness = true) ?(all_props = false) context =
   let id_map = Action.Communication.in_context context |> Action.Id_map.of_list in
   let modules = List.map ~f:(translate_ctx_item ~id_map) context in
-  let wals_labels = if liveness then [ Gen_labels.wals_label context ] else [] in
+  let livelock_labels = if liveness then [ Gen_labels.livelock_label context ] else [] in
   ( { globals = []
     ; modules = closure modules :: modules
-    ; labels = Gen_labels.generate context @ wals_labels
+    ; labels = Gen_labels.generate context @ livelock_labels
     }
   , Gen_props.generate ~liveness ~all_props context )
 ;;

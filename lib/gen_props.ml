@@ -8,18 +8,13 @@ let rec conjunction = function
 ;;
 
 let deadlock = Label Prism.Deadlock
-
 let deadlock_freedom_lower = P (ExactMin, G (Implies (deadlock, Label Prism.End)))
 let deadlock_freedom_upper = P (ExactMax, G (Implies (deadlock, Label Prism.End)))
 let termination_lower = P (ExactMin, F deadlock)
 let termination_upper = P (ExactMax, F deadlock)
-
-(* Almost-sure liveness (Thm 4.26): a context is live iff the weak-almost-sure-
-   livelock region is unreachable. The liveness probability is [G !"wals"]
-   ([= 1 - F "wals"]); minimising/maximising over schedulers gives the bounds. *)
-let wals = Label Prism.Wals
-let liveness_lower = P (ExactMin, G (Not wals))
-let liveness_upper = P (ExactMax, G (Not wals))
+let livelock = Label Prism.Livelock
+let liveness_lower = P (ExactMin, G (Not livelock))
+let liveness_upper = P (ExactMax, G (Not livelock))
 
 let safety context =
   let communications = Action.Communication.in_context context in

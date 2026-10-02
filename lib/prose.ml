@@ -274,7 +274,7 @@ let benchmark_wals ~iterations ~ctx_file =
   lexbuf.lex_curr_p <- { lexbuf.lex_curr_p with pos_fname = ctx_file };
   let context = parse lexbuf in
   In_channel.close inx;
-  Microbenchmark.measure ~iterations ~f:(fun () -> Gen_labels.wals_label context) ()
+  Microbenchmark.measure ~iterations ~f:(fun () -> Gen_labels.livelock_label context) ()
 ;;
 
 let is_liveness_annotation = function

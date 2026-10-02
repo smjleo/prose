@@ -49,12 +49,13 @@ let enabled_states ~direction ~from_participant ~to_participant ~tag context =
       let matches =
         List.exists all_choices ~f:(fun { Ast.ch_part; ch_label; ch_sort; _ } ->
           String.equal ch_part to_participant
-          && (match tag with
-              | None -> true
-              | Some t ->
-                Action.Communication.Tag.equal
-                  (Action.Communication.Tag.tag ch_label ch_sort)
-                  t))
+          &&
+          match tag with
+          | None -> true
+          | Some t ->
+            Action.Communication.Tag.equal
+              (Action.Communication.Tag.tag ch_label ch_sort)
+              t)
       in
       (match direction, matches with
        | `Branching, _ -> rest
@@ -72,12 +73,13 @@ let enabled_states ~direction ~from_participant ~to_participant ~tag context =
       let matches =
         List.exists ext_choices ~f:(fun { Ast.ch_part; ch_label; ch_sort; _ } ->
           String.equal ch_part from_participant
-          && (match tag with
-              | None -> true
-              | Some t ->
-                Action.Communication.Tag.equal
-                  (Action.Communication.Tag.tag ch_label ch_sort)
-                  t))
+          &&
+          match tag with
+          | None -> true
+          | Some t ->
+            Action.Communication.Tag.equal
+              (Action.Communication.Tag.tag ch_label ch_sort)
+              t)
       in
       (match direction, matches with
        | `Output, _ -> rest
@@ -174,14 +176,21 @@ let generate context =
   List.concat [ [ end_label ]; cando_action; cando_any ]
 ;;
 
-(** The combined weak-almost-sure-livelock label [WASlivelock(Delta)]: a
-    disjunction over the bad global configurations, each a conjunction of
-    per-participant [S_p] equalities. Empty (live) ⇒ [false]. *)
-let wals_label context =
-  let configs = Live.bad_configs context in
+(* A balanced [Or] tree, so that large regions do not produce a deeply
+   left-nested disjunction for PRISM's parser. *)
+let rec balanced_disjunction = function
+  | [] -> BoolConst false
+  | [ c ] -> c
+  | cs ->
+    let l, r = List.split_n cs (List.length cs / 2) in
+    Or (balanced_disjunction l, balanced_disjunction r)
+;;
+
+let livelock_label context =
+  let configs = Live.livelock_configs context in
   let clauses =
     List.map configs ~f:(fun cfg ->
       conjunction (List.map cfg ~f:(fun (p, n) -> Eq (Var (StringVar p), IntConst n))))
   in
-  { name = Wals; expr = disjunction clauses }
+  { name = Livelock; expr = balanced_disjunction clauses }
 ;;

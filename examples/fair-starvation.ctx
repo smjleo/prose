@@ -1,0 +1,18 @@
+(* A fair scheduler may let p ask f only while r holds it, starving g. *)
+
+r : mu t . (+) { f ! 1.0 : take . & { f ? ok . (+) { f ! 1.0 : drop . t } } }
+
+f : mu t . & {
+      r ? take . (+) { r ! 1.0 : ok . mu s . & {
+                          r ? drop . t,
+                          p ? pick . (+) { p ! 1.0 : notFree . s }
+                        } },
+      p ? pick . (+) { p ! 1.0 : free . t }
+    }
+
+p : mu t . (+) { f ! 1.0 : pick . & {
+      f ? free . (+) { g ! 1.0 : done . end },
+      f ? notFree . t
+    } }
+
+g : & { p ? done . end }

@@ -1,21 +1,32 @@
 open! Core
 module Tag = Action.Communication.Tag
 
+(** Computation of the weak almost-sure livelocked region.
+
+   We construct the context MDP explicitly. Each global state is a tuple of
+   the participants' PRISM state variables [S_p], and the actions are the
+   summand steps ([ct-nd]), the commitment steps ([ct-prob]) and the
+   synchronisations ([ct-tau]) as emitted by [Translate]. *)
+
 (* Micro-states of a single participant's automaton. Node ids are prose's PRISM
    state numbers, computed exactly as in [Translate.translate_type] /
    [Type_utils]. *)
 type micro =
   | MEnd
-  | MEntry of int list list
-    (* Selection. Outer list is nondeterminism and inner list is probabilistic choice *)
+  | MSum of int list
+    (* Entry of a proper sum (two or more summands): a nondeterministic step to
+       the entry of one of its singleton selections. *)
+  | MSel of (float * int) list
+    (* Entry of a singleton selection: a probabilistic step to the
+       intermediary state of one of its branches. *)
   | MOffer of
       { partner : string
       ; tag : Tag.t
       ; cont : int
       }
-    (* Intermediary state for committed send (q, l) *)
-  | MBra of
-      (string * Tag.t * int) list (* Branching (sender, label, continuation node id) *)
+    (* Intermediary state of a committed send [q!l], waiting to synchronise. *)
+  | MBra of (string * Tag.t * int) list
+(* Branching: (sender, label, continuation node id). *)
 
 type role_machine =
   { rm_start : int
@@ -23,12 +34,6 @@ type role_machine =
   }
 
 type machines = (string * role_machine) list
-
-let machine machines r =
-  match List.Assoc.find machines r ~equal:String.equal with
-  | Some rm -> rm
-  | None -> failwithf "unknown role %s" r ()
-;;
 
 let cont_internal
       ~state
@@ -65,34 +70,43 @@ let compile_role ty =
     | End | Variable _ -> ()
     | Mu (var, t) -> go ~state ~var_map:(Map.set var_map ~key:var ~data:state) t
     | Internal choice_branches ->
-      let summands =
+      let entries =
         List.mapi choice_branches ~f:(fun branch_index branch ->
-          List.mapi
-            branch
-            ~f:(fun choice_index (_prob, { Ast.ch_part; ch_label; ch_sort; ch_cont }) ->
-              let offer_state =
-                Type_utils.intermediate_state_internal
-                  ~state
-                  ~branch_index
-                  ~choice_index
-                  ~choice_branches
-              in
-              let cont =
-                cont_internal
-                  ~state
-                  ~branch_index
-                  ~choice_index
-                  ~choice_branches
-                  ~end_
-                  ~var_map
-                  ch_cont
-              in
-              reg
-                offer_state
-                (MOffer { partner = ch_part; tag = Tag.tag ch_label ch_sort; cont });
-              offer_state))
+          let entry =
+            Type_utils.summand_entry_state ~state ~branch_index ~choice_branches
+          in
+          let offers =
+            List.mapi
+              branch
+              ~f:(fun choice_index (prob, { Ast.ch_part; ch_label; ch_sort; ch_cont }) ->
+                let offer_state =
+                  Type_utils.intermediate_state_internal
+                    ~state
+                    ~branch_index
+                    ~choice_index
+                    ~choice_branches
+                in
+                let cont =
+                  cont_internal
+                    ~state
+                    ~branch_index
+                    ~choice_index
+                    ~choice_branches
+                    ~end_
+                    ~var_map
+                    ch_cont
+                in
+                reg
+                  offer_state
+                  (MOffer { partner = ch_part; tag = Tag.tag ch_label ch_sort; cont });
+                prob, offer_state)
+          in
+          reg entry (MSel offers);
+          entry)
       in
-      reg state (MEntry summands);
+      (match choice_branches with
+       | [ _ ] -> () (* a singleton sum is the selection itself: no summand step *)
+       | _ -> reg state (MSum entries));
       List.iteri choice_branches ~f:(fun branch_index branch ->
         List.iteri branch ~f:(fun choice_index (_prob, { Ast.ch_cont; _ }) ->
           let new_state =
@@ -128,263 +142,304 @@ let compile (context : Ast.context) : machines =
   List.map context ~f:(fun { Ast.ctx_part; ctx_type } -> ctx_part, compile_role ctx_type)
 ;;
 
-(** A synchronisation. *)
-type sync =
-  { from_part : string
-  ; offer_node : int
-  ; from_cont : int
-  ; to_part : string
-  ; branch_node : int
-  ; to_cont : int
+(** The fairness obligation an action incurs. *)
+type obligation =
+  | Nd of int
+  | Prob of int
+  | Comm of int
+[@@deriving compare, hash, sexp_of]
+
+type action =
+  { kind : obligation
+  ; succ : int list (** successor state ids with positive probability *)
   }
 
-let collect_syncs machines =
-  List.concat_map machines ~f:(fun (p, rm_p) ->
-    Map.to_alist rm_p.rm_nodes
-    |> List.concat_map ~f:(fun (o, micro) ->
-      match micro with
-      | MOffer { partner = q; tag = l; cont = cont_p } ->
-        (* [q] may not be in the context (e.g. a dangling output to a
-           participant with no matching branch, as auth.ctx sends to [e]): then
-           there is simply no discharging sync, leaving the sender pending. *)
-        (match List.Assoc.find machines q ~equal:String.equal with
-         | None -> []
-         | Some rm_q ->
-           Map.to_alist rm_q.rm_nodes
-           |> List.concat_map ~f:(fun (w, micq) ->
-             match micq with
-             | MBra brs ->
-               List.filter_map brs ~f:(fun (sender, l2, cont_q) ->
-                 if String.equal sender p && Tag.equal l2 l
-                 then
-                   Some
-                     { from_part = p
-                     ; offer_node = o
-                     ; from_cont = cont_p
-                     ; to_part = q
-                     ; branch_node = w
-                     ; to_cont = cont_q
-                     }
-                 else None)
-             | _ -> []))
-      | _ -> []))
-;;
-
-type obl_kind =
-  | OSel
-  | OBra
-
-type obl =
-  { ob_role : string
-  ; ob_node : int
-  ; ob_kind : obl_kind
+(** The explored context MDP. *)
+type mdp =
+  { n : int
+  ; roles : string array
+  ; nodes : int array array (** [nodes.(i)] is the tuple of [S_p] values *)
+  ; trans : action list array
+  ; pend : bool array array (** [pend.(p).(i)]: [p] is pending at state [i] *)
   }
 
-let collect_obls machines =
-  List.concat_map machines ~f:(fun (role, rm) ->
-    Map.to_alist rm.rm_nodes
-    |> List.filter_map ~f:(fun (n, micro) ->
-      match micro with
-      | MEntry _ -> Some { ob_role = role; ob_node = n; ob_kind = OSel }
-      | MBra _ -> Some { ob_role = role; ob_node = n; ob_kind = OBra }
-      | MEnd | MOffer _ -> None))
+(* Whether role [p] (at node [np]) can synchronise right now with some other
+   role of the global configuration [nodes], as the sender or the receiver. *)
+let can_sync machines ~r_ix ~nodes ~p ~np =
+  match np with
+  | MOffer { partner = q; tag; cont = _ } ->
+    (match Map.find r_ix q with
+     | None -> false
+     | Some qi ->
+       (match Map.find_exn (snd machines.(qi)).rm_nodes nodes.(qi) with
+        | MBra brs ->
+          List.exists brs ~f:(fun (sender, tag', _) ->
+            String.equal sender p && Tag.equal tag tag')
+        | _ -> false))
+  | MBra brs ->
+    List.exists brs ~f:(fun (sender, tag, _) ->
+      match Map.find r_ix sender with
+      | None -> false
+      | Some si ->
+        (match Map.find_exn (snd machines.(si)).rm_nodes nodes.(si) with
+         | MOffer { partner; tag = tag'; cont = _ } ->
+           String.equal partner p && Tag.equal tag tag'
+         | _ -> false))
+  | MEnd | MSum _ | MSel _ -> false
 ;;
 
-let offers_of machines o =
-  let nodes = (machine machines o.ob_role).rm_nodes in
-  match Map.find_exn nodes o.ob_node with
-  | MEntry summands -> List.concat summands
-  | _ -> []
-;;
-
-let dischargers machines syncs o =
-  match o.ob_kind with
-  | OSel ->
-    let offs = offers_of machines o in
-    List.filter syncs ~f:(fun s ->
-      String.equal s.from_part o.ob_role && List.mem offs s.offer_node ~equal:Int.equal)
-  | OBra ->
-    List.filter syncs ~f:(fun s ->
-      String.equal s.to_part o.ob_role && Int.equal s.branch_node o.ob_node)
-;;
-
-type gstate =
-  { ctl : [ `Resolve | `Schedule ]
-  ; nodes : int array (* indexed by role index *)
-  }
-
-let succs machines syncs ~r_ix (gs : gstate) : gstate list list =
-  let node_of_role role = (machine machines role).rm_nodes in
-  let micro_at role =
-    Map.find_exn (node_of_role role) gs.nodes.(Map.find_exn r_ix role)
+let explore (context : Ast.context) : mdp =
+  let machines = Array.of_list (compile context) in
+  let roles = Array.map machines ~f:fst in
+  let k = Array.length roles in
+  let r_ix =
+    String.Map.of_alist_exn (Array.to_list (Array.mapi roles ~f:(fun i r -> r, i)))
   in
-  let roles = List.map machines ~f:fst in
-  let set role v =
-    let a = Array.copy gs.nodes in
-    a.(Map.find_exn r_ix role) <- v;
+  let micro_at nodes i = Map.find_exn (snd machines.(i)).rm_nodes nodes.(i) in
+  let set nodes i v =
+    let a = Array.copy nodes in
+    a.(i) <- v;
     a
   in
-  match gs.ctl with
-  | `Resolve ->
-    let transient =
-      List.filter_map roles ~f:(fun role ->
-        match micro_at role with
-        | MEntry summands -> Some (role, summands)
-        | _ -> None)
-    in
-    (match transient with
-     | [] -> [ [ { ctl = `Schedule; nodes = gs.nodes } ] ]
-     | _ ->
-       List.concat_map transient ~f:(fun (role, summands) ->
-         List.map summands ~f:(fun summand ->
-           List.map summand ~f:(fun offer -> { ctl = `Resolve; nodes = set role offer }))))
-  | `Schedule ->
-    let sync_acts =
-      List.filter_map syncs ~f:(fun s ->
-        if
-          gs.nodes.(Map.find_exn r_ix s.from_part) = s.offer_node
-          && gs.nodes.(Map.find_exn r_ix s.to_part) = s.branch_node
-        then (
-          let a = Array.copy gs.nodes in
-          a.(Map.find_exn r_ix s.from_part) <- s.from_cont;
-          a.(Map.find_exn r_ix s.to_part) <- s.to_cont;
-          Some [ { ctl = `Resolve; nodes = a } ])
-        else None)
-    in
-    (match sync_acts with
-     | [] -> [ [ { ctl = `Schedule; nodes = gs.nodes } ] ]
-     | _ -> sync_acts)
-;;
-
-type explored =
-  { n : int
-  ; st : gstate array
-  ; trans :
-      int list list array (* per state: list of actions; each action = successor ids *)
-  }
-
-let explore machines syncs ~r_ix =
-  let roles = List.map machines ~f:fst in
-  let init =
-    { ctl = `Resolve
-    ; nodes = Array.of_list (List.map roles ~f:(fun r -> (machine machines r).rm_start))
-    }
+  (* Scheduler-available actions at a configuration, as successor
+     configurations. *)
+  let successors nodes =
+    List.concat_mapi (Array.to_list nodes) ~f:(fun i _ ->
+      match micro_at nodes i with
+      | MEnd | MBra _ -> []
+      | MSum entries -> List.map entries ~f:(fun e -> Nd i, [ set nodes i e ])
+      | MSel offers ->
+        let outs =
+          List.filter_map offers ~f:(fun (prob, o) ->
+            if Float.( > ) prob 0.0 then Some (set nodes i o) else None)
+        in
+        if List.is_empty outs then [] else [ Prob i, outs ]
+      | MOffer { partner = q; tag; cont } ->
+        (* [q] may not be in the context (a dangling output, as auth.ctx sends
+           to [e]): then there is no synchronisation, leaving [i] pending. *)
+        (match Map.find r_ix q with
+         | None -> []
+         | Some qi ->
+           (match micro_at nodes qi with
+            | MBra brs ->
+              List.filter_map brs ~f:(fun (sender, tag', cont_q) ->
+                if String.equal sender roles.(i) && Tag.equal tag tag'
+                then (
+                  let a = Array.copy nodes in
+                  a.(i) <- cont;
+                  a.(qi) <- cont_q;
+                  Some (Comm i, [ a ]))
+                else None)
+            | _ -> [])))
   in
-  let key (gs : gstate) = gs.ctl, Array.to_list gs.nodes in
   let intern = Hashtbl.Poly.create () in
-  let st = ref [] in
-  let trans = ref [] in
+  let states = ref [] in
   let count = ref 0 in
-  let rec id_of gs =
-    match Hashtbl.find intern (key gs) with
+  let rec id_of nodes =
+    let key = Array.to_list nodes in
+    match Hashtbl.find intern key with
     | Some i -> i
     | None ->
       let i = !count in
       incr count;
-      Hashtbl.set intern ~key:(key gs) ~data:i;
-      let acts = succs machines syncs ~r_ix gs in
-      let acts_ids = List.map acts ~f:(fun outs -> List.map outs ~f:id_of) in
-      st := (i, gs) :: !st;
-      trans := (i, acts_ids) :: !trans;
+      Hashtbl.set intern ~key ~data:i;
+      let acts =
+        List.map (successors nodes) ~f:(fun (kind, outs) ->
+          { kind
+          ; succ = List.map outs ~f:id_of |> List.dedup_and_sort ~compare:Int.compare
+          })
+      in
+      states := (i, nodes, acts) :: !states;
       i
   in
+  let init = Array.map machines ~f:(fun (_, rm) -> rm.rm_start) in
   ignore (id_of init : int);
   let n = !count in
-  let st_arr = Array.create ~len:n init in
-  List.iter !st ~f:(fun (i, gs) -> st_arr.(i) <- gs);
-  let trans_arr = Array.create ~len:n [] in
-  List.iter !trans ~f:(fun (i, a) -> trans_arr.(i) <- a);
-  { n; st = st_arr; trans = trans_arr }
+  let nodes_arr = Array.create ~len:n init in
+  let trans = Array.create ~len:n [] in
+  List.iter !states ~f:(fun (i, nodes, acts) ->
+    nodes_arr.(i) <- nodes;
+    trans.(i) <- acts);
+  let pend =
+    Array.init k ~f:(fun p ->
+      Array.init n ~f:(fun i ->
+        let nodes = nodes_arr.(i) in
+        match micro_at nodes p with
+        | MEnd -> false
+        | np -> not (can_sync machines ~r_ix ~nodes ~p:roles.(p) ~np)))
+  in
+  { n; roles; nodes = nodes_arr; trans; pend }
 ;;
 
-let attractor (ex : explored) ~target =
-  let n = ex.n in
-  let n_acts = Array.map ex.trans ~f:List.length in
+(* Stage 1 (closure): the largest subset [S*] of [pend] whose every state is
+   either action-less or has an action fully supported in [S*]. Computed as a
+   greatest fixpoint by iterated removal with a worklist. *)
+let closure (m : mdp) ~(pend : bool array) : bool array =
+  let n = m.n in
+  let in_s = Array.copy pend in
+  (* Global action indexing, so that per-action counters can be kept. *)
   let act_off = Array.create ~len:(n + 1) 0 in
   for i = 0 to n - 1 do
-    act_off.(i + 1) <- act_off.(i) + n_acts.(i)
+    act_off.(i + 1) <- act_off.(i) + List.length m.trans.(i)
   done;
-  let tot_acts = act_off.(n) in
-  (* predecessors: for state j, list of (i, global action index) *)
+  let tot = act_off.(n) in
+  let out_cnt = Array.create ~len:(max 1 tot) 0 in
+  let stay_cnt = Array.create ~len:n 0 in
   let preds = Array.create ~len:n [] in
   for i = 0 to n - 1 do
-    List.iteri ex.trans.(i) ~f:(fun k outs ->
-      let fa = act_off.(i) + k in
-      List.iter outs ~f:(fun j -> preds.(j) <- (i, fa) :: preds.(j)))
+    List.iteri m.trans.(i) ~f:(fun a { succ; _ } ->
+      let fa = act_off.(i) + a in
+      List.iter succ ~f:(fun j ->
+        preds.(j) <- (i, fa) :: preds.(j);
+        if not in_s.(j) then out_cnt.(fa) <- out_cnt.(fa) + 1);
+      if out_cnt.(fa) = 0 then stay_cnt.(i) <- stay_cnt.(i) + 1)
   done;
-  let in_x = Array.create ~len:n false in
-  let hit_a = Array.create ~len:(max 1 tot_acts) false in
-  let cnt = Array.copy n_acts in
   let work = Stack.create () in
-  let push i =
-    if not in_x.(i)
+  let remove i =
+    if in_s.(i)
     then (
-      in_x.(i) <- true;
+      in_s.(i) <- false;
       Stack.push work i)
   in
-  List.iter target ~f:push;
+  for i = 0 to n - 1 do
+    if in_s.(i) && (not (List.is_empty m.trans.(i))) && stay_cnt.(i) = 0 then remove i
+  done;
   let rec loop () =
     match Stack.pop work with
     | None -> ()
     | Some j ->
       List.iter preds.(j) ~f:(fun (i, fa) ->
-        if not in_x.(i)
+        if out_cnt.(fa) = 0
         then (
-          match ex.st.(i).ctl with
-          | `Schedule -> push i
-          | `Resolve ->
-            if not hit_a.(fa)
-            then (
-              hit_a.(fa) <- true;
-              cnt.(i) <- cnt.(i) - 1;
-              if cnt.(i) = 0 && n_acts.(i) > 0 then push i)));
+          stay_cnt.(i) <- stay_cnt.(i) - 1;
+          if in_s.(i) && stay_cnt.(i) = 0 && not (List.is_empty m.trans.(i)) then remove i);
+        out_cnt.(fa) <- out_cnt.(fa) + 1);
       loop ()
   in
   loop ();
-  in_x
+  in_s
 ;;
 
-(* A global config is "stable" when no role is at a selection entry (MEntry). *)
-let is_stable machines ~r_ix (gs : gstate) =
-  List.for_all machines ~f:(fun (role, rm) ->
-    match Map.find_exn rm.rm_nodes gs.nodes.(Map.find_exn r_ix role) with
-    | MEntry _ -> false
-    | _ -> true)
+(* Scratch space for Tarjan's algorithm. *)
+type scratch =
+  { index : int array
+  ; low : int array
+  ; onstack : bool array
+  }
+
+let scratch (m : mdp) =
+  { index = Array.create ~len:m.n (-1)
+  ; low = Array.create ~len:m.n 0
+  ; onstack = Array.create ~len:m.n false
+  }
 ;;
 
-let bad_configs (context : Ast.context) : (string * int) list list =
-  let machines = compile context in
-  let roles = List.map machines ~f:fst in
-  let r_ix = String.Map.of_alist_exn (List.mapi roles ~f:(fun i r -> r, i)) in
-  let syncs = collect_syncs machines in
-  let obls = collect_obls machines in
-  let ex = explore machines syncs ~r_ix in
-  let bad = Hash_set.Poly.create () in
-  List.iter obls ~f:(fun o ->
-    let dis = dischargers machines syncs o in
-    let enabled i =
-      let nodes = ex.st.(i).nodes in
-      List.exists dis ~f:(fun s ->
-        nodes.(Map.find_exn r_ix s.from_part) = s.offer_node
-        && nodes.(Map.find_exn r_ix s.to_part) = s.branch_node)
+(* Tarjan's strongly connected components of the graph on [nodes] with
+   successor function [succ] (which must only yield members of [nodes]). *)
+let tarjan { index; low; onstack } ~nodes ~succ =
+  List.iter nodes ~f:(fun v -> index.(v) <- -1);
+  let stack = Stack.create () in
+  let counter = ref 0 in
+  let sccs = ref [] in
+  let rec dfs v =
+    index.(v) <- !counter;
+    low.(v) <- !counter;
+    incr counter;
+    Stack.push stack v;
+    onstack.(v) <- true;
+    List.iter (succ v) ~f:(fun w ->
+      if index.(w) = -1
+      then (
+        dfs w;
+        low.(v) <- min low.(v) low.(w))
+      else if onstack.(w)
+      then low.(v) <- min low.(v) index.(w));
+    if low.(v) = index.(v)
+    then (
+      let comp = ref [] in
+      let continue = ref true in
+      while !continue do
+        let w = Stack.pop_exn stack in
+        onstack.(w) <- false;
+        comp := w :: !comp;
+        if w = v then continue := false
+      done;
+      sccs := !comp :: !sccs)
+  in
+  List.iter nodes ~f:(fun v -> if index.(v) = -1 then dfs v);
+  !sccs
+;;
+
+(* The actions of state [i] whose support lies inside [inset]. *)
+let staying_actions (m : mdp) ~inset i =
+  List.filter m.trans.(i) ~f:(fun { succ; _ } ->
+    List.for_all succ ~f:(Hash_set.mem inset))
+;;
+
+(* Maximal end components of the sub-MDP induced on [states]. *)
+let mecs (m : mdp) (sc : scratch) (states : int list) : int list list =
+  let result = ref [] in
+  let rec process states =
+    let inset = Int.Hash_set.of_list states in
+    let succ i =
+      List.concat_map (staying_actions m ~inset i) ~f:(fun { succ; _ } -> succ)
     in
-    let offs = offers_of machines o in
-    let pending i =
-      let nodes = ex.st.(i).nodes in
-      let v = nodes.(Map.find_exn r_ix o.ob_role) in
-      match o.ob_kind with
-      | OSel -> List.mem offs v ~equal:Int.equal
-      | OBra -> Int.equal v o.ob_node
-    in
-    let target =
-      List.filter (List.range 0 ex.n) ~f:(fun s -> enabled s || not (pending s))
-    in
-    let esc = attractor ex ~target in
-    for i = 0 to ex.n - 1 do
-      if (not esc.(i)) && is_stable machines ~r_ix ex.st.(i)
-      then Hash_set.add bad (Array.to_list ex.st.(i).nodes)
-    done);
-  Hash_set.to_list bad
+    List.iter (tarjan sc ~nodes:states ~succ) ~f:(fun scc ->
+      let sset = Int.Hash_set.of_list scc in
+      let bad =
+        List.filter scc ~f:(fun i -> List.is_empty (staying_actions m ~inset:sset i))
+      in
+      if List.is_empty bad
+      then result := scc :: !result
+      else (
+        let badset = Int.Hash_set.of_list bad in
+        let remainder = List.filter scc ~f:(fun i -> not (Hash_set.mem badset i)) in
+        if not (List.is_empty remainder) then process remainder))
+  in
+  process states;
+  !result
+;;
+
+(* Stage 2 (pruning). *)
+let rec prune (m : mdp) (sc : scratch) (states : int list) : int list =
+  let inset = Int.Hash_set.of_list states in
+  let incurred = Hash_set.Poly.create () in
+  let discharged = Hash_set.Poly.create () in
+  List.iter states ~f:(fun i ->
+    List.iter m.trans.(i) ~f:(fun { kind; _ } -> Hash_set.add incurred kind);
+    List.iter (staying_actions m ~inset i) ~f:(fun { kind; _ } ->
+      Hash_set.add discharged kind));
+  let unpaid kind = Hash_set.mem incurred kind && not (Hash_set.mem discharged kind) in
+  let d =
+    List.filter states ~f:(fun i ->
+      List.exists m.trans.(i) ~f:(fun { kind; _ } -> unpaid kind))
+  in
+  if List.is_empty d
+  then states
+  else (
+    let dset = Int.Hash_set.of_list d in
+    let rest = List.filter states ~f:(fun i -> not (Hash_set.mem dset i)) in
+    List.concat_map (mecs m sc rest) ~f:(prune m sc))
+;;
+
+let settle (m : mdp) ~p : int list =
+  let sc = scratch m in
+  let s_star = closure m ~pend:m.pend.(p) in
+  let deadlocked, live =
+    List.partition_tf
+      (List.filter (List.range 0 m.n) ~f:(fun i -> s_star.(i)))
+      ~f:(fun i -> List.is_empty m.trans.(i))
+  in
+  deadlocked @ List.concat_map (mecs m sc live) ~f:(prune m sc)
+;;
+
+let livelock_configs (context : Ast.context) : (string * int) list list =
+  let m = explore context in
+  let region = Hash_set.Poly.create () in
+  Array.iteri m.roles ~f:(fun p _ -> List.iter (settle m ~p) ~f:(Hash_set.add region));
+  Hash_set.to_list region
+  |> List.map ~f:(fun i -> Array.to_list m.nodes.(i))
   |> List.sort ~compare:[%compare: int list]
-  |> List.map ~f:(fun nodes -> List.map2_exn roles nodes ~f:(fun r n -> r, n))
+  |> List.map ~f:(fun nodes ->
+    List.map2_exn (Array.to_list m.roles) nodes ~f:(fun r n -> r, n))
 ;;

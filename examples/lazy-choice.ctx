@@ -1,0 +1,10 @@
+(* Fairness forces p to resolve its sum and selection eventually. *)
+
+a : mu t . (+) { b ! 1.0 : ping . t }
+
+b : mu t . & { a ? ping . t }
+
+p : (+) { c ! 0.5 : done . end, c ! 0.5 : done2 . end }
+  + (+) { c ! 1.0 : done . end }
+
+c : & { p ? done . end, p ? done2 . end }
