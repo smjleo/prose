@@ -63,7 +63,8 @@ val benchmark_states
   -> unit
   -> unit
 
-(** Check only probabilistic termination for the given context file.
-    Outputs only the probability and verification time (space-separated).
+(** Check only the lower bound of probabilistic deadlock-freedom for the given
+    context file. Outputs only the probability and verification time
+    (space-separated).
     Uses 10 iterations for microbenchmarking the PRISM invocation time. *)
-val term_only : ctx_file:string -> upper:bool -> unit -> unit
+val df_only : ctx_file:string -> upper:bool -> unit -> unit

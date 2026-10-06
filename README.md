@@ -24,7 +24,7 @@ Ensure that the location of your `prism` executable is in your `PATH`.
 For the end-to-end benchmark and analysis scripts, we additionally require:
 * zsh
 * [Python and `pip`](https://www.python.org/downloads/)
-* `pip install numpy scipy pandas`
+* `pip install numpy scipy pandas matplotlib`
 
 
 ### Usage
@@ -44,6 +44,8 @@ The granular benchmark measures the time taken for the translation and the PRISM
 For example, use the [examples/](examples/) directory: `dune exec prose -- benchmark examples`.
 
 The granular benchmark also supports LaTeX `tabular` output (to reproduce the table in the paper): `dune exec prose -- benchmark examples -latex`, as well as Markdown table output: `dune exec prose -- benchmark examples -markdown`.
+
+The factorial benchmark compares verifying a session directly against verifying its typing context. For each `n`, it generates the factorial session ([examples/gen_fact_n_sess.py](examples/gen_fact_n_sess.py)) and its typing context ([examples/gen_fact_n_ctx.py](examples/gen_fact_n_ctx.py)), then records their deadlock-freedom probabilities and PRISM verification times: `experiments/factorials.sh [max_n]`. The results can be plotted using `experiments/plot_factorial_results.py experiments/results/factorial_[timestamp].csv --save-pdf`.
 
 The model size benchmark collects the number of states, transitions and choices of the PRISM model built for each context file, as reported by PRISM: `dune exec prose -- states examples`. It supports the same `-latex`, `-markdown` and `-list` flags as the granular benchmark, e.g. `dune exec prose -- states examples -list examples/benchmark.txt -latex`.
 

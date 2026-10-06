@@ -6,6 +6,7 @@ type t =
   ; participant : string
   ; state_var : int Prism.variable
   ; registered_vars : int String.Map.t
+  ; nil_states : int list
   ; upper : bool
   }
 
@@ -15,6 +16,7 @@ let empty ~participant ~upper =
   ; participant
   ; state_var = StringVar participant
   ; registered_vars = String.Map.empty
+  ; nil_states = []
   ; upper
   }
 ;;
@@ -40,4 +42,6 @@ let register_action_var t action ~max_value =
 ;;
 
 let get_registered_variables t = Map.to_alist t.registered_vars
+let register_nil_state t = { t with nil_states = t.current_state :: t.nil_states }
+let nil_states t = List.rev t.nil_states
 let upper t = t.upper

@@ -340,9 +340,10 @@ let run_prism_and_get_output ~model_output_file ~prop_output_file ~is_session_fi
   |> parse_prism_output
 ;;
 
-let term_only ~ctx_file ~upper () =
+let df_only ~ctx_file ~upper () =
   let iterations = 10 in
-  let termination_annotation = Psl.Annotation.Termination_lower in
+  let df_annotation = Psl.Annotation.Deadlock_freedom_lower in
+  (* The livelock label is irrelevant to deadlock-freedom, so we skip computing it. *)
   with_prism_files
     ~ctx_file
     ~print_ast:false
@@ -351,9 +352,9 @@ let term_only ~ctx_file ~upper () =
     ~on_warning:`Ignore
     ~balance:false
     ~upper
-    ~liveness:true
-    ~all_props:true
-    ~f:(fun ~model_output_file ~prop_output_file ~annotations ~is_session_file ->
+    ~liveness:false
+    ~all_props:false
+    ~f:(fun ~model_output_file ~prop_output_file ~annotations:_ ~is_session_file ->
       let prism_runtimes =
         Microbenchmark.measure
           ~iterations
@@ -374,24 +375,19 @@ let term_only ~ctx_file ~upper () =
           ~f:Time_float.Span.( + )
         |> fun total -> Time_float.Span.(total / Float.of_int iterations)
       in
-      let output =
-        run_prism_and_get_output ~model_output_file ~prop_output_file ~is_session_file
-      in
-      let termination_result =
+      let df_result =
         match
-          List.findi annotations ~f:(fun _i a ->
-            Psl.Annotation.equal a termination_annotation)
+          run_prism_and_get_output ~model_output_file ~prop_output_file ~is_session_file
         with
-        | None ->
-          error_s [%message "Probabilistic termination property not found"] |> ok_exn
-        | Some (index, _) ->
-          (match List.nth output index with
-           | None ->
-             error_s [%message "PRISM output missing termination result"] |> ok_exn
-           | Some result_line -> extract_probability_from_result result_line)
+        | [ result_line ] -> extract_probability_from_result result_line
+        | output ->
+          error_s
+            [%message
+              "PRISM output missing deadlock-freedom result" (output : string list)]
+          |> ok_exn
       in
-      printf "%s %f\n" termination_result (Time_float.Span.to_sec mean_runtime))
-    ~only_annotation:termination_annotation
+      printf "%s %f\n" df_result (Time_float.Span.to_sec mean_runtime))
+    ~only_annotation:df_annotation
     ()
 ;;
 

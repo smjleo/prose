@@ -1156,14 +1156,18 @@ For each context file in this directory, run [prose output] to check the model a
   w1 : mu t . & { w2 ? req .
               (+) { w0 ! 1.0 : req .
               & {
-                 w0 ? res(Int) . (+) { w2 ! 0.6 : res<Int> . t, w2 ! 0.4 : err . t },
+                 w0 ? res(Int) .
+                   (+) { w2 ! 0.7 : res<Int> . t, w2 ! 0.3 : err . t }
+                 + (+) { w2 ! 0.5 : res<Int> . t, w2 ! 0.5 : err . t },
                  w0 ? err . (+) { w2 ! 1.0 : err . t }
               } } }
   
   w2 : mu t . & { w3 ? req .
               (+) { w1 ! 1.0 : req .
               & {
-                 w1 ? res(Int) . (+) { w3 ! 0.6 : res<Int> . t, w3 ! 0.4 : err . t },
+                 w1 ? res(Int) .
+                   (+) { w3 ! 0.7 : res<Int> . t, w3 ! 0.3 : err . t }
+                 + (+) { w3 ! 0.5 : res<Int> . t, w3 ! 0.5 : err . t },
                  w1 ? err . (+) { w3 ! 1.0 : err . t }
               } } }
   
@@ -1193,33 +1197,43 @@ For each context file in this directory, run [prose output] to check the model a
   endmodule
   
   module w1
-    w1 : [0..9] init 0;
+    w1 : [0..13] init 0;
   
     [w2_w1_req_unit] w1=0 -> 1:(w1'=1);
     [] w1=1 -> 1:(w1'=2);
     [w1_w0_req_unit] w1=2 -> 1:(w1'=3);
     [w0_w1_res_int] w1=3 -> 1:(w1'=4);
-    [w0_w1_err_unit] w1=3 -> 1:(w1'=7);
-    [] w1=4 -> 0.6:(w1'=5) + 0.4:(w1'=6);
-    [w1_w2_res_int] w1=5 -> 1:(w1'=0);
-    [w1_w2_err_unit] w1=6 -> 1:(w1'=0);
-    [] w1=7 -> 1:(w1'=8);
-    [w1_w2_err_unit] w1=8 -> 1:(w1'=0);
+    [w0_w1_err_unit] w1=3 -> 1:(w1'=11);
+    [] w1=4 -> 1:(w1'=5);
+    [] w1=4 -> 1:(w1'=8);
+    [] w1=5 -> 0.7:(w1'=6) + 0.3:(w1'=7);
+    [] w1=8 -> 0.5:(w1'=9) + 0.5:(w1'=10);
+    [w1_w2_res_int] w1=6 -> 1:(w1'=0);
+    [w1_w2_err_unit] w1=7 -> 1:(w1'=0);
+    [w1_w2_res_int] w1=9 -> 1:(w1'=0);
+    [w1_w2_err_unit] w1=10 -> 1:(w1'=0);
+    [] w1=11 -> 1:(w1'=12);
+    [w1_w2_err_unit] w1=12 -> 1:(w1'=0);
   endmodule
   
   module w2
-    w2 : [0..9] init 0;
+    w2 : [0..13] init 0;
   
     [w3_w2_req_unit] w2=0 -> 1:(w2'=1);
     [] w2=1 -> 1:(w2'=2);
     [w2_w1_req_unit] w2=2 -> 1:(w2'=3);
     [w1_w2_res_int] w2=3 -> 1:(w2'=4);
-    [w1_w2_err_unit] w2=3 -> 1:(w2'=7);
-    [] w2=4 -> 0.6:(w2'=5) + 0.4:(w2'=6);
-    [w2_w3_res_int] w2=5 -> 1:(w2'=0);
-    [w2_w3_err_unit] w2=6 -> 1:(w2'=0);
-    [] w2=7 -> 1:(w2'=8);
-    [w2_w3_err_unit] w2=8 -> 1:(w2'=0);
+    [w1_w2_err_unit] w2=3 -> 1:(w2'=11);
+    [] w2=4 -> 1:(w2'=5);
+    [] w2=4 -> 1:(w2'=8);
+    [] w2=5 -> 0.7:(w2'=6) + 0.3:(w2'=7);
+    [] w2=8 -> 0.5:(w2'=9) + 0.5:(w2'=10);
+    [w2_w3_res_int] w2=6 -> 1:(w2'=0);
+    [w2_w3_err_unit] w2=7 -> 1:(w2'=0);
+    [w2_w3_res_int] w2=9 -> 1:(w2'=0);
+    [w2_w3_err_unit] w2=10 -> 1:(w2'=0);
+    [] w2=11 -> 1:(w2'=12);
+    [w2_w3_err_unit] w2=12 -> 1:(w2'=0);
   endmodule
   
   module w3
@@ -1239,20 +1253,20 @@ For each context file in this directory, run [prose output] to check the model a
     [w3_dummy_done_unit] dummy=0 -> 1:(dummy'=0);
   endmodule
   
-  label "end" = (w0=4) & (w1=9) & (w2=9) & (w3=5) & (dummy=1);
+  label "end" = (w0=4) & (w1=13) & (w2=13) & (w3=5) & (dummy=1);
   label "cando_w0_w1_err_unit" = w0=1;
   label "cando_w0_w1_err_unit_branch" = w1=3;
   label "cando_w0_w1_res_int" = w0=1;
   label "cando_w0_w1_res_int_branch" = w1=3;
   label "cando_w1_w0_req_unit" = w1=1;
   label "cando_w1_w0_req_unit_branch" = w0=0;
-  label "cando_w1_w2_err_unit" = (w1=4) | (w1=7);
+  label "cando_w1_w2_err_unit" = (w1=4) | (w1=11);
   label "cando_w1_w2_err_unit_branch" = w2=3;
   label "cando_w1_w2_res_int" = w1=4;
   label "cando_w1_w2_res_int_branch" = w2=3;
   label "cando_w2_w1_req_unit" = w2=1;
   label "cando_w2_w1_req_unit_branch" = w1=0;
-  label "cando_w2_w3_err_unit" = (w2=4) | (w2=7);
+  label "cando_w2_w3_err_unit" = (w2=4) | (w2=11);
   label "cando_w2_w3_err_unit_branch" = w3=2;
   label "cando_w2_w3_res_int" = w2=4;
   label "cando_w2_w3_res_int_branch" = w3=2;
@@ -1284,7 +1298,7 @@ For each context file in this directory, run [prose output] to check the model a
   Result: true
   
   Deadlock freedom (lower bound)
-  Result: 0.252 (exact floating point)
+  Result: 0.17500000000000004 (exact floating point)
   
   Liveness (lower bound)
   Result: 0.0 (exact floating point)

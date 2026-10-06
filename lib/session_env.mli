@@ -12,4 +12,9 @@ val state_var : t -> int Prism.variable
 val register_variable : t -> var:string -> max_value:int -> t
 val register_action_var : t -> Action.t -> max_value:int -> t
 val get_registered_variables : t -> (string * int) list
+
+(** Record that the participant has terminated (i.e. is [Nil]) at the current state. *)
+val register_nil_state : t -> t
+
+val nil_states : t -> int list
 val upper : t -> bool

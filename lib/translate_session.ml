@@ -32,7 +32,9 @@ let rec translate_process ~env process =
   let _state, state_var, at_current_state = state_utils ~env in
   let fail_var = StringVar "fail" in
   match process with
-  | Nil -> [], env
+  | Nil ->
+    (* [Nil] gets a state of its own, so that we can tell when the participant has ended *)
+    [], Session_env.register_nil_state env |> Session_env.increment_state
   | Mu (var, process) ->
     let env = Session_env.map_variable env ~var in
     translate_process ~env process
@@ -275,14 +277,31 @@ let translate_session_item { sess_part; sess_process } ~upper =
     List.map registered_vars ~f:(fun (var, max_val) -> Int (StringVar var, max_val))
   in
   let state_local = Int (StringVar sess_part, Session_env.current_state env) in
-  { locals = state_local :: var_locals; participant = sess_part; commands }
+  let ended =
+    Session_env.nil_states env
+    |> List.map ~f:(fun state -> Eq (Var (Session_env.state_var env), IntConst state))
+    |> List.reduce ~f:(fun accum e -> Or (accum, e))
+    |> Option.value ~default:(BoolConst false)
+  in
+  { locals = state_local :: var_locals; participant = sess_part; commands }, ended
 ;;
 
 let translate ~upper session =
-  let modules = List.map ~f:(translate_session_item ~upper) session in
+  let modules, ended =
+    List.map ~f:(translate_session_item ~upper) session |> List.unzip
+  in
+  let end_label =
+    { name = End
+    ; expr =
+        List.reduce ended ~f:(fun accum e -> And (accum, e))
+        |> Option.value ~default:(BoolConst true)
+    }
+  in
   let open Psl in
   let properties =
-    [ Annotation.Termination_lower, P (ExactMin, F (Label Deadlock))
+    [ Annotation.Deadlock_freedom_lower, Gen_props.deadlock_freedom_lower
+    ; Annotation.Deadlock_freedom_upper, Gen_props.deadlock_freedom_upper
+    ; Annotation.Termination_lower, P (ExactMin, F (Label Deadlock))
     ; Annotation.Termination_upper, P (ExactMax, F (Label Deadlock))
     ]
   in
@@ -291,5 +310,5 @@ let translate ~upper session =
     | false -> []
     | true -> [ Bool (StringVar "fail") ]
   in
-  { globals; modules; labels = [] }, properties
+  { globals; modules; labels = [ end_label ] }, properties
 ;;

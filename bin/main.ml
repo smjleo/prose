@@ -161,13 +161,14 @@ let states_command =
      Prose.benchmark_states ~directory ~format ?list_file)
 ;;
 
-let term_only_flag =
+let df_only_flag =
   let open Command.Param in
   flag
-    "-term-only"
+    "-df-only"
     no_arg
     ~doc:
-      " Only check probabilistic termination and output probability and verification time"
+      " Only check the lower bound of probabilistic deadlock-freedom and output \
+       probability and verification time"
 ;;
 
 let verify_command =
@@ -179,13 +180,13 @@ let verify_command =
      and print_raw_prism = print_raw_prism_flag
      and print_translation_time = print_translation_time_flag
      and balance = balance_flag
-     and term_only = term_only_flag
+     and df_only = df_only_flag
      and upper = upper_flag
      and no_liveness = no_liveness_flag
      and all_props = all_props_flag
      and fair = fair_flag in
-     if term_only
-     then Prose.term_only ~ctx_file ~upper
+     if df_only
+     then Prose.df_only ~ctx_file ~upper
      else
        Prose.verify
          ~ctx_file
