@@ -56,7 +56,7 @@ operation you wish to run:
 - **Inference and type checking:** GHC and Cabal (tested with the versions above).
 - **Model checking:** OCaml, Dune, Menhir, `core`, `core_unix`, `ppx_jane`, and
   PRISM with Java. Select the OCaml opam switch before running the tools.
-- **Factorial experiments:** the ProSe dependencies, Bash and Python 3;
+- **Factorial experiments:** the Prose dependencies, Bash and Python 3;
   plotting additionally requires `pandas` and `matplotlib`.
 
 With an OCaml 5.2.0 switch selected, its dependencies can be installed using
