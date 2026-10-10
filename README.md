@@ -196,6 +196,10 @@ All participant verdicts should be `OK`.
 
 ## Reproducing the experiments
 
+This section describes the steps needed to reproduce the experiments conducted in the paper.
+We expect all probability results to be identical up to floating-point rounding. The
+runtime measurements may vary depending on the machine, but should exhibit similar trends.
+
 ### Combined timing table
 
 This section walks through how to reproduce the results presented in table 1 of the
