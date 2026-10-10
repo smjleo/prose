@@ -1,0 +1,28 @@
+(* Coin debiasing *)
+
+f : mu t . (+) {
+      c ! 0.9 : heads . (+) {
+        c ! 0.9 : heads . t,
+        c ! 0.1 : tails . mu s . (+) { o ! 1.0 : heads . s }
+      },
+      c ! 0.1 : tails . (+) {
+        c ! 0.9 : heads . (+) { o ! 1.0 : tails . end },
+        c ! 0.1 : tails . t
+      }
+    }
+
+c : mu t . & {
+      f ? heads . & {
+        f ? heads . t,
+        f ? tails . end
+      },
+      f ? tails . & {
+        f ? heads . end,
+        f ? tails . t
+      }
+    }
+
+o : & {
+      f ? heads . mu t . & { f ? heads . t },
+      f ? tails . end
+    }

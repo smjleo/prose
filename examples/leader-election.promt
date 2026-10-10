@@ -1,0 +1,35 @@
+(* Two-node randomised leader election. *)
+
+n0 = (mu t .
+  flip 0.5 (
+    n1 ! zero . (
+      n1 ? zero . t
+      + n1 ? one . end
+    )
+  ,
+    n1 ! one . (
+      n1 ? zero . o ! leader0 . end
+      + n1 ? one . t
+    )
+  )
+)
+
+n1 = (mu t .
+  (
+    n0 ? zero . flip 0.5 (
+      n0 ! zero . t
+    ,
+      n0 ! one . o ! leader1 . end
+    )
+    + n0 ? one . flip 0.5 (
+      n0 ! zero . end
+    ,
+      n0 ! one . t
+    )
+  )
+)
+
+o = (
+  n0 ? leader0 . end
+  + n1 ? leader1 . end
+)

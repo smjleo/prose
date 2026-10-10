@@ -1,109 +1,87 @@
-# PROMT Artifact
+# PROMT
 
-This repository contains the implementation of the PROMT process type inference and
-checking tool used for the paper artifact.
+PROMT infers local types and checks specifications and subtyping. See the
+[artifact README](../README.md) for setup, examples and model checking.
 
-The tool parses PROMT process definitions, infers their types, and optionally checks
-the inferred type against a user-provided type specification.
+## Build and run
 
-## Tested Environment
+From this directory, with GHC 9.6.7 and Cabal:
 
-This artifact has been tested with:
+```sh
+cabal build exe:promt
+PROMT_BIN="$(cabal list-bin exe:promt)"
+"$PROMT_BIN" infer ../examples/dining.promt -o dining.ctx
+"$PROMT_BIN" typecheck ../examples/dining.promt ../examples/dining.ctx
+"$PROMT_BIN" subtype dining.ctx ../examples/dining.ctx
+```
+
+Without `-o`, inference prints to stdout. `typecheck` requires matching
+participant sets; `subtype LEFT RIGHT` permits extra participants on the right.
+Failed checks return nonzero. ProSe and PRISM are not needed.
+
+## Process syntax (`.promt`)
+
+Files contain distinct declarations `p = P`. `[...]` is optional and
+`(...)*` denotes repetition.
 
 ```text
-GHC:            9.6.7
-cabal-install:  3.12.1.0
-Cabal library:  3.12.1.0
+P ::= A (+ A)*                         receive choices use +
+A ::= p ! l [<e>] . A                  send
+    | p ? l [(x : B)] . A              receive
+    | if e then P else P               conditional
+    | flip w (P, P)                    probabilistic choice
+    | mu t . P | t                     recursion
+    | end | 0                          termination
+    | (P) | {P}                        grouping
+B ::= Unit | Bool | Int | Str | Nat
+e ::= n | x | true | false | () | (e)
+    | not e | succ(e) | neg(e) | e op e
+op ::= + | = | == | < | > | and | or
 ```
 
-The project only depends on the standard `base` package and `containers`.
+`+` joins receives only; parenthesise choices under prefixes. Omitted payloads
+mean `Unit`. Flips require `0 < w < 1`; recursion must be bound and guarded by
+a communication. `n` is a nonnegative `Int`; use `neg(n)` for negatives.
 
-## Building
+## Type syntax (`.ctx`)
 
-From the root of the repository, run:
-
-```bash
-cabal update
-cabal build all
-```
-
-## Running Tests
-
-Run the test suite with:
-
-```bash
-cabal test all
-```
-
-## Running the Tool
-
-The executable is called `promt`.
-
-Run the tool on an input file with:
-
-```bash
-cabal run promt -- file.promt [--prose]
-```
-
-or, after building or installing the executable:
-
-```bash
-promt file.promt [--prose]
-```
-
-By default, `promt` outputs inferred types in a human-readable pretty-printed
-format.
-
-With the optional `--prose` flag, `promt` outputs types in the input format
-expected by the Prose model checker.
-
-## Input Format
-
-A `.promt` file contains a list of participant/process definitions.
-
-Each definition has the form:
+Files contain distinct declarations `p : T`.
 
 ```text
-name = process
+T ::= end                              termination
+    | t | mu t . T                     recursion
+    | (T)                              grouping
+    | & {R (, R)*}                     receive choice
+    | D (+ D)*                         nondeterministic choice
+R ::= p ? l [(B)] . T
+D ::= (+) {S (, S)*}                    probabilistic choice
+S ::= p ! w : l [<B>] . T
 ```
 
-Optionally, a type specification may be provided on the following line:
+Each `&` or `(+)` has nonempty branches with distinct `(p, l)` pairs.
+Distribution weights are positive and sum to one. Recursion is bound and
+communication-guarded. Both formats accept `(* comments *)`.
+
+For model checking, fractions are converted to decimals and `Nat` is rejected.
+Use the [shared ProSe grammar](../README.md#local-type-contexts-ctx) for
+handwritten model-checking inputs, omitting grouping and explicit `Unit`.
+
+## Source layout and AST
 
 ```text
-name : type
+app/Main.hs                    command-line interface
+src/Frontend/Parser.hs          parsers
+src/Syntax/                    process AST, binding and contractiveness
+src/Typing/
+  Types.hs                     type AST
+  Expressions.hs               expression checking
+  Inference.hs, Inference/     inference and type construction
+  Relations.hs, Relations/     type graphs, joins and subtyping
+  Check.hs                     specification checks
+src/Output/Context.hs           .ctx rendering
 ```
 
-If no type specification is provided, `promt` only performs type inference.
+Process constructors are `Nil`, `Sel`, `Bra`, `Flip`, `If`, `Mu` and `Var`; type
+constructors are `TEnd`, `TSel`, `TBra`, `TMu` and `TRecVar`.
 
-If a type specification is provided, `promt` infers the type of the process and
-checks the inferred type against the given specification.
-
-Comments are written using `(* ... *)`.
-
-## Example
-
-```text
-(* branching subtype: impl handles a AND b; spec only requires a *)
-server = r ? a . end + r ? b . end
-server : & { r ? a . end }
-
-(* a probabilistic sender checked against an exact distribution *)
-coin = flip 0.5 ( s ! heads . end , s ! tails . end )
-coin : (+) { s ! 0.5 : heads . end , s ! 0.5 : tails . end }
-```
-
-In this example, `server` is checked against the specification:
-
-```text
-& { r ? a . end }
-```
-
-The process `coin` is checked against the probabilistic output type:
-
-```text
-(+) { s ! 0.5 : heads . end , s ! 0.5 : tails . end }
-```
-
-If either the `server : ...` or `coin : ...` line were omitted, `promt` would
-infer and print the corresponding type without checking it against a
-specification.
+[MIT license](LICENSE), copyright 2026 Promt/ProSe contributors.

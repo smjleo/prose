@@ -1,0 +1,30 @@
+(* Authentication example. The supplied context references e but does not define it. *)
+
+s = (
+  b ? connect . flip 0.6 (
+    c ! login . a ? authorise . end
+  ,
+    c ! cancel . e ! stop . end
+  )
+  + b ? err . (mu t .
+    b ? retry . t
+  )
+)
+
+c = (
+  s ? login . a ! pass . end
+  + s ? cancel . a ! quit . end
+)
+
+a = (
+  c ? pass . s ! authorise . end
+  + c ? quit . end
+)
+
+b = flip 0.6 (
+  s ! connect . end
+,
+  s ! err . (mu t .
+    s ! retry . t
+  )
+)

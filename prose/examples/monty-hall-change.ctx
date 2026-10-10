@@ -1,0 +1,27 @@
+(* Monty Hall problem. In this variant, the contestant always switches doors
+   to either 2 or 3, depending on whichever door the host opens.
+
+   The probability of deadlock freedom corresponds with the probability of
+   picking the door with the car.
+
+   Compare with [monty-hall-stay.ctx]. *)
+
+car : (+) {
+        host ! 0.34 : l1 . end,
+        host ! 0.33 : l2 . end,
+        host ! 0.33 : l3 . end
+      }
+
+host : & {
+         car ? l1 . (+) {
+           player ! 0.5 : l2 . & { player ? l1 . end },
+           player ! 0.5 : l3 . & { player ? l1 . end }
+         },
+         car ? l2 . (+) { player ! 1.0 : l3 . & { player ? l2 . end } },
+         car ? l3 . (+) { player ! 1.0 : l2 . & { player ? l3 . end } }
+      }
+
+player : & {
+           host ? l2 . (+) { host ! 1.0 : l3 . end },
+           host ? l3 . (+) { host ! 1.0 : l2 . end }
+         }

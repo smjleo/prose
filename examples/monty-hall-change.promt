@@ -1,0 +1,26 @@
+(* Monty Hall: switch doors. Car probabilities are exactly 0.34, 0.33, 0.33. *)
+
+car = flip 0.34 (
+  host ! l1 . end
+,
+  flip 0.5 (
+    host ! l2 . end
+  ,
+    host ! l3 . end
+  )
+)
+
+host = (
+  car ? l1 . flip 0.5 (
+    player ! l2 . player ? l1 . end
+  ,
+    player ! l3 . player ? l1 . end
+  )
+  + car ? l2 . player ! l3 . player ? l2 . end
+  + car ? l3 . player ! l2 . player ? l3 . end
+)
+
+player = (
+  host ? l2 . host ! l3 . end
+  + host ? l3 . host ! l2 . end
+)

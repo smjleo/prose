@@ -1,0 +1,30 @@
+(* Gambler's ruin on positions 0..4, starting at 2, moving up with
+   probability 0.6. Termination probability equals the ruin probability,
+   4/13 ~ 0.3077. *)
+
+w : mu t . (+) {
+      q ! 0.4 : down . (+) {
+        q ! 0.4 : down . (+) { o ! 1.0 : ruined . end },
+        q ! 0.6 : up . t
+      },
+      q ! 0.6 : up . (+) {
+        q ! 0.6 : up . mu s . (+) { o ! 1.0 : won . s },
+        q ! 0.4 : down . t
+      }
+    }
+
+q : mu t . & {
+      w ? down . & {
+        w ? down . end,
+        w ? up . t
+      },
+      w ? up . & {
+        w ? up . end,
+        w ? down . t
+      }
+    }
+
+o : & {
+      w ? ruined . end,
+      w ? won . mu t . & { w ? won . t }
+    }

@@ -22,4 +22,3 @@ b : (+) {
       s ! 0.6 : connect . end,
       s ! 0.4 : err . mu t . (+) { s ! 1.0 : retry . t }
     }
-

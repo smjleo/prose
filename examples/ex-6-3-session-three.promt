@@ -1,0 +1,7 @@
+(* A bounded variation: q needs three messages before it can tell r to quit. *)
+p = q ! m . flip 0.5 (
+      q ! m . flip 0.5 (q ! m . end, r ! m . end),
+      r ! m . end
+    )
+q = p ? m . p ? m . p ? m . r ! quit . end
+r = p ? m . end + q ? quit . end

@@ -1,30 +1,24 @@
-{-# LANGUAGE LambdaCase #-}
-
--- | Checking a process against a user-specified type.
--- > infer (normalize impl)  <=  specified
--- i.e. the process's (already normal-form) inferred type must be a subtype of
--- the specified type.
 module Typing.Check
   ( CheckResult(..)
   , Verdict(..)
-  , runChecks
+  , checkSpecs
+  , checkContext
   , allHold
   , reportLine
   ) where
 
-import Normalize.Passes  (normalizeE)
-import Typing.Infer      (infer)
-import Typing.Subtype    (subtype)
+import Typing.Relations  (subtype, validateType)
 import Typing.Types      (SType)
-import Typing.Pretty     (pretty)
+import Output.Context    (pretty)
 import Frontend.Parser   (Decl(..))
+import qualified Data.Map.Lazy as Map
 
--- | Outcome of checking one @name : type@ specification.
 data Verdict
-  = Holds                       -- ^ inferred <= specified
-  | Violates SType SType        -- ^ inferred is NOT a subtype of specified
-  | NoProcess                   -- ^ a spec with no matching @name = process@
-  | IllTyped String             -- ^ the process failed to type
+  = Holds
+  | Violates SType SType
+  | NoProcess
+  | NoSpecification
+  | IllTyped String
   deriving (Eq, Show)
 
 data CheckResult = CheckResult
@@ -32,34 +26,44 @@ data CheckResult = CheckResult
   , crVerdict :: Verdict
   } deriving (Eq, Show)
 
--- | Run every @name : type@ specification against its @name = process@.
-runChecks :: [Decl] -> [CheckResult]
-runChecks ds =
+checkSpecs :: [(String, Either String SType)] -> [Decl] -> [CheckResult]
+checkSpecs defs ds =
   [ CheckResult name (check name spec) | Spec name spec <- ds ]
   where
-    defs = [ (n, p) | Def n p <- ds ]
-    check name spec =
-      case lookup name defs of
+    -- Keep the first definition; unused inference results remain lazy.
+    definitions = Map.fromListWith (\_ first -> first) defs
+    check name spec = case validateType spec of
+      Left e -> IllTyped ("specification " ++ name ++ ": " ++ e)
+      Right () -> checkProcess name spec
+    checkProcess name spec =
+      case Map.lookup name definitions of
         Nothing   -> NoProcess
-        Just impl ->
-          case normalizeE impl of
+        Just result ->
+          case result of
             Left e   -> IllTyped ("process " ++ name ++ ": " ++ e)
-            Right nf -> case infer nf of
-              Left e   -> IllTyped ("process " ++ name ++ ": " ++ e)
-              Right ti
-                | subtype ti spec -> Holds
-                | otherwise       -> Violates ti spec
+            Right inferred
+              | subtype inferred spec -> Holds
+              | otherwise -> Violates inferred spec
 
--- | Did every specification hold? (Vacuously true when there are none.)
+checkContext :: [(String, SType)] -> [(String, SType)] -> [CheckResult]
+checkContext left right = [CheckResult name (check name t) | (name,t) <- left]
+  where
+    specifications = Map.fromList right
+    check name t = case Map.lookup name specifications of
+      Nothing -> NoSpecification
+      Just s -> case validateType t >> validateType s of
+        Left e -> IllTyped e
+        Right () | subtype t s -> Holds
+                 | otherwise -> Violates t s
+
 allHold :: [CheckResult] -> Bool
 allHold = all ((== Holds) . crVerdict)
 
--- | Render one check result as a human-readable report line (multi-line for
--- violations, which show the inferred and specified types).
 reportLine :: CheckResult -> String
 reportLine (CheckResult name v) = case v of
   Holds          -> "  " ++ name ++ " : OK  (inferred <= specified)"
-  NoProcess      -> "  " ++ name ++ " : SKIPPED  (no matching process definition)"
+  NoProcess      -> "  " ++ name ++ " : FAILED  (no matching process definition)"
+  NoSpecification -> "  " ++ name ++ " : FAILED  (no matching type specification)"
   IllTyped e     -> "  " ++ name ++ " : ERROR  (" ++ e ++ ")"
   Violates ti ts -> "  " ++ name ++ " : FAILED  (inferred type is not a subtype of the specified type)\n"
                     ++ "        inferred:  " ++ pretty ti ++ "\n"

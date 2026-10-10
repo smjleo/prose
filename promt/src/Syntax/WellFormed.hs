@@ -1,41 +1,24 @@
 {-# LANGUAGE LambdaCase #-}
 
--- | Well-formedness: contractivity (guardedness) of recursion.
---
--- A recursion variable must be guarded by at least one send\/receive prefix
--- between its binder and each occurrence. Crucially a @flip@ or @if@ is NOT a
--- guard. 
-
 module Syntax.WellFormed
-  ( contractive
-  , checkContractive
+  ( checkContractive
   ) where
 
 import Syntax.Process
 
-unguardedOccurs :: Int -> Proc a -> Bool
-unguardedOccurs i = \case
-  Var (BVar k) -> k == i
-  Var (FVar _) -> False
-  Nil          -> False
-  Sel{}        -> False          -- prefix guards the continuation
-  Bra{}        -> False          -- prefix guards the continuations
-  Flip _ p q   -> unguardedOccurs i p || unguardedOccurs i q
-  If _ p q     -> unguardedOccurs i p || unguardedOccurs i q
-  Mu (Scope b) -> unguardedOccurs (i + 1) b
-  Ghost _ p    -> unguardedOccurs i p
-
--- | Is the whole process contractive?
+-- Count binders since the last communication; scope is checked separately.
 contractive :: Proc a -> Bool
-contractive = \case
-  Nil          -> True
-  Var _        -> True
-  Sel _ _ _ k  -> contractive k
-  Bra bs       -> all (\(_,_,_,_,q) -> contractive q) bs
-  Flip _ p q   -> contractive p && contractive q
-  If _ p q     -> contractive p && contractive q
-  Mu (Scope b) -> not (unguardedOccurs 0 b) && contractive b
-  Ghost _ p    -> contractive p
+contractive = go 0
+  where
+    go unguarded = \case
+      Nil          -> True
+      Var (BVar k) -> k < 0 || k >= unguarded
+      Var (FVar _) -> True
+      Sel _ _ _ k  -> go 0 k
+      Bra bs       -> all (\(_,_,_,_,q) -> go 0 q) bs
+      Flip _ p q   -> go unguarded p && go unguarded q
+      If _ p q     -> go unguarded p && go unguarded q
+      Mu (Scope b) -> go (unguarded + 1) b
 
 checkContractive :: Proc a -> Either String ()
 checkContractive p

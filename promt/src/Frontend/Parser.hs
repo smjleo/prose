@@ -1,38 +1,15 @@
 {-# LANGUAGE LambdaCase #-}
 
--- | A small front-end: parse processes written in an ASCII surface syntax into
--- the 'Proc' AST, so the @promt@ executable can read a file of role bindings.
---
--- > program ::= (role '=' proc)*
--- > proc    ::= '0' | 'end'
--- >           | role '!' label ('<' expr '>')? '.' proc  
--- >           | recv ('+' recv)*                         
--- >           | 'if' expr 'then' proc 'else' proc
--- >           | 'mu' var '.' proc | var                  
--- >           | 'flip' prob '(' proc ',' proc ')'        
--- >           | '(' proc ')' | '{' proc '}'              
--- > recv    ::= role '?' label ('(' var ':' sort ')')? '.' proc
--- > sort    ::= 'Unit' | 'Bool' | 'Nat' | 'Int'
--- > expr    ::= var | integer | 'true' | 'false' | '(' ')'
--- > prob    ::= decimal (0.5) | fraction (1/2) | integer
+module Frontend.Parser (parseDecls, parseContext, Decl(..)) where
 
-module Frontend.Parser
-  ( parseProgram
-  , parseDecls
-  , Decl(..)
-  , parseProc
-  , parseType
-  ) where
-
-import Data.Char     (isSpace, isDigit, isAlpha, isAlphaNum)
+import Data.Char     (isSpace, isDigit, isAlpha, isAlphaNum, isAscii)
 import Data.List     (elemIndex)
 import Data.Ratio    (Ratio, (%))
+import qualified Data.Set as Set
 import Syntax.Process
 import Syntax.Binder  (abstract)
 import Typing.Types   (SType(..), SBranch(..), Dist, STScope(..))
-
--- ---------------------------------------------------------------------------
--- Tokens
+import Typing.Relations (validateType)
 
 data Token = TId String | TNum String | TSym Char
   deriving (Eq, Show)
@@ -42,7 +19,8 @@ lexTokens [] = Right []
 lexTokens ('(' : '*' : cs) = skipComment cs
 lexTokens (c : cs)
   | isSpace c                = lexTokens cs
-  | isAlpha c || c == '_'    = let (w, r) = span (\x -> isAlphaNum x || x == '_') (c : cs)
+  | isAscii c && (isAlpha c || c == '_') =
+                               let (w, r) = span (\x -> isAscii x && (isAlphaNum x || x == '_')) (c : cs)
                                in (TId w :)  <$> lexTokens r
   | isDigit c                = let (n, r) = spanNumber (c : cs)
                                in (TNum n :) <$> lexTokens r
@@ -62,20 +40,17 @@ spanNumber s =
        ('/' : d : r2) | isDigit d -> let (f, r3) = span isDigit (d : r2) in (i ++ "/" ++ f, r3)
        _ -> (i, r1)
 
--- Parser
-
 type R a = Either String (a, [Token])
 
 reserved :: [String]
-reserved = ["flip", "if", "then", "else", "mu", "end", "true", "false"]
+reserved = [ "flip", "if", "then", "else", "mu", "end", "true", "false"
+           , "not", "or", "and", "succ", "neg" ]
 
 data Decl
-  = Def  String (Proc String)   
-  | Spec String SType           
+  = Def  String (Proc String)
+  | Spec String SType
   deriving (Eq, Show)
 
--- | Parse a whole program: a sequence of @name '=' proc@ and @name ':' type@
--- declarations, in any order.
 parseDecls :: String -> Either String [Decl]
 parseDecls src = do
   toks <- lexTokens src
@@ -84,39 +59,44 @@ parseDecls src = do
     decls [] = Right []
     decls ts = do (d, ts') <- decl ts; (d :) <$> decls ts'
     decl (TId name : TSym '=' : ts)
-      | name `notElem` reserved = do (p, ts') <- pProc ts;     Right (Def  name p, ts')
+      | name `notElem` reserved && name `notElem` typeReserved =
+          do (p, ts') <- pProc ts; Right (Def name p, ts')
     decl (TId name : TSym ':' : ts)
-      | name `notElem` reserved = do (t, ts') <- pType [] ts;  Right (Spec name t, ts')
+      | name `notElem` typeReserved = do
+          (t, ts') <- pType [] ts
+          validateType t
+          Right (Spec name t, ts')
     decl ts = Left ("expected a 'name = process' or 'name : type' declaration near: "
                     ++ showToks ts)
 
--- | Parse a whole program, keeping only the process definitions (type specs are
--- dropped).
-parseProgram :: String -> Either String [(String, Proc String)]
-parseProgram src = do
-  ds <- parseDecls src
-  Right [ (n, p) | Def n p <- ds ]
-
--- | Parse a single process (exposed for tests).
-parseProc :: String -> Either String (Proc String)
-parseProc src = do
+parseContext :: String -> Either String [(String, SType)]
+parseContext src = do
   toks <- lexTokens src
-  (p, rest) <- pProc toks
-  case rest of
-    [] -> Right p
-    _  -> Left ("trailing tokens: " ++ showToks rest)
+  case toks of
+    [] -> Left "a type context must contain at least one participant"
+    _ -> context Set.empty toks
+  where
+    context _ [] = Right []
+    context seen ts = do
+      (name, r0) <- typeIdent ts
+      r1 <- sym ':' r0
+      if name `Set.member` seen
+        then Left ("duplicate participant " ++ show name)
+        else do
+          (t, r2) <- pType [] r1
+          validateType t
+          ((name, t) :) <$> context (Set.insert name seen) r2
 
--- A process is a '+'-separated list of terms; if more than one, all must be
--- receives and they fuse into a single branching.
+-- Only receives can form a '+' branching.
 pProc :: [Token] -> R (Proc String)
 pProc ts = do
   (t1, r1) <- pTerm ts
   go [t1] r1
   where
-    go acc (TSym '+' : rest) = do (t, r) <- pTerm rest; go (acc ++ [t]) r
+    go acc (TSym '+' : rest) = do (t, r) <- pTerm rest; go (t : acc) r
     go [single] rest = Right (single, rest)
     go many rest = do
-      bss <- mapM asBranches many
+      bss <- mapM asBranches (reverse many)
       Right (Bra (concat bss), rest)
     asBranches (Bra bs) = Right bs
     asBranches _        = Left "'+' may only join receive (?) branches"
@@ -129,11 +109,11 @@ pTerm = \case
   (TId "end"  : ts)  -> Right (Nil, ts)
   (TNum "0"   : ts)  -> Right (Nil, ts)
   (TSym '('   : ts)  -> do (p, r) <- pProc ts; r' <- sym ')' r; Right (p, r')
-  (TSym '{'   : ts)  -> do (p, r) <- pProc ts; r' <- sym '}' r; Right (p, r')   -- grouping
+  (TSym '{'   : ts)  -> do (p, r) <- pProc ts; r' <- sym '}' r; Right (p, r')
   (TId x : TSym '!' : ts) | x `notElem` reserved -> pSend x ts
   (TId x : TSym '?' : ts) | x `notElem` reserved -> pRecv x ts
   (TId x : ts)
-    | x `notElem` reserved -> Right (Var (FVar x), ts)   -- process variable
+    | x `notElem` reserved -> Right (Var (FVar x), ts)
     | otherwise            -> Left ("unexpected keyword '" ++ x ++ "'")
   ts -> Left ("expected a process near: " ++ showToks ts)
 
@@ -194,46 +174,61 @@ recvPayload (TSym '(' : ts) = do
 recvPayload ts = Right ("_", SUnit, ts)
 
 pExpr :: [Token] -> R Expr
-pExpr (TNum n : ts)
-  | all isDigit n        = Right (EInt (read n), ts)
-pExpr (TId "true"  : ts) = Right (EBool True,  ts)
-pExpr (TId "false" : ts) = Right (EBool False, ts)
-pExpr (TSym '(' : TSym ')' : ts) = Right (EUnit, ts)
-pExpr (TId x : ts) | x `notElem` reserved = Right (EVar x, ts)
-pExpr ts = Left ("expected an expression near: " ++ showToks ts)
+pExpr = pOr
+  where
+    pOr ts = do
+      (l, t1) <- pAnd ts
+      case t1 of
+        (TId "or" : t2) -> do (r, t3) <- pOr t2; Right (EOr l r, t3)
+        _               -> Right (l, t1)
+    pAnd ts = do
+      (l, t1) <- pCmp ts
+      case t1 of
+        (TId "and" : t2) -> do (r, t3) <- pAnd t2; Right (EAnd l r, t3)
+        _                -> Right (l, t1)
+    pCmp ts = do
+      (l, t1) <- pAdd ts
+      let cmp mk t2 = case pAdd t2 of
+            Right (r, t3) -> Right (mk l r, t3)
+            Left _        -> Right (l, t1)
+      case t1 of
+        (TSym '=' : TSym '=' : t2) -> cmp EEq t2
+        (TSym '=' : t2)            -> cmp EEq t2
+        (TSym '>' : t2)            -> cmp EGt t2
+        (TSym '<' : t2)            -> cmp ELt t2
+        _                          -> Right (l, t1)
+    pAdd ts = do
+      (l, t1) <- pAtom ts
+      case t1 of
+        (TSym '+' : t2) -> do (r, t3) <- pAdd t2; Right (EAdd l r, t3)
+        _               -> Right (l, t1)
+    pAtom (TId "not" : ts)  = do (e, t1) <- pAtom ts; Right (ENot e, t1)
+    pAtom (TId "succ" : TSym '(' : ts) =
+      do (e, t1) <- pExpr ts; t2 <- sym ')' t1; Right (ESucc e, t2)
+    pAtom (TId "neg" : TSym '(' : ts) =
+      do (e, t1) <- pExpr ts; t2 <- sym ')' t1; Right (ENeg e, t2)
+    pAtom (TNum n : ts)
+      | all isDigit n       = Right (EInt (read n), ts)
+    pAtom (TId "true"  : ts) = Right (EBool True,  ts)
+    pAtom (TId "false" : ts) = Right (EBool False, ts)
+    pAtom (TSym '(' : TSym ')' : ts) = Right (EUnit, ts)
+    pAtom (TSym '(' : ts)   = do (e, t1) <- pExpr ts; t2 <- sym ')' t1; Right (e, t2)
+    pAtom (TId x : ts) | x `notElem` reserved = Right (EVar x, ts)
+    pAtom ts = Left ("expected an expression near: " ++ showToks ts)
 
 pSort :: [Token] -> R Sort
 pSort (TId "Unit" : ts) = Right (SUnit, ts)
 pSort (TId "Bool" : ts) = Right (SBool, ts)
 pSort (TId "Nat"  : ts) = Right (SNat,  ts)
 pSort (TId "Int"  : ts) = Right (SInt,  ts)
-pSort ts = Left ("expected a sort (Unit|Bool|Nat|Int) near: " ++ showToks ts)
+pSort (TId "Str"  : ts) = Right (SStr,  ts)
+pSort ts = Left ("expected a sort (Unit|Bool|Nat|Int|Str) near: " ++ showToks ts)
 
--- ---------------------------------------------------------------------------
--- Type parser: the Prose surface syntax for local types -> 'SType'.
---
--- > type    ::= 'end' | recvar | 'mu' var '.' type
--- >           | '&' '{' braB (',' braB)* '}'    
--- >           | dist ('+' dist)*                
--- > dist    ::= '(+)' '{' selB (',' selB)* '}'
--- > braB    ::= role '?' label ('(' Sort ')')? '.' type
--- > selB    ::= role '!' weight ':' label ('<' Sort '>')? '.' type
---
-
--- | Parse a local type written in Prose syntax.
-parseType :: String -> Either String SType
-parseType src = do
-  toks <- lexTokens src
-  (t, rest) <- pType [] toks
-  case rest of
-    [] -> Right t
-    _  -> Left ("trailing tokens in type: " ++ showToks rest)
-
--- @env@: recursion-binder names with the innermost binder at the head.
+-- Innermost recursion binder first.
 pType :: [String] -> [Token] -> R SType
 pType env ts = case ts of
   (TId "end" : r) -> Right (TEnd, r)
-  (TId "mu"  : r) -> do (v, r1)  <- ident r
+  (TId "mu"  : r) -> do (v, r1)  <- typeIdent r
                         r2       <- sym '.' r1
                         (b, r3)  <- pType (v : env) r2
                         Right (TMu (STScope b), r3)
@@ -241,23 +236,25 @@ pType env ts = case ts of
                         (brs, r2) <- sepBy1 ',' (pBraBranch env) r1
                         r3        <- sym '}' r2
                         Right (TBra brs, r3)
-  (TSym '('  : _) -> pSelSum env ts
+  -- '(+)' starts a selection; other parentheses group types.
+  (TSym '(' : TSym '+' : TSym ')' : _) -> pSelSum env ts
+  (TSym '(' : r) -> do (t, r1) <- pType env r
+                       r2      <- sym ')' r1
+                       Right (t, r2)
   (TId v     : r)
-    | v `notElem` reserved -> case elemIndex v env of
+    | v `notElem` typeReserved -> case elemIndex v env of
         Just i  -> Right (TRecVar i, r)
         Nothing -> Left ("type: unbound recursion variable " ++ show v)
   _ -> Left ("expected a type (end | recvar | mu | & | (+)) near: " ++ showToks ts)
 
--- A selection is a '+'-separated sum of one or more (+) distribution blocks.
 pSelSum :: [String] -> [Token] -> R SType
 pSelSum env ts = do
   (d, r) <- pDist env ts
   go [d] r
   where
-    go acc (TSym '+' : r) = do (d, r') <- pDist env r; go (acc ++ [d]) r'
-    go acc r              = Right (TSel acc, r)
+    go acc (TSym '+' : r) = do (d, r') <- pDist env r; go (d : acc) r'
+    go acc r              = Right (TSel (reverse acc), r)
 
--- One @(+) { selB, ... }@ distribution block.
 pDist :: [String] -> [Token] -> R Dist
 pDist env ts = do
   r0 <- sym '(' ts
@@ -270,11 +267,11 @@ pDist env ts = do
 
 pSelBranch :: [String] -> [Token] -> R SBranch
 pSelBranch env ts = do
-  (rn, r0)   <- ident ts
+  (rn, r0)   <- typeIdent ts
   r1         <- sym '!' r0
   (w, r2)    <- probLit r1
   r3         <- sym ':' r2
-  (ln, r4)   <- ident r3
+  (ln, r4)   <- typeIdent r3
   (so, r5)   <- pSendSort r4
   r6         <- sym '.' r5
   (cont, r7) <- pType env r6
@@ -282,15 +279,14 @@ pSelBranch env ts = do
 
 pBraBranch :: [String] -> [Token] -> R (Role, Label, Sort, SType)
 pBraBranch env ts = do
-  (rn, r0)   <- ident ts
+  (rn, r0)   <- typeIdent ts
   r1         <- sym '?' r0
-  (ln, r2)   <- ident r1
+  (ln, r2)   <- typeIdent r1
   (so, r3)   <- pRecvSort r2
   r4         <- sym '.' r3
   (cont, r5) <- pType env r4
   Right ((Role rn, Label ln, so, cont), r5)
 
--- send payloads in angle brackets, receive payloads in parens; bare = Unit.
 pSendSort :: [Token] -> R Sort
 pSendSort (TSym '<' : r) = do (s, r1) <- pSort r; r2 <- sym '>' r1; Right (s, r2)
 pSendSort ts             = Right (SUnit, ts)
@@ -299,30 +295,37 @@ pRecvSort :: [Token] -> R Sort
 pRecvSort (TSym '(' : r) = do (s, r1) <- pSort r; r2 <- sym ')' r1; Right (s, r2)
 pRecvSort ts             = Right (SUnit, ts)
 
--- | One-or-more @p@ separated by the symbol @c@.
 sepBy1 :: Char -> ([Token] -> R a) -> [Token] -> R [a]
 sepBy1 c p ts = do
   (x, r) <- p ts
   go [x] r
   where
-    go acc (TSym d : r) | d == c = do (x, r') <- p r; go (acc ++ [x]) r'
-    go acc r                     = Right (acc, r)
+    go acc (TSym d : r) | d == c = do (x, r') <- p r; go (x : acc) r'
+    go acc r                     = Right (reverse acc, r)
 
 probLit :: [Token] -> R (Ratio Integer)
 probLit (TNum s : ts)
   | '/' `elem` s = let (a, b) = break (== '/') s
-                   in Right (read a % read (drop 1 b), ts)
+                       denominator = read (drop 1 b)
+                   in if denominator == 0
+                        then Left "probability denominator must be nonzero"
+                        else Right (read a % denominator, ts)
   | '.' `elem` s = let (a, b) = break (== '.') s
                        frac   = drop 1 b
                    in Right (read (a ++ frac) % (10 ^ length frac), ts)
   | otherwise    = Right (read s % 1, ts)
 probLit ts = Left ("expected a probability near: " ++ showToks ts)
 
--- token expectations -------------------------------------------------------
-
 ident :: [Token] -> R String
 ident (TId x : ts) | x `notElem` reserved = Right (x, ts)
 ident ts = Left ("expected an identifier near: " ++ showToks ts)
+
+typeReserved :: [String]
+typeReserved = ["end", "mu", "Int", "Str", "Bool"]
+
+typeIdent :: [Token] -> R String
+typeIdent (TId x : ts) | x `notElem` typeReserved = Right (x, ts)
+typeIdent ts = Left ("expected a type-context identifier near: " ++ showToks ts)
 
 sym :: Char -> [Token] -> Either String [Token]
 sym c (TSym d : ts) | c == d = Right ts

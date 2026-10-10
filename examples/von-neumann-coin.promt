@@ -1,0 +1,39 @@
+(* Biased coin with probability 0.9 of heads, preserving the benchmark observer loops. *)
+
+f = (mu t .
+  flip 0.9 (
+    c ! heads . flip 0.9 (
+      c ! heads . t
+    ,
+      c ! tails . (mu s .
+        o ! heads . s
+      )
+    )
+  ,
+    c ! tails . flip 0.9 (
+      c ! heads . o ! tails . end
+    ,
+      c ! tails . t
+    )
+  )
+)
+
+c = (mu t .
+  (
+    f ? heads . (
+      f ? heads . t
+      + f ? tails . end
+    )
+    + f ? tails . (
+      f ? heads . end
+      + f ? tails . t
+    )
+  )
+)
+
+o = (
+  f ? heads . (mu t .
+    f ? heads . t
+  )
+  + f ? tails . end
+)

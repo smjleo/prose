@@ -1,0 +1,9 @@
+(* The inferred context of ex-6-3-session.promt. *)
+p : (+) {
+  q ! 1.0 : m . mu t . (+) {
+    q ! 0.5 : m . t,
+    r ! 0.5 : m . end
+  }
+}
+q : & { p ? m . & { r ? done . end } }
+r : & { p ? m . (+) { q ! 1.0 : done . end } }

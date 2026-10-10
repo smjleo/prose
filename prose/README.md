@@ -1,0 +1,58 @@
+# Prose
+Prose is a compiler from **pro**babilistic multiparty **se**ssion types into [PRISM](https://www.prismmodelchecker.org/), which enables model checking of probabilitic properties on the types.
+
+Promt is the probabilistic programming language supported by Prose.
+
+The [promt/](promt/) directory contains the Haskell implementation of the Promt
+process type inference and checking tool.
+
+This tool can be used to infer types from Promt process definitions, optionally
+check inferred types against user-provided specifications, and generate types in
+the input format expected by Prose.
+
+We refer to the separate **README.md** in that folder for usage instructions on promt.
+
+## Getting started
+### Prerequisites
+* [OCaml and `opam`](https://ocaml.org/install)
+* [Dune](https://dune.build/install)
+* [PRISM](https://www.prismmodelchecker.org/manual/InstallingPRISM/Instructions)
+* `opam install core ppx_jane`
+
+Ensure that the location of your `prism` executable is in your `PATH`.
+
+For the end-to-end benchmark and analysis scripts, we additionally require:
+* zsh
+* [Python and `pip`](https://www.python.org/downloads/)
+* `pip install numpy scipy pandas matplotlib`
+
+
+### Usage
+To verify probabilistic properties (e.g. safety and deadlock-freedom), run `dune exec prose -- verify [path/to/file.ctx]`.
+
+To see the translated PRISM model and property file, run `dune exec prose -- output [path/to/file.ctx]`. You can also output the model and properties into a file using the flags `-o [filename.prism]` and `-p [filename.props]`, respectively.
+
+For examples of session types, see [examples/](examples/).
+
+### Benchmarking
+There are two types of benchmarks: end-to-end and granular.
+
+The end-to-end benchmark measures the runtime of invoking `prose`, from start to finish. This can be run using [experiments/benchmark.sh](experiments/benchmark.sh), which invokes [experiments/stats.py](experiments/stats.py) for analysis. The raw data is also placed in [experiments/results/](experiments/results/).
+
+The granular benchmark measures the time taken for the translation and the PRISM verification of each property, all separately. This is done directly via the Prose CLI: `dune exec prose -- benchmark [path/to/dir]` runs benchmarks on all context files in the directory given. 
+
+For example, use the [examples/](examples/) directory: `dune exec prose -- benchmark examples`.
+
+The granular benchmark also supports LaTeX `tabular` output (to reproduce the table in the paper): `dune exec prose -- benchmark examples -latex`, as well as Markdown table output: `dune exec prose -- benchmark examples -markdown`.
+
+The factorial benchmark compares verifying a session directly against verifying its typing context. For each `n`, it generates the factorial session ([examples/gen_fact_n_sess.py](examples/gen_fact_n_sess.py)) and its typing context ([examples/gen_fact_n_ctx.py](examples/gen_fact_n_ctx.py)), then records their deadlock-freedom probabilities and PRISM verification times: `experiments/factorials.sh [max_n]`. The results can be plotted using `experiments/plot_factorial_results.py experiments/results/factorial_[timestamp].csv --save-pdf`.
+
+The model size benchmark collects the number of states, transitions and choices of the PRISM model built for each context file, as reported by PRISM: `dune exec prose -- states examples`. It supports the same `-latex`, `-markdown` and `-list` flags as the granular benchmark, e.g. `dune exec prose -- states examples -list examples/benchmark.txt -latex`.
+
+### Testing
+`dune test test/run-examples.t` (alternatively, just `dune test`)
+
+This runs Prose on every file in the [examples/](examples/) directory, and compares both the PRISM output and the property verification output against the expected output. If they don't match, a `diff` listing of the changes are shown. If the new changes are correct, the diff can be applied automatically via `dune promote`.
+
+## Contributing
+TODO

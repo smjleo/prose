@@ -61,4 +61,3 @@ workerC3 : mu t .
                workerB3 ? datum(Int) . (+) { workerA3 ! 1.0 : result<Int> . t },
                workerB3 ? stop . end
              }
-

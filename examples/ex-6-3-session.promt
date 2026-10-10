@@ -1,0 +1,4 @@
+(* The same P; repeating q!m deadlocks, while r!m completes the session. *)
+p = mu X . q ! m . flip 0.5 (X, r ! m . end)
+q = p ? m . r ? done . end
+r = p ? m . q ! done . end

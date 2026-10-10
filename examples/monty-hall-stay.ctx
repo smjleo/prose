@@ -23,4 +23,3 @@ player : & {
            host ? l2 . (+) { host ! 1.0 : l1 . end },
            host ? l3 . (+) { host ! 1.0 : l1 . end }
          }
-

@@ -1,4 +1,5 @@
-alice: (+) { shop ! 1.0 : query<Str> .
+(* Adaptation: query carries Int instead of the original Str. *)
+alice: (+) { shop ! 1.0 : query<Int> .
        & { shop ? price(Int) .
        mu t .
           (+) {
@@ -6,11 +7,10 @@ alice: (+) { shop ! 1.0 : query<Str> .
               bob ! 0.5 : cancel . (+) { shop ! 1.0 : no . end }
           } } }
 
-shop: & { alice ? query(Str) . (+) { alice ! 1.0 : price<Int> . & { alice ? buy.end, alice ? no.end } } }
+shop: & { alice ? query(Int) . (+) { alice ! 1.0 : price<Int> . & { alice ? buy.end, alice ? no.end } } }
 
 bob: mu t .
        & {
          alice ? split(Int) . (+) { alice ! 0.5 : yes.end, alice ! 0.5 : no.t },
          alice ? cancel . end
        }
-

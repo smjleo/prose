@@ -1,0 +1,69 @@
+(* Three independent worker pipelines; Int values are illustrative. *)
+
+starter = workerA1 ! datum<0> . workerA2 ! datum<0> . workerA3 ! datum<0> . end
+
+workerA1 = starter ? datum(x1 : Int) . (mu t .
+  flip 0.5 (
+    workerB1 ! datum<x1> . workerC1 ? result(x2 : Int) . t
+  ,
+    workerB1 ! stop . end
+  )
+)
+
+workerB1 = (mu t .
+  (
+    workerA1 ? datum(x1 : Int) . workerC1 ! datum<x1> . t
+    + workerA1 ? stop . workerC1 ! stop . end
+  )
+)
+
+workerC1 = (mu t .
+  (
+    workerB1 ? datum(x1 : Int) . workerA1 ! result<x1> . t
+    + workerB1 ? stop . end
+  )
+)
+
+workerA2 = starter ? datum(x1 : Int) . (mu t .
+  flip 0.5 (
+    workerB2 ! datum<x1> . workerC2 ? result(x2 : Int) . t
+  ,
+    workerB2 ! stop . end
+  )
+)
+
+workerB2 = (mu t .
+  (
+    workerA2 ? datum(x1 : Int) . workerC2 ! datum<x1> . t
+    + workerA2 ? stop . workerC2 ! stop . end
+  )
+)
+
+workerC2 = (mu t .
+  (
+    workerB2 ? datum(x1 : Int) . workerA2 ! result<x1> . t
+    + workerB2 ? stop . end
+  )
+)
+
+workerA3 = starter ? datum(x1 : Int) . (mu t .
+  flip 0.5 (
+    workerB3 ! datum<x1> . workerC3 ? result(x2 : Int) . t
+  ,
+    workerB3 ! stop . end
+  )
+)
+
+workerB3 = (mu t .
+  (
+    workerA3 ? datum(x1 : Int) . workerC3 ! datum<x1> . t
+    + workerA3 ? stop . workerC3 ! stop . end
+  )
+)
+
+workerC3 = (mu t .
+  (
+    workerB3 ? datum(x1 : Int) . workerA3 ! result<x1> . t
+    + workerB3 ? stop . end
+  )
+)

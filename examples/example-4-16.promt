@@ -1,0 +1,57 @@
+(* Example 4.16: extended calculator, with Int payloads.
+   Retry guard and reconnect value are illustrative; inference retains
+   both branches of if true. *)
+
+u = s ! incr<1> . mu X .
+    c ? res(x : Int) . s ! incr<x> . X
+
+s = mu X . (
+      c ? crit . end
+    + c ? disconn . (mu R .
+        if true then
+          c ! retry . R
+        else
+          c ! conn . flip 0.9 (
+            c ! incr<0> . X,
+            c ! upgrade . c ! incr<0> . (mu U .
+              u ? incr(y : Int) . c ! incr<y> . U
+            )
+          )
+      )
+    + c ? err(x : Int) . flip 0.9 (
+        c ! incr<x> . X,
+        c ! upgrade . c ! incr<x> . (mu U .
+          u ? incr(y : Int) . c ! incr<y> . U
+        )
+      )
+    + u ? incr(x : Int) . flip 0.9 (
+        c ! incr<x> . X,
+        c ! upgrade . c ! incr<x> . (mu U .
+          u ? incr(y : Int) . c ! incr<y> . U
+        )
+      )
+)
+
+c = mu X . (
+      s ? upgrade . (mu U .
+        s ? incr(x : Int) . u ! res<succ(x)> . U
+      )
+    + s ? incr(x : Int) . (
+        if x < 256 then
+          u ! res<succ(x)> . X
+        else
+          flip 0.8 (
+            u ! res<succ(x)> . X,
+            flip 0.5 (
+              s ! err<x> . X,
+              flip 0.5 (
+                s ! crit . end,
+                s ! disconn . (mu R .
+                    s ? retry . R
+                  + s ? conn . X
+                )
+              )
+            )
+          )
+      )
+)

@@ -1,0 +1,7 @@
+(* A supertype of P's inferred type, with an extra nondeterministic output. *)
+p : (+) {
+  q ! 1.0 : m . mu t . (+) {
+    q ! 0.5 : m . t,
+    r ! 0.5 : m . end
+  }
+} + (+) { q ! 1.0 : cancel . end }

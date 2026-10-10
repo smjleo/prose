@@ -1,0 +1,37 @@
+(* Recursive map-reduce protocol; received Int values can be forwarded. *)
+
+mapper = (mu t .
+  worker1 ! datum<0> . worker2 ! datum<0> . worker3 ! datum<0> . (
+    reducer ? continue(x1 : Int) . t
+    + reducer ? stop . worker1 ! stop . worker2 ! stop . worker3 ! stop . end
+  )
+)
+
+worker1 = mapper ? datum(x1 : Int) . (mu t .
+  reducer ! result<x1> . (
+    mapper ? datum(x2 : Int) . t
+    + mapper ? stop . end
+  )
+)
+
+worker2 = mapper ? datum(x1 : Int) . (mu t .
+  reducer ! result<x1> . (
+    mapper ? datum(x2 : Int) . t
+    + mapper ? stop . end
+  )
+)
+
+worker3 = mapper ? datum(x1 : Int) . (mu t .
+  reducer ! result<x1> . (
+    mapper ? datum(x2 : Int) . t
+    + mapper ? stop . end
+  )
+)
+
+reducer = (mu t .
+  worker1 ? result(x1 : Int) . worker2 ? result(x2 : Int) . worker3 ? result(x3 : Int) . flip 0.4 (
+    mapper ! continue<x3> . t
+  ,
+    mapper ! stop . end
+  )
+)

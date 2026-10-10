@@ -1,45 +1,47 @@
 cabal-version:      2.4
 name:               promt
 version:            0.1.0.0
-synopsis:           Normalization to canonical form for PROMT-calculus processes,
-                    with contractivity checking, type inference, and subtyping.
+synopsis:           Graph-based type inference and checking for PROMT processes.
+description:        Infers recursive local types for probabilistic multiparty
+                    processes, checks type specifications, and exports to ProSe.
+category:           Language
+license:            MIT
+license-file:       LICENSE
+copyright:          2026 Promt/ProSe contributors
+maintainer:         Promt/ProSe contributors
+tested-with:        GHC ==9.6.7
 build-type:         Simple
+extra-source-files:
+    cabal.project
+    README.md
 
-common warnings
+common shared
+    default-language: Haskell2010
+    build-depends: base >=4.14 && <5
     ghc-options: -Wall -Wno-unused-matches -Wno-name-shadowing
 
 library
-    import:           warnings
+    import:           shared
     hs-source-dirs:   src
-    default-language: Haskell2010
-    build-depends:    base >=4.14 && <5
-                    , containers
-    exposed-modules:  Syntax.Process
-                    , Syntax.Binder
-                    , Syntax.RegularTree
-                    , Syntax.WellFormed
-                    , Normalize.Passes
-                    , Typing.Check
-                    , Typing.Types
-                    , Typing.Infer
-                    , Typing.Subtype
-                    , Typing.Pretty
-                    , Output.Prose
-                    , Frontend.Parser
+    build-depends:    containers >=0.6 && <0.8
+    exposed-modules: Frontend.Parser
+                      Syntax.Process
+                      Typing.Types
+                      Typing.Inference
+                      Typing.Check
+                      Typing.Relations
+                      Output.Context
+    other-modules: Syntax.Binder
+                      Syntax.WellFormed
+                      Typing.Expressions
+                      Typing.Inference.Candidate
+                      Typing.Inference.Construct
+                      Typing.Inference.Source
+                      Typing.Relations.Graph
+                      Typing.Relations.Matching
 
 executable promt
-    import:           warnings
+    import:           shared
     hs-source-dirs:   app
     main-is:          Main.hs
-    default-language: Haskell2010
-    build-depends:    base, containers, promt
-
-test-suite spec
-    import:           warnings
-    type:             exitcode-stdio-1.0
-    hs-source-dirs:   test
-    main-is:          Spec.hs
-    other-modules:    Examples.DiningPhilosophers
-                    , Examples.Tricky
-    default-language: Haskell2010
-    build-depends:    base, containers, promt
+    build-depends:    promt, directory, filepath

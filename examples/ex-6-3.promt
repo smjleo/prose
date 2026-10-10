@@ -1,0 +1,2 @@
+(* Section 6.3: the recursive process P, with probability 0.5. *)
+p = mu X . q ! m . flip 0.5 (X, r ! m . end)

@@ -1,9 +1,3 @@
-{-# LANGUAGE DeriveFunctor #-}
-{-# LANGUAGE DeriveFoldable #-}
-{-# LANGUAGE DeriveTraversable #-}
-
--- | Core process syntax for the PROMT-calculus
-
 module Syntax.Process
   ( Role(..)
   , Label(..)
@@ -15,76 +9,68 @@ module Syntax.Process
   , Var(..)
   , Scope(..)
   , Proc(..)
-  , Obligation(..)
   , Branch
   ) where
 
 import Data.Ratio (Ratio, numerator, denominator)
 
--- | Participant / role identifiers (the @p@, @q@ of the calculus).
 newtype Role = Role String
   deriving (Eq, Ord, Show)
 
--- | Branch labels (the @l_i@).
 newtype Label = Label String
   deriving (Eq, Ord, Show)
 
--- | The coin bias of a @flip@. Always a literal rational strictly inside (0,1);
--- never an expression.
 newtype Prob = Prob (Ratio Integer)
   deriving (Eq, Ord)
 
 instance Show Prob where
   show (Prob r) = show (numerator r) ++ "/" ++ show (denominator r)
 
+-- Flip biases must lie in (0,1).
 mkProb :: Ratio Integer -> Either String Prob
 mkProb r
   | r <= 0 || r >= 1 = Left ("flip probability must be in (0,1), got " ++ show r)
   | otherwise        = Right (Prob r)
 
--- | The underlying rational of a flip bias.
 probValue :: Prob -> Ratio Integer
 probValue (Prob r) = r
 
--- | Base sorts (B, B', ... in the paper).
-data Sort = SUnit | SBool | SNat | SInt
+data Sort = SUnit | SBool | SNat | SInt | SStr
   deriving (Eq, Ord, Show)
 
 data Expr
   = EUnit
   | EVar String
   | EBool Bool
-  | ENat Integer
   | EInt Integer
-  | EFlipChoice Prob Expr Expr   -- ^ e1 (+)_p e2
-  | ECond Expr Expr Expr         -- ^ if c then e1 else e2  (value level)
+  | ENot Expr
+  | EOr  Expr Expr
+  | EAnd Expr Expr
+  | EAdd Expr Expr
+  | ESucc Expr
+  | ENeg Expr
+  | EEq Expr Expr
+  | EGt Expr Expr
+  | ELt Expr Expr
   deriving (Eq, Ord, Show)
 
--- | de Bruijn variable
+-- Bound de Bruijn index, or a source name awaiting abstraction.
 data Var a = BVar !Int | FVar a
-  deriving (Eq, Ord, Show, Functor, Foldable, Traversable)
+  deriving (Eq, Ord, Show)
 
--- | A body under exactly one binder.
+-- Index 0 refers to this binder.
 newtype Scope a = Scope (Proc a)
-  deriving (Eq, Ord, Show, Functor, Foldable, Traversable)
+  deriving (Eq, Ord, Show)
 
 type Branch a = (Role, Label, Sort, String, Proc a)
 
--- | Processes.
 data Proc a
-  = Nil                                
-  | Sel  Role Label Expr (Proc a)      
-  | Bra  [Branch a]                    
-  | Flip Prob (Proc a) (Proc a)        
-  | If   Expr (Proc a) (Proc a)        
-  | Mu   (Scope a)                     
-  | Var  (Var a)                       
-  | Ghost [Obligation a] (Proc a)      
-  deriving (Eq, Ord, Show, Functor, Foldable, Traversable)
+  = Nil
+  | Sel  Role Label Expr (Proc a)
+  | Bra  [Branch a]
+  | Flip Prob (Proc a) (Proc a)
+  | If   Expr (Proc a) (Proc a)
+  | Mu   (Scope a)
+  | Var  (Var a)
+  deriving (Eq, Ord, Show)
 
--- | Typing obligations attached by 'Ghost'. Created during normalization, never
--- present in a running term.
-data Obligation a
-  = BoolCheck Expr        
-  | TypeCheck (Proc a)    
-  deriving (Eq, Ord, Show, Functor, Foldable, Traversable)

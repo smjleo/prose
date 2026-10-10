@@ -1,0 +1,39 @@
+(* Gambler walk: down with probability 0.4, up with probability 0.6. *)
+
+w = (mu t .
+  flip 0.4 (
+    q ! down . flip 0.4 (
+      q ! down . o ! ruined . end
+    ,
+      q ! up . t
+    )
+  ,
+    q ! up . flip 0.6 (
+      q ! up . (mu s .
+        o ! won . s
+      )
+    ,
+      q ! down . t
+    )
+  )
+)
+
+q = (mu t .
+  (
+    w ? down . (
+      w ? down . end
+      + w ? up . t
+    )
+    + w ? up . (
+      w ? up . end
+      + w ? down . t
+    )
+  )
+)
+
+o = (
+  w ? ruined . end
+  + w ? won . (mu t .
+    w ? won . t
+  )
+)

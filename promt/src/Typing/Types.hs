@@ -1,7 +1,3 @@
-{-# LANGUAGE DeriveFunctor #-}
-
--- | Probabilistic multiparty session types (local types), following the grammar
-
 module Typing.Types
   ( Weight
   , SBranch(..)
@@ -23,6 +19,7 @@ data SBranch = SBranch
   , sbCont   :: SType
   } deriving (Eq, Ord, Show)
 
+-- Nonempty, unique keys, positive weights summing to 1.
 type Dist = [SBranch]
 
 newtype STScope = STScope SType
@@ -33,5 +30,5 @@ data SType
   | TSel [Dist]
   | TBra [(Role, Label, Sort, SType)]
   | TMu STScope
-  | TRecVar Int
+  | TRecVar Int  -- de Bruijn index
   deriving (Eq, Ord, Show)

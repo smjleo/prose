@@ -1,0 +1,28 @@
+(* Recursive two buyers. The query payload is Int (book identifier) instead of Str. *)
+
+alice = shop ! query<0> . shop ? price(x1 : Int) . (mu t .
+  flip 0.5 (
+    bob ! split<x1> . (
+      bob ? yes . shop ! buy . end
+      + bob ? no . t
+    )
+  ,
+    bob ! cancel . shop ! no . end
+  )
+)
+
+shop = alice ? query(x1 : Int) . alice ! price<x1> . (
+  alice ? buy . end
+  + alice ? no . end
+)
+
+bob = (mu t .
+  (
+    alice ? split(x1 : Int) . flip 0.5 (
+      alice ! yes . end
+    ,
+      alice ! no . t
+    )
+    + alice ? cancel . end
+  )
+)
