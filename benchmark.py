@@ -24,8 +24,8 @@ PROSE_HEADERS = ("Filename", "Tran (ms)", "Wals (ms)", "Safe (ms)", "DF (ms)", "
 PAPER = {
     "auth": ("OAuth Protocol", 1),
     "dice": ("Knuth-Yao Dice", 2),
-    "dining": ("Dining Philosophers", 2),
-    "leader-election": ("Synchronised Leader Election", 2),
+    "dining": ("Dining Phils.", 2),
+    "leader-election": ("Synch. Leader Election", 2),
     "monty-hall-change": ("Monty Hall, Change", None),
     "monty-hall-stay": ("Monty Hall, Stay", None),
     "multiparty-workers": ("Multiparty Workers", 1),
@@ -175,7 +175,7 @@ def table(results, latex=False):
             if name == "dining":
                 title += r" (Ex.~\ref{exam:diningphilo})"
             elif name == "example-4-16":
-                title = r"Example~\ref{exam:mdp}"
+                title = r"Example \ref{exam:mdp}"
             if note:
                 notes.add(note)
                 title += rf"\tnote{{{note}}}"
@@ -257,7 +257,7 @@ def main(argv=None):
             stages = prose_samples(prose, contexts, names, args.runs, args.translation_batch)
             for source in files:
                 results[source.stem].update(stages[source.stem])
-                print(f"Measuring pipeline for {source.name}...", file=sys.stderr, flush=True)
+                print(f"Measuring end-to-end for {source.name}...", file=sys.stderr, flush=True)
                 results[source.stem]["end_to_end"] = measure(
                     [sys.executable, str(root / "artifact.py"), "--promt-bin", promt,
                      "--prose-bin", prose, "verify", str(source)],
@@ -276,3 +276,4 @@ def main(argv=None):
 
 if __name__ == "__main__":
     sys.exit(main())
+

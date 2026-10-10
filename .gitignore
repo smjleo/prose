@@ -2,3 +2,22 @@
 _build/
 _opam/
 experiments/results/
+# Cabal build artifacts under /promt
+/promt/dist/
+/promt/dist-newstyle/
+/promt/.cabal-sandbox/
+/promt/cabal.sandbox.config
+
+# GHC build artifacts, if emitted alongside source files
+/promt/**/*.hi
+/promt/**/*.o
+/promt/**/*.dyn_hi
+/promt/**/*.dyn_o
+/promt/**/*.p_hi
+/promt/**/*.p_o
+/promt/**/*.prof
+/promt/**/*.aux
+
+# HPC coverage output
+/promt/.hpc/
+/promt/**/*.tix
