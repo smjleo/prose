@@ -1,30 +1,27 @@
-# PROMT / ProSe artifact
+# Artifact for "Model-Checking Probabilistic Multiparty Session Types"
 
 This artifact contains two tools for probabilistic multiparty sessions:
 
 - **PROMT** a prototype implementation of type inference,
   infers local session types from processes,
-  checks processes against type specifications, 
+  checks processes against type specifications,
   and checks subtyping between type contexts.
-- **ProSe** translates type contexts to PRISM and checks safety,
-  deadlock-freedom and liveness. 
-
-The file `artifact.py`, connects inference to model checking. The
-benchmark scripts reproduce the combined timing table and compare the
-factorial sessions with their generated type contexts.
+- **Prose** translates type contexts to PRISM and checks safety,
+  deadlock-freedom and liveness.
 
 ## Requirements and installation
 
-### Docker
+We support the installation of our artifact either through Docker or natively.
+
+### Docker (recommended)
 
 Install and start Docker for your host:
 
 - **Linux (x86-64 or ARM64):** install [Docker Engine](https://docs.docker.com/engine/install/).
 - **macOS (Intel or Apple Silicon):** install and start
   [Docker Desktop](https://docs.docker.com/desktop/setup/install/mac-install/).
-  It runs the Linux container in a virtual machine.
 
-On either system, build the image and enter its shell from this directory:
+Then, build the image and enter its shell from this directory:
 
 ```sh
 docker build -t promt-prose .
@@ -35,14 +32,7 @@ The shell starts in `/opt/artifact`, containing both projects, examples and
 scripts. All subsequent commands in this README run from that directory,
 unless marked as host commands. The default **runtime image** includes the
 compiled `promt` and `prose` tools, PRISM, Java, Python plotting dependencies,
-source files and examples. It runs the sanity checks and experiments below without further downloads;
-compilers and build caches stay out of this image.
-
-Building from source downloads and compiles dependencies in a separate builder
-stage, then copies the compiled tools into the runtime image. This needs extra
-disk space for build files and Docker's cache; subsequent builds reuse the cache.
-Both images check the example specifications and the inference/model-checking
-pipeline during construction.
+source files and examples.
 
 To also build an image for modifying and recompiling the tools:
 
@@ -55,27 +45,8 @@ This optional image includes GHC, Cabal, OCaml, opam and Dune. Inside it, rebuil
 with `(cd promt && cabal build exe:promt --offline)` or
 `(cd prose && dune build bin/main.exe)`.
 
-Type `exit` to leave the container. Its files persist; from the host, return
-with `docker start -ai artifact`. Copy generated results to the host with, for
-example, `docker cp artifact:/opt/artifact/results ./results`.
-
-The build uses the host CPU architecture by default: ARM64 on Apple Silicon or
-ARM Linux, and x86-64 on Intel Macs or x86 Linux. Use that native architecture
-for benchmarking. To build and run the x86-64 version on another architecture:
-
-```sh
-docker build --platform linux/amd64 -t promt-prose-amd64 .
-docker run --platform linux/amd64 -it --name artifact-amd64 promt-prose-amd64
-```
-
-Docker Desktop supports this through emulation; Linux may require
-[emulation setup](https://docs.docker.com/build/building/multi-platform/).
-Use `linux/arm64` instead to target ARM64.
-
 The tools are built with GHC 9.6.7, Cabal 3.12.1.0, OCaml 5.2.0, opam 2.5.2
 and Dune 3.23.1. Both images include PRISM 4.10.1 and Java 17.
-`toolchain.txt` records the build environment; `runtime-packages.txt` records
-the packages installed in the runtime image.
 
 ### Native installation
 
@@ -92,19 +63,16 @@ With an OCaml 5.2.0 switch selected, its dependencies can be installed using
 `opam install dune menhir core core_unix ppx_jane`. Ensure `prism` is on `PATH`.
 The Dockerfile records the pinned build recipe.
 
-`artifact.py` and `benchmark.py` prefer installed `promt` and `prose`
-executables on `PATH`; otherwise they build the required sibling projects.
-`--promt-bin PATH` and `--prose-bin PATH` select specific executables without
-building. Input and output paths are relative to the caller's directory.
-The factorial launcher also uses installed `prose` (or `PROSE_BIN` when set),
-falling back to Dune and the active opam environment only if needed.
+Our scripts can detect installed `promt` and `prose` executables from `PATH`. If
+it cannot find them, they build the required projects. You can also specify the
+specific executables with `--promt-bin PATH` and `--prose-bin PATH`.
 
-## Sanity checks
+## Sanity-check instructions
 
 The following walkthrough exercises all five supported commands of the tool, namely;
 `infer`, `typecheck`, `subtype`, `verify`, `model-check`
-using the recursive process from Section 6.3 of the paper, with flip probability `0.5`. 
-Run these commands from the artifact root; `./artifact.py --help` lists the available modes.
+using the recursive process from Section 6.3 of the paper.
+Run these commands from the artifact root.
 
 ### 1. Infer the paper example
 
@@ -127,9 +95,7 @@ p : (+) { q ! 1.0 : m . mu t .
       (+) { q ! 0.5 : m . t, r ! 0.5 : m . end } }
 ```
 
-The initial send to `q` is certain; subsequent choices either repeat it with
-probability `0.5` or send to `r` and terminate with probability `0.5`.
-Then save it for the following checks:
+We can save the file into a file for the next steps.
 
 ```sh
 mkdir -p results
@@ -149,8 +115,7 @@ p : (+) { q ! 1.0 : m . mu t .
     + (+) { q ! 1.0 : cancel . end }
 ```
 
-Here `+` separates nondeterministic alternatives; the probabilities inside each
-`(+)` still sum to one. Check that `T_inf <= T_spec`:
+Check that `T_inf <= T_spec`:
 
 ```sh
 ./artifact.py subtype results/ex-6-3-inferred.ctx examples/ex-6-3.ctx
@@ -161,10 +126,6 @@ Expected output:
 ```text
   p : OK  (inferred <= specified)
 ```
-
-Reversing the two files fails: the extra `cancel` alternative is not permitted
-by `T_inf`. In general, `subtype LEFT RIGHT` checks each left participant against
-its counterpart on the right;
 
 ### 3. Typecheck the process against the specification
 
@@ -186,10 +147,7 @@ q = p ? m . r ? done . end
 r = p ? m . q ! done . end
 ```
 
-After the initial `p`--`q` communication, choosing `r` lets `r` notify `q` and
-all three terminate. Choosing `q` again deadlocks: `q` is waiting for `r`,
-while `r` is waiting for `p`. Thus successful termination has probability
-`0.5`. Run inference followed by model checking with:
+Run inference followed by model checking with:
 
 ```sh
 ./artifact.py verify examples/ex-6-3-session.promt
@@ -208,27 +166,6 @@ Liveness (lower bound)
 Result: 0.5 (exact floating point)
 ```
 
-For a variation, `examples/ex-6-3-session-three.promt` lets `p` send to `q`
-at most three times. Now `q` notifies `r` when all three messages arrive:
-
-```text
-p = q ! m . flip 0.5 (
-      q ! m . flip 0.5 (q ! m . end, r ! m . end),
-      r ! m . end)
-q = p ? m . p ? m . p ? m . r ! quit . end
-r = p ? m . end + q ? quit . end
-```
-
-Both flips must choose `q` for everyone to terminate, with probability
-`0.5 * 0.5 = 0.25`. An early send to `r` lets `p` and `r` terminate but leaves
-`q` waiting for the remaining messages.
-
-```sh
-./artifact.py verify examples/ex-6-3-session-three.promt
-```
-
-Expect safety `true` and both deadlock-freedom and liveness bounds `0.25`.
-
 ### 5. Model check the exported context
 
 The same pipeline can be split into two steps, inferring the type and exporting it
@@ -239,12 +176,11 @@ to a file, before model-checking the result:
 ./artifact.py model-check results/ex-6-3-session.ctx
 ```
 
-This gives the same three property results as `verify`: `true`, `0.5`, `0.5`.
-The exported context includes all three participants.
+This should give the same results as before.
 
 PRISM's numeric formatting may vary by version. For an example whose safety
 property fails, run `./artifact.py model-check prose/examples/unsafe.ctx`;
-it reports `false`. 
+it reports `false`.
 
 ### Check all example specifications
 
@@ -262,7 +198,7 @@ All participant verdicts should be `OK`.
 
 ### Combined timing table
 
-This section walks through how to reproduce the results presented in table 1 of the 
+This section walks through how to reproduce the results presented in table 1 of the
 paper. The sessions used can all be found in `examples/`.
 
 For a quick check of the benchmark harness:
@@ -280,30 +216,24 @@ mkdir -p results
 ```
 
 This defaults to five timed runs and one warmup per measurement. Values are milliseconds,
-reported as **mean ± standard error** (`sample_stdev / sqrt(runs)`); builds and
-warmups are excluded. Use `--only NAME ...` to select examples or `--runs 30`
-for more repetitions (at least two are required). Add `--latex` to output a
-LaTeX table instead. Progress goes to stderr.
+reported as **mean ± standard error** (`sample_stdev / sqrt(runs)`), excluding any
+build or warmup times.
 
-| Column | What is measured |
+| Column | Description |
 | --- | --- |
 | Inference | One PROMT invocation, including startup, parsing, inference and type formatting. |
-| Translation | ProSe parsing and translation, excluding WASL; each sample averages 100 translations (`--translation-batch` changes this). |
-| WASL | ProSe's weak-almost-sure-livelock computation. |
+| Translation | Prose parsing and translation, excluding WASL. |
+| WASL | Prose's weak-almost-sure-livelock computation. |
 | Safety / DF / Liveness | Separate PRISM invocations for the three properties. |
 | End-to-end | `artifact.py verify`: tool startup, inference, context handoff, translation including WASL, and one PRISM invocation checking all three properties. |
 
-The end-to-end measurement is independent, not the sum of the other columns:
-the individual property columns each start PRISM, whereas the pipeline starts
-it once. Timed inference and pipeline stdout/stderr go to /dev/null;
 
 ### Factorial sessions versus type contexts
 
 This experiment reproduces Figure 12 of the paper, comparing the cost of
 model checking factorial sessions directly against their typing contexts,
 and the resulting deadlock-freedom probabilities and lower bounds.
-
-Run it directly from the artifact root:
+See Appendix E.7 for the processes and types.
 
 ```sh
 ./compare-session-types.sh 3       # small check: n = 1, 2, 3
@@ -311,14 +241,14 @@ Run it directly from the artifact root:
 ```
 
 The launcher delegates to `prose/experiments/factorials.sh`. For each `n`,
-ProSe's generators produce a concrete `.sess` file and a `.ctx` file, which are
-model checked separately; PROMT inference is not involved.
-There are **`n + 2` participants** (`w0`, ..., `wn`, and `dummy`), computing **`(n - 1)!`** 
+Prose's generators produce a concrete `.sess` file and a `.ctx` file, which are
+model checked separately. PROMT inference is not involved.
+There are **`n + 2` participants** (`w0`, ..., `wn`, and `dummy`), computing **`(n - 1)!`**
 along the successful execution path.
 
-The script prints one row as each case finishes. For the small check, expect
-the probabilities below (up to rounding); the times show one local run and
-will vary by machine:
+The script prints one row as each case finishes.
+On our machine, we have measured the following results (up to rounding),
+though the timing informations may differ based on the machine.
 
 | `n` | Participants | Session deadlock freedom | Session time (s) | Context lower bound | Context time (s) |
 | ---: | ---: | ---: | ---: | ---: | ---: |
@@ -326,15 +256,12 @@ will vary by machine:
 | 2 | 4 | 0.49 | 1.650 | 0.35 | 0.389 |
 | 3 | 5 | 0.343 | 1.639 | 0.175 | 0.390 |
 
-Results are saved to `prose/experiments/results/factorial_<timestamp>.csv`:
-`n,sess_p,sess_time,ctx_p,ctx_time`. Times are mean PRISM verification times in
-seconds over ten runs, excluding translation. Allow a minute or so for the
-small check. `DNF` marks failed or skipped measurements; after a session fails,
-larger sessions are skipped while context measurements continue.
+Results are saved to `prose/experiments/results/factorial_<timestamp>.csv`.
+Times are mean PRISM verification times in
+seconds over ten runs, excluding translation.
 
-In the paper's experiment, session verification exhausted PRISM's default
-1 GB Java heap for `n >= 14`; the cutoff may differ on your machine. See
-Appendix E.7 for the processes and types.
+On our machine, the small experiment took roughly one minute to run,
+and the full experiment **TODO Aleks**
 
 To plot the most recent CSV:
 
@@ -345,42 +272,23 @@ MPLBACKEND=Agg python3 prose/experiments/plot_factorial_results.py "$CSV" --save
 
 This writes `factorial_probabilities.pdf` and `factorial_times.pdf` in the
 current directory.
-Use the full run for the complete curves; timings depend on your machine.
 Omit `--save-pdf` to display the plots interactively when a graphical display
 is available.
 
-### Saving container results
-
-Inside a named container, generated files remain available after leaving its
-shell. From the host, copy them out, for example:
-
-```sh
-docker cp artifact:/opt/artifact/results ./results
-docker cp artifact:/opt/artifact/factorial_probabilities.pdf .
-docker cp artifact:/opt/artifact/factorial_times.pdf .
-docker cp artifact:/opt/artifact/prose/experiments/results ./factorial-results
-```
-
-For a one-off table written directly on the host:
-
-```sh
-docker run --rm promt-prose ./benchmark.py > table.txt
-```
-
 ## Licence
 
-The PROMT/ProSe sources are released under the [MIT licence](LICENSE),
-copyright 2026 Promt/ProSe contributors. Third-party tools retain their own
-licences. The Docker image retains PRISM's licence notices under `/opt/prism`
-and its source archive at `/opt/prism-source.tar.gz`.
+The PROMT/Prose sources are released under the [MIT licence](LICENSE).
+Third-party tools, such as PRISM, retain their own licences.
 
-## Appendix: file formats
+## Additional artifact description
+
+### File formats
 
 Here `p`, `l`, `x`, `t` and `w` denote participants, labels, value variables,
-recursion variables and probabilities. `[...]` is optional; `(...)*` denotes
-repetition. Both formats accept `(* comments *)`.
+recursion variables and probabilities, respectively.
+We write `[...]` for optional components, and `(...)*` for repetition.
 
-### PROMT processes (`.promt`)
+#### PROMT processes (`.promt`)
 
 Files contain distinct declarations `p = P`.
 
@@ -398,17 +306,10 @@ e ::= n | x | true | false | () | (e)
     | not e | succ(e) | neg(e) | e op e
 op ::= + | = | == | < | > | and | or
 ```
-
-Only receives combine with `+`; parenthesise choices under prefixes, e.g.
-`q ! m . (r ? a . end + r ? b . end)`. Recursion must be bound and
-communication-guarded. Omitted payloads mean `Unit`; received values are
-scoped to their continuation.
-
-`n` is a nonnegative `Int` literal; use `neg(n)` for negatives and parentheses
-to group expressions. `Str` values can be forwarded but have no literals.
+Here `n` is a nonnegative `Int` literal.
 Flips require `0 < w < 1`, using decimals or fractions such as `1/3`.
 
-### Local type contexts (`.ctx`)
+#### Local type contexts (`.ctx`)
 
 Files contain distinct declarations `p : T`.
 
@@ -424,15 +325,10 @@ B ::= Int | Bool | Str
 ```
 
 Each `&` or `(+)` has nonempty branches with distinct `(p, l)` pairs.
-Distribution weights are positive and sum to one. Recursion must be bound
-and communication-guarded; omitted payloads mean `Unit`.
+Probabilities in probabilistic choice must be positive and sum to one.
+Recursion must be bound and guarded.
 
-This syntax serves inference, checking and model checking. PROMT additionally
-accepts fractions, `Nat`, grouped types and explicit `Unit`. For ProSe, use the
-grammar above with decimal weights such as `0.5` or `1.0`; the driver converts
-fractions but rejects `Nat` and does not remove grouping or `Unit` annotations.
-
-## Appendix: directory structure
+### Directory structure
 
 ```text
 artifact.py                   infer, typecheck, subtype, model-check and verify
@@ -441,19 +337,19 @@ compare-session-types.sh      compare session and type-context model checking
 Dockerfile, docker/           image build, dependencies and container checks
 LICENSE                       MIT licence
 examples/
-  *.promt                     paper benchmarks and sanity examples
-  *.ctx                       matching type specifications
+  *.promt                     process definitions for paper benchmarks and examples
+  *.ctx                       type specifications for paper benchmarks and examples
 promt/
   app/                        PROMT command-line interface
-  src/Frontend/               process and type-context parser
+  src/Frontend/               parser for process and type-context
   src/Syntax/                 process syntax, binding and well-formedness
   src/Typing/                 graph inference, joins, merging and subtyping
-  src/Output/                 shared .ctx renderer
+  src/Output/                 .ctx pretty-printing
 prose/
-  bin/, lib/                  ProSe command-line interface and implementation
+  bin/, lib/                  Prose command-line interface and implementation
   examples/                   type contexts, concrete sessions and generators
-  experiments/                original experiments and factorial plotting
+  experiments/                scripts for experiments and plotting
   experiments/results/        generated factorial CSV files
-  test/                       original ProSe snapshots
+  test/                       end-to-end testcases for Prose
 results/                      optional output directory used in this README
 ```
