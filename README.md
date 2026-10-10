@@ -220,13 +220,13 @@ mkdir -p results
 ```
 
 This defaults to five timed runs and one warmup per measurement. Values are milliseconds,
-reported as **mean ± standard error** (`sample_stdev / sqrt(runs)`), excluding any
+reported as **mean ± standard error**, excluding any
 build or warmup times.
 
 | Column | Description |
 | --- | --- |
 | Inference | One PROMT invocation, including startup, parsing, inference and type formatting. |
-| Translation | Prose parsing and translation, excluding WASL. |
+| Translation | Prose parsing and translation, excluding WASL. As described in the paper, each data point is a mean of 100 consecutive runs.|
 | WASL | Prose's weak-almost-sure-livelock computation. |
 | Safety / DF / Liveness | Separate PRISM invocations for the three properties. |
 | End-to-end | `artifact.py verify`: tool startup, inference, context handoff, translation including WASL, and one PRISM invocation checking all three properties. |
