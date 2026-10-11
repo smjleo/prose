@@ -292,10 +292,45 @@ There are **`n + 2` participants** (`w0`, ..., `wn`, and `dummy`), computing **`
 along the successful execution path.
 
 Results are saved to `prose/experiments/results/factorial_<timestamp>.csv`.
-Times are mean PRISM verification times in
-seconds over ten runs, excluding translation.
+Times are mean PRISM verification times in seconds over ten runs, 
+excluding translation.
 
-On our machine, the full experiment **TODO Aleks**
+On our machine, the full experiment ran in 16m 40s, yielding the table below.
+
+| `n` | Participants | Session deadlock freedom | Session time (s) | Context lower bound | Context time (s) |
+| ---: | ---: | ---: | ---: | ---: | ---: |
+| 1 | 3 | 0.7 | 1.675 | 0.7 | 0.414 |
+| 2 | 4 | 0.49 | 1.651 | 0.35 | 0.423 |
+| 3 | 5 | 0.343 | 1.611 | 0.175 | 0.427 |
+| 4 | 6 | 0.2401 | 1.610 | 0.0875 | 0.429 |
+| 5 | 7 | 0.16807 | 1.606 | 0.04375 | 0.448 |
+| 6 | 8 | 0.117649 | 1.603 | 0.021875 | 0.448 |
+| 7 | 9 | 0.0588245 | 1.610 | 0.0109375 | 0.463 |
+| 8 | 10 | 0.0294123 | 1.609 | 0.00546875 | 0.489 |
+| 9 | 11 | 0.0147061 | 1.610 | 0.00273437 | 0.515 |
+| 10 | 12 | 0.00735306 | 1.612 | 0.00136719 | 0.547 |
+| 11 | 13 | 0.00367653 | 2.428 | 0.000683594 | 0.598 |
+| 12 | 14 | 0.00183827 | 4.619 | 0.000341797 | 0.610 |
+| 13 | 15 | 0.000919133 | 8.781 | 0.000170898 | 0.665 |
+| 14 | 16 | DNF | DNF | 8.54492e-05 | 0.727 |
+| 15 | 17 | DNF | DNF | 4.27246e-05 | 0.802 |
+| 16 | 18 | DNF | DNF | 2.13623e-05 | 0.905 |
+| 17 | 19 | DNF | DNF | 1.06812e-05 | 1.018 |
+| 18 | 20 | DNF | DNF | 5.34058e-06 | 1.152 |
+| 19 | 21 | DNF | DNF | 2.67029e-06 | 1.334 |
+| 20 | 22 | DNF | DNF | 1.33514e-06 | 1.586 |
+| 21 | 23 | DNF | DNF | 1.33514e-06 | 1.780 |
+| 22 | 24 | DNF | DNF | 1.33514e-06 | 2.035 |
+| 23 | 25 | DNF | DNF | 1.33514e-06 | 2.332 |
+| 24 | 26 | DNF | DNF | 1.33514e-06 | 2.732 |
+| 25 | 27 | DNF | DNF | 1.33514e-06 | 3.150 |
+| 26 | 28 | DNF | DNF | 1.33514e-06 | 3.556 |
+| 27 | 29 | DNF | DNF | 1.33514e-06 | 4.019 |
+| 28 | 30 | DNF | DNF | 1.33514e-06 | 4.566 |
+| 29 | 31 | DNF | DNF | 1.33514e-06 | 5.210 |
+| 30 | 32 | DNF | DNF | 1.33514e-06 | 5.984 |
+
+Which were subsequently used to plot figure 12 in the paper.
 
 To plot the most recent CSV:
 

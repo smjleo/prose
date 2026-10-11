@@ -40,7 +40,6 @@ ghcup set cabal 3.12.1.0
 ```
 
 Create an OCaml switch and install Prose's dependencies 
-(skip initialization or switch creation if already done):
 
 ```sh
 opam init --bare --no-setup -y
