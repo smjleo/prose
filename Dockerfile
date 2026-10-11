@@ -1,5 +1,5 @@
 # syntax=docker/dockerfile:1
-FROM debian:bookworm-slim@sha256:7c7b2c966bc9ee8cedfeef67e0e279108992c77681fa595db4a9d65c06ccc587 AS builder
+FROM debian:trixie-slim@sha256:a29215f6a35e51e22adffa17f89e9d2ef06214e64a2bad10d765c46aea49f11f AS builder
 
 ARG BUILD_JOBS=2
 ARG OPAM_REPOSITORY=b0f29298c11859482484f6237c75de5d6d4682a7
@@ -19,7 +19,7 @@ RUN apt-get update \
        bash build-essential bzip2 ca-certificates curl git m4 patch pkg-config \
        rsync unzip xz-utils zsh time \
        libffi-dev libgmp-dev libncurses-dev libnuma-dev zlib1g-dev \
-       openjdk-17-jre-headless \
+       openjdk-21-jre-headless \
        python3 python3-matplotlib python3-numpy python3-pandas python3-scipy \
        fonts-dejavu-core \
     && rm -rf /var/lib/apt/lists/* \
@@ -84,7 +84,7 @@ RUN mkdir -p /home/artifact/runtime-bin \
 CMD ["bash"]
 
 # The default image contains the compiled tools, source, and runtime dependencies.
-FROM debian:bookworm-slim@sha256:7c7b2c966bc9ee8cedfeef67e0e279108992c77681fa595db4a9d65c06ccc587 AS runtime
+FROM debian:trixie-slim@sha256:a29215f6a35e51e22adffa17f89e9d2ef06214e64a2bad10d765c46aea49f11f AS runtime
 
 ENV LANG=C.UTF-8 \
     LC_ALL=C.UTF-8 \
@@ -98,7 +98,7 @@ RUN apt-get update \
     && apt-get install -y --no-install-recommends \
        bash coreutils mawk ca-certificates \
        libgmp10 libffi8 libnuma1 libncurses6 libtinfo6 zlib1g libgomp1 libstdc++6 \
-       openjdk-17-jre-headless \
+       openjdk-21-jre-headless \
        python3 python3-munkres python3-matplotlib python3-numpy python3-pandas \
        fonts-dejavu-core \
     && rm -rf /var/lib/apt/lists/* \

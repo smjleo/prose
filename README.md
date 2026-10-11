@@ -53,7 +53,7 @@ with `(cd promt && cabal build exe:promt --offline)` or
 `(cd prose && dune build bin/main.exe)`.
 
 The tools are built with GHC 9.6.7, Cabal 3.12.1.0, OCaml 5.2.0, opam 2.5.2
-and Dune 3.23.1. Both images include PRISM 4.10.1 and Java 17.
+and Dune 3.23.1. Both images include PRISM 4.10.1 and Java 21.
 
 ### Native installation
 
