@@ -16,7 +16,7 @@ import tempfile
 import time
 
 sys.dont_write_bytecode = True
-from artifact import adapt_context, infer, resolve_tools
+from run import adapt_context, infer, resolve_tools
 
 METRICS = ("inference", "translation", "wasl", "safety", "df", "liveness", "end_to_end")
 HEADERS = ("Inference", "Translation", "WASL", "Safety", "DF", "Liveness", "End-to-end")
@@ -222,7 +222,7 @@ def main(argv=None):
     parser.add_argument("--examples", type=Path,
                         help="benchmark all .promt files in this directory (default: paper benchmark suite)")
     parser.add_argument("--only", nargs="+", metavar="NAME", help="benchmark only these file stems")
-    parser.add_argument("--runs", "-n", type=int, default=5, help="timed runs per metric (default: 5)")
+    parser.add_argument("--runs", "-n", type=int, default=30, help="timed runs per metric (default: 30)")
     parser.add_argument("--warmups", type=int, default=1, help="untimed runs per metric (default: 1)")
     parser.add_argument("--translation-batch", "-tb", type=int, default=100)
     parser.add_argument("--latex", "-latex", action="store_true", help="output a complete LaTeX table")

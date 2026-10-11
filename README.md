@@ -1,6 +1,13 @@
 # Artifact for "Model-Checking Probabilistic Multiparty Session Types"
 
-This artifact contains two tools for probabilistic multiparty sessions:
+This is the artifact for POPL paper submission **#484**, "Model-Checking
+Probabilistic Multiparty Session Types". It should reproduce:
+
+- **Table 1:** inference, translation, model-checking and end-to-end timings.
+- **Figure 12:** verification times and deadlock-freedom probabilities for
+  concrete sessions and their typing contexts.
+
+The artifact contains two tools for probabilistic multiparty sessions:
 
 - **PROMT** a prototype implementation of type inference,
   infers local session types from processes,
@@ -48,25 +55,10 @@ with `(cd promt && cabal build exe:promt --offline)` or
 The tools are built with GHC 9.6.7, Cabal 3.12.1.0, OCaml 5.2.0, opam 2.5.2
 and Dune 3.23.1. Both images include PRISM 4.10.1 and Java 17.
 
-### Native installation (TODO: add more detailed instructions!)
+### Native installation
 
-
-Outside Docker, use Python 3.9 or later and install the tools needed by the
-operation you wish to run:
-
-- **Inference and type checking:** GHC and Cabal (tested with the versions above).
-- **Model checking:** OCaml, Dune, Menhir, `core`, `core_unix`, `ppx_jane`, and
-  PRISM with Java. Select the OCaml opam switch before running the tools.
-- **Factorial experiments:** the Prose dependencies, Bash and Python 3;
-  plotting additionally requires `pandas` and `matplotlib`.
-
-With an OCaml 5.2.0 switch selected, its dependencies can be installed using
-`opam install dune menhir core core_unix ppx_jane`. Ensure `prism` is on `PATH`.
-The Dockerfile records the pinned build recipe.
-
-Our scripts can detect installed `promt` and `prose` executables from `PATH`. If
-it cannot find them, they build the required projects. You can also specify the
-specific executables with `--promt-bin PATH` and `--prose-bin PATH`.
+See [NATIVE-INSTALL.md](NATIVE-INSTALL.md) for Linux and macOS setup instructions,
+including the compilers, PRISM and plotting dependencies.
 
 ## Sanity-check instructions
 
@@ -96,7 +88,7 @@ p : (+) { q ! 1.0 : m . mu t .
       (+) { q ! 0.5 : m . t, r ! 0.5 : m . end } }
 ```
 
-We can save the file into a file for the next steps.
+We can save the result into a file for the next steps:
 
 ```sh
 mkdir -p results
@@ -195,6 +187,54 @@ done
 
 All participant verdicts should be `OK`.
 
+### 6. Compare sessions and contexts, and view the plots
+
+To check the plotting software runs properly, run the first three cases 
+of the Figure 12 "sessions vs. typing-context" comparison (roughly one minute):
+
+```sh
+./compare-session-types.sh 3
+```
+
+The script prints one row as each case finishes.
+On our machine, we have measured the following results (up to rounding),
+though the timings may differ based on the machine.
+
+| `n` | Participants | Session deadlock freedom | Session time (s) | Context lower bound | Context time (s) |
+| ---: | ---: | ---: | ---: | ---: | ---: |
+| 1 | 3 | 0.7 | 1.669 | 0.7 | 0.401 |
+| 2 | 4 | 0.49 | 1.650 | 0.35 | 0.389 |
+| 3 | 5 | 0.343 | 1.639 | 0.175 | 0.390 |
+
+Generate plots from the resulting CSV:
+
+```sh
+CSV=$(/bin/ls -t prose/experiments/results/factorial_*.csv | head -n 1)
+MPLBACKEND=Agg python3 prose/experiments/plot_factorial_results.py "$CSV" --save-pdf
+```
+
+This should report three successful session measurements and three successful
+context measurements, and write `factorial_probabilities.pdf` and
+`factorial_times.pdf`. Open both files to check that the plots can be viewed:
+
+```sh
+# Native macOS:
+open factorial_probabilities.pdf factorial_times.pdf
+
+# Native Linux with a graphical desktop:
+xdg-open factorial_probabilities.pdf
+xdg-open factorial_times.pdf
+```
+
+With Docker, first copy the PDFs out from a **host terminal**:
+
+```sh
+docker cp artifact:/opt/artifact/factorial_probabilities.pdf .
+docker cp artifact:/opt/artifact/factorial_times.pdf .
+```
+
+Then check they display correctly using your host's PDF viewer.
+
 ## Reproducing the experiments
 
 This section describes the steps needed to reproduce the experiments conducted in the paper.
@@ -220,9 +260,10 @@ mkdir -p results
 ./benchmark.py --samples results/samples.csv
 ```
 
-This defaults to five timed runs and one warmup per measurement. Values are milliseconds,
-reported as **mean ± standard error**, excluding any
+This defaults to 30 timed runs per measurement, after discarding one warmup run.
+Values are milliseconds, reported as **mean ± standard error**, excluding any
 build or warmup times.
+Add `--latex` to print the table in LaTeX format.
 
 | Column | Description |
 | --- | --- |
@@ -241,7 +282,6 @@ and the resulting deadlock-freedom probabilities and lower bounds.
 See Appendix E.7 for the processes and types.
 
 ```sh
-./compare-session-types.sh 3       # small check: n = 1, 2, 3
 ./compare-session-types.sh         # full experiment: n = 1, ..., 30
 ```
 
@@ -251,34 +291,23 @@ model checked separately. PROMT inference is not involved.
 There are **`n + 2` participants** (`w0`, ..., `wn`, and `dummy`), computing **`(n - 1)!`**
 along the successful execution path.
 
-The script prints one row as each case finishes.
-On our machine, we have measured the following results (up to rounding),
-though the timing informations may differ based on the machine.
-
-| `n` | Participants | Session deadlock freedom | Session time (s) | Context lower bound | Context time (s) |
-| ---: | ---: | ---: | ---: | ---: | ---: |
-| 1 | 3 | 0.7 | 1.669 | 0.7 | 0.401 |
-| 2 | 4 | 0.49 | 1.650 | 0.35 | 0.389 |
-| 3 | 5 | 0.343 | 1.639 | 0.175 | 0.390 |
-
 Results are saved to `prose/experiments/results/factorial_<timestamp>.csv`.
 Times are mean PRISM verification times in
 seconds over ten runs, excluding translation.
 
-On our machine, the small experiment took roughly one minute to run,
-and the full experiment **TODO Aleks**
+On our machine, the full experiment **TODO Aleks**
 
 To plot the most recent CSV:
 
 ```sh
-CSV=$(ls -t prose/experiments/results/factorial_*.csv | head -n 1)
+CSV=$(/bin/ls -t prose/experiments/results/factorial_*.csv | head -n 1)
 MPLBACKEND=Agg python3 prose/experiments/plot_factorial_results.py "$CSV" --save-pdf
 ```
 
 This writes `factorial_probabilities.pdf` and `factorial_times.pdf` in the
 current directory.
-Omit `--save-pdf` to display the plots interactively when a graphical display
-is available.
+View them as described in sanity check 6. To display plots interactively,
+omit both `MPLBACKEND=Agg` and `--save-pdf` on a system with a graphical display.
 
 ## Licence
 
@@ -336,7 +365,7 @@ Recursion must be bound and guarded.
 ### Directory structure
 
 ```text
-run.py                   infer, typecheck, subtype, model-check and verify
+run.py                        infer, typecheck, subtype, model-check and verify
 benchmark.py                  combined timing table and raw samples
 compare-session-types.sh      compare session and type-context model checking
 Dockerfile, docker/           image build, dependencies and container checks
