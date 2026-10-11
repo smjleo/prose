@@ -1,7 +1,7 @@
 # Native installation
 
 These instructions cover Debian/Ubuntu Linux and macOS (Intel or ARM64).
-Run the project commands from the artifact root, in the same terminal.
+The commands below should be run from the artifact root in the same terminal.
 
 ## 1. Install system dependencies
 
@@ -16,7 +16,7 @@ sudo apt-get install -y build-essential curl git m4 patch pkg-config rsync \
 ```
 
 On macOS, install the Xcode Command Line Tools (`xcode-select --install`) and
-[Homebrew](https://brew.sh/), following its instructions to add `brew` to `PATH`.
+[Homebrew](https://brew.sh/).
 Then run:
 
 ```sh
@@ -25,11 +25,11 @@ export JAVA_HOME="$(brew --prefix openjdk@17)/libexec/openjdk.jdk/Contents/Home"
 export PATH="$JAVA_HOME/bin:$(brew --prefix python@3.12)/libexec/bin:$PATH"
 ```
 
-Use a native terminal on Apple Silicon so Java and PRISM use the same architecture.
+Use a native terminal on Apple Silicon so that Java and PRISM are using the same architecture.
 
 ## 2. Install the compilers and libraries
 
-Install [GHCup](https://www.haskell.org/ghcup/install/), then select the tested
+Install [GHCup](https://www.haskell.org/ghcup/install/), and use the following
 GHC and Cabal versions:
 
 ```sh
@@ -39,23 +39,20 @@ ghcup install cabal 3.12.1.0
 ghcup set cabal 3.12.1.0
 ```
 
-Create an OCaml switch and install Prose's dependencies 
+Then, create an OCaml switch and install the dependencies required for Prose.
 
 ```sh
 opam init --bare --no-setup -y
 opam switch create promt-prose ocaml-base-compiler.5.2.0 -y
 eval "$(opam env --switch=promt-prose --set-switch)"
-opam install -y dune.3.23.1 menhir.20260209 \
-  core.v0.17.2 core_unix.v0.17.1 ppx_jane.v0.17.0
+opam install -y dune.3.23.1 menhir.20260209 core.v0.17.2 core_unix.v0.17.1 ppx_jane.v0.17.0
 ```
 
 ## 3. Install PRISM
 
 Download [PRISM 4.10.1](https://github.com/prismmodelchecker/prism/releases/tag/v4.10.1)
-for your OS and processor (Linux/macOS, x86/ARM). Extract it to a permanent
-location, run `./install.sh` from the extracted directory, and add its `bin`
-directory to `PATH`. Check that `prism -version` works; Java 17 must also be
-on `PATH`. See the [PRISM installation guide](https://www.prismmodelchecker.org/manual/InstallingPRISM/Instructions)
+for your OS and processor (Linux/macOS, x86/ARM).
+See the [PRISM installation guide](https://www.prismmodelchecker.org/manual/InstallingPRISM/Instructions)
 for platform-specific help.
 
 ## 4. Build the tools and install plotting support
@@ -75,8 +72,7 @@ python3 -m venv .venv
 python3 -m pip install pandas matplotlib
 ```
 
-PROMT builds offline using GHC's bundled libraries. The scripts find both
-compiled tools on `PATH`; `--promt-bin` and `--prose-bin` can override them.
+The benchmark scripts find both compiled tools on `PATH`, though they can be overriden using the flags `--promt-bin` and `--prose-bin`.
 In later terminals, restore these PATH settings, select the OCaml switch with
 `eval "$(opam env --switch=promt-prose --set-switch)"`, and activate `.venv` again.
 
