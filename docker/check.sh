@@ -5,7 +5,7 @@ cd "$(dirname "$0")/.."
 python3 -c 'import matplotlib, numpy, pandas'
 gtimeout 5 gdate +%s%N >/dev/null
 for source in examples/*.promt; do
-    python3 artifact.py typecheck "$source" "${source%.promt}.ctx"
+    python3 run.py typecheck "$source" "${source%.promt}.ctx"
 done
 python3 - <<'PY'
 from pathlib import Path
@@ -16,7 +16,7 @@ import sys
 import tempfile
 
 def run(*arguments):
-    result = subprocess.run([sys.executable, "artifact.py", *map(str, arguments)],
+    result = subprocess.run([sys.executable, "run.py", *map(str, arguments)],
                             text=True, capture_output=True, timeout=120)
     if result.returncode:
         sys.exit(result.stdout + result.stderr)

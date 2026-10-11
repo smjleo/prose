@@ -48,7 +48,8 @@ with `(cd promt && cabal build exe:promt --offline)` or
 The tools are built with GHC 9.6.7, Cabal 3.12.1.0, OCaml 5.2.0, opam 2.5.2
 and Dune 3.23.1. Both images include PRISM 4.10.1 and Java 17.
 
-### Native installation
+### Native installation (TODO: add more detailed instructions!)
+
 
 Outside Docker, use Python 3.9 or later and install the tools needed by the
 operation you wish to run:
@@ -85,7 +86,7 @@ p = mu X . q ! m . flip 0.5 (X, r ! m . end)
 First print its inferred type:
 
 ```sh
-./artifact.py infer examples/ex-6-3.promt
+./run.py infer examples/ex-6-3.promt
 ```
 
 The result should be the paper's `T_inf` (up to recursion-variable names and formatting):
@@ -99,7 +100,7 @@ We can save the file into a file for the next steps.
 
 ```sh
 mkdir -p results
-./artifact.py infer examples/ex-6-3.promt -o results/ex-6-3-inferred.ctx
+./run.py infer examples/ex-6-3.promt -o results/ex-6-3-inferred.ctx
 ```
 
 The `.ctx` format is shared by inference, specifications and model checking.
@@ -118,7 +119,7 @@ p : (+) { q ! 1.0 : m . mu t .
 Check that `T_inf <= T_spec`:
 
 ```sh
-./artifact.py subtype results/ex-6-3-inferred.ctx examples/ex-6-3.ctx
+./run.py subtype results/ex-6-3-inferred.ctx examples/ex-6-3.ctx
 ```
 
 Expected output:
@@ -130,7 +131,7 @@ Expected output:
 ### 3. Typecheck the process against the specification
 
 ```sh
-./artifact.py typecheck examples/ex-6-3.promt examples/ex-6-3.ctx
+./run.py typecheck examples/ex-6-3.promt examples/ex-6-3.ctx
 ```
 
 This infers the process's type and checks it against `T_spec`, producing the
@@ -150,7 +151,7 @@ r = p ? m . q ! done . end
 Run inference followed by model checking with:
 
 ```sh
-./artifact.py verify examples/ex-6-3-session.promt
+./run.py verify examples/ex-6-3-session.promt
 ```
 
 The reported properties should be:
@@ -172,14 +173,14 @@ The same pipeline can be split into two steps, inferring the type and exporting 
 to a file, before model-checking the result:
 
 ```sh
-./artifact.py infer examples/ex-6-3-session.promt -o results/ex-6-3-session.ctx
-./artifact.py model-check results/ex-6-3-session.ctx
+./run.py infer examples/ex-6-3-session.promt -o results/ex-6-3-session.ctx
+./run.py model-check results/ex-6-3-session.ctx
 ```
 
 This should give the same results as before.
 
 PRISM's numeric formatting may vary by version. For an example whose safety
-property fails, run `./artifact.py model-check prose/examples/unsafe.ctx`;
+property fails, run `./run.py model-check prose/examples/unsafe.ctx`;
 it reports `false`.
 
 ### Check all example specifications
@@ -188,7 +189,7 @@ Every `.promt` file has an adjacent `.ctx` specification:
 
 ```sh
 for source in examples/*.promt; do
-  ./artifact.py typecheck "$source" "${source%.promt}.ctx" || exit 1
+  ./run.py typecheck "$source" "${source%.promt}.ctx" || exit 1
 done
 ```
 
@@ -229,7 +230,7 @@ build or warmup times.
 | Translation | Prose parsing and translation, excluding WASL. As described in the paper, each data point is a mean of 100 consecutive runs.|
 | WASL | Prose's weak-almost-sure-livelock computation. |
 | Safety / DF / Liveness | Separate PRISM invocations for the three properties. |
-| End-to-end | `artifact.py verify`: tool startup, inference, context handoff, translation including WASL, and one PRISM invocation checking all three properties. |
+| End-to-end | `run.py verify`: tool startup, inference, context handoff, translation including WASL, and one PRISM invocation checking all three properties. |
 
 
 ### Factorial sessions versus type contexts
@@ -335,7 +336,7 @@ Recursion must be bound and guarded.
 ### Directory structure
 
 ```text
-artifact.py                   infer, typecheck, subtype, model-check and verify
+run.py                   infer, typecheck, subtype, model-check and verify
 benchmark.py                  combined timing table and raw samples
 compare-session-types.sh      compare session and type-context model checking
 Dockerfile, docker/           image build, dependencies and container checks

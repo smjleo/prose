@@ -112,7 +112,7 @@ COPY --from=builder /opt/prism/ /opt/prism/
 COPY --from=builder /opt/prism-source.tar.gz /opt/prism-source.tar.gz
 COPY --chown=artifact:artifact . /opt/artifact/
 COPY --from=builder /opt/artifact/toolchain.txt /opt/artifact/toolchain.txt
-RUN chmod 755 /opt/artifact/artifact.py /opt/artifact/benchmark.py \
+RUN chmod 755 /opt/artifact/run.py /opt/artifact/benchmark.py \
     /opt/artifact/compare-session-types.sh
 
 USER artifact

@@ -60,7 +60,7 @@ def measure(command, runs, warmups, label):
         elapsed = (time.perf_counter_ns() - start) / 1_000_000
         if result.returncode:
             raise ValueError(f"{label}: run {i + 1} exited with status {result.returncode}; "
-                             "run this input with artifact.py verify to see diagnostics")
+                             "run this input with run.py verify to see diagnostics")
         if i >= warmups:
             samples.append(elapsed)
     return samples
@@ -259,7 +259,7 @@ def main(argv=None):
                 results[source.stem].update(stages[source.stem])
                 print(f"Measuring end-to-end for {source.name}...", file=sys.stderr, flush=True)
                 results[source.stem]["end_to_end"] = measure(
-                    [sys.executable, str(root / "artifact.py"), "--promt-bin", promt,
+                    [sys.executable, str(root / "run.py"), "--promt-bin", promt,
                      "--prose-bin", prose, "verify", str(source)],
                     args.runs, args.warmups, source.stem + "/end-to-end")
         if args.samples:
