@@ -38,12 +38,12 @@ docker build -t promt-prose .
 docker run -it --name artifact promt-prose
 ```
 
-The final docker image takes up ~1.3G of space, and took ~6min to build.
+The final docker image takes up ~1.3G of space, and takes around 6 minutes to build on our machine.
 
 The shell starts in `/opt/artifact`, containing both projects, examples and
 scripts. All subsequent commands in this README run from that directory,
-unless marked as host commands. The default **runtime image**, as built by 
-the commands above, includes the compiled `promt` and `prose` tools, 
+unless marked as host commands. The default **runtime image**, as built by
+the commands above, includes the compiled `promt` and `prose` tools,
 PRISM, Java, Python plotting dependencies, source files and examples.
 
 To also build an image for modifying and recompiling the tools:
@@ -53,7 +53,8 @@ docker build --target builder -t promt-prose-builder .
 docker run -it --name artifact-builder promt-prose-builder
 ```
 
-The final image that includes build tools uses ~8.38G of space, and took ~7min to build.
+The final image that includes build tools uses ~8.38G of space, and takes around
+7 minutes to build on our machine.
 
 This optional image includes GHC, Cabal, OCaml, opam and Dune. Inside it, rebuild
 with `(cd promt && cabal build exe:promt --offline)` or
@@ -157,9 +158,9 @@ to a file, before model-checking the result:
 
 This should give the same results as before.
 
-PRISM's numeric formatting may vary by version. For an example whose safety
-property fails, run `./run.py model-check prose/examples/unsafe.ctx`;
-it reports `false`.
+For an example whose safety property fails, run
+`./run.py model-check prose/examples/unsafe.ctx`, which should
+report `false`.
 
 ### Check all example specifications
 
@@ -252,8 +253,8 @@ All seven report `true` for safety. The reported probability bounds are:
 | 7 | 1 | 1 |
 
 Examples 3, 5, 6 and 7 are deadlock-free. Examples 6 and 7 are almost surely
-live, but only 7 is live in the paper's non-probabilistic sense: in 6, always
-sending to `q` leaves `r` waiting forever, an execution with probability zero.
+live, but only 7 is (non-probabilistically) live, since there exists a path in 6
+with probability zero that always sends to `q`, leaving `r` waiting forever.
 
 ### Combined timing table
 
