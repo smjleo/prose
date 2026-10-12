@@ -63,7 +63,7 @@ with `(cd promt && cabal build exe:promt --offline)` or
 The tools are built with GHC 9.6.7, Cabal 3.12.1.0, OCaml 5.2.0, opam 2.5.2
 and Dune 3.23.1. Both images include PRISM 4.10.1 and Java 21.
 
-Both docker images include the tool "vim" to edit files if desired.
+Both docker images include `vim` to edit files if desired.
 
 ### Native installation
 
