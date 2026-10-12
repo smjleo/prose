@@ -41,6 +41,9 @@ ghcup set cabal 3.12.1.0
 
 Then, create an OCaml switch and install the dependencies required for Prose.
 
+(if it can't find the versions indicated below when running `opam install` 
+ then do an `opam update` and retry)
+
 ```sh
 opam init --bare --no-setup -y
 opam switch create promt-prose ocaml-base-compiler.5.2.0 -y
@@ -54,6 +57,8 @@ Download [PRISM 4.10.1](https://github.com/prismmodelchecker/prism/releases/tag/
 for your OS and processor (Linux/macOS, x86/ARM).
 See the [PRISM installation guide](https://www.prismmodelchecker.org/manual/InstallingPRISM/Instructions)
 for platform-specific help.
+
+And remember to add prism to the PATH variable in your terminal.
 
 ## 4. Build the tools and install plotting support
 
