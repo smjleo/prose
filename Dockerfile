@@ -17,7 +17,7 @@ ENV LANG=C.UTF-8 \
 RUN apt-get update \
     && apt-get install -y --no-install-recommends \
        bash build-essential bzip2 ca-certificates curl git m4 patch pkg-config \
-       rsync unzip xz-utils zsh time \
+       rsync unzip xz-utils zsh time vim \
        libffi-dev libgmp-dev libncurses-dev libnuma-dev zlib1g-dev \
        openjdk-21-jre-headless \
        python3 python3-matplotlib python3-numpy python3-pandas python3-scipy \
@@ -96,7 +96,7 @@ ENV LANG=C.UTF-8 \
 # Munkres satisfies fonttools without SciPy's compiler dependencies.
 RUN apt-get update \
     && apt-get install -y --no-install-recommends \
-       bash coreutils mawk ca-certificates \
+       bash coreutils mawk ca-certificates vim \
        libgmp10 libffi8 libnuma1 libncurses6 libtinfo6 zlib1g libgomp1 libstdc++6 \
        openjdk-21-jre-headless \
        python3 python3-munkres python3-matplotlib python3-numpy python3-pandas \
