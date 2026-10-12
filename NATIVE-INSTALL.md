@@ -15,6 +15,18 @@ sudo apt-get install -y build-essential curl git m4 patch pkg-config rsync \
   python3 python3-pip python3-venv
 ```
 
+On Fedora (using dnf package manager):
+
+```sh
+sudo dnf install -y \
+  gcc gcc-c++ make perl curl git m4 patch pkgconf-pkg-config rsync \
+  unzip tar xz bzip2 \
+  libffi-devel gmp-devel ncurses-devel ncurses-compat-libs \
+  numactl-devel zlib-devel \
+  opam bubblewrap java-21-openjdk-headless \
+  python3 python3-pip
+```
+
 On macOS, install the Xcode Command Line Tools (`xcode-select --install`) and
 [Homebrew](https://brew.sh/).
 Then run:
