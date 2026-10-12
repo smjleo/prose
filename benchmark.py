@@ -16,7 +16,7 @@ import tempfile
 import time
 
 sys.dont_write_bytecode = True
-from run import adapt_context, infer, resolve_tools
+from run import adapt_context, infer, require_prism, resolve_tools
 
 METRICS = ("inference", "translation", "wasl", "safety", "df", "liveness", "end_to_end")
 HEADERS = ("Inference", "Translation", "WASL", "Safety", "DF", "Liveness", "End-to-end")
@@ -238,6 +238,7 @@ def main(argv=None):
         if args.examples is None and selected is None:
             selected = DEFAULT_BENCHMARKS
         files = sources((args.examples or root / "examples").resolve(), selected)
+        require_prism()
         promt, prose = resolve_tools(root, args.promt_bin, args.prose_bin)
         names = [source.stem for source in files]
         results = {name: {} for name in names}

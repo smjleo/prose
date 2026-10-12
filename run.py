@@ -21,6 +21,16 @@ class ArtifactError(ValueError):
     """A tool failure suitable for displaying without a traceback."""
 
 
+def require_prism():
+    if shutil.which("prism") is None:
+        raise ArtifactError(
+            "PRISM executable 'prism' was not found on PATH.\n"
+            "Install PRISM or add its bin directory to PATH, for example:\n"
+            '  export PATH="/path/to/prism/bin:$PATH"\n'
+            "Then run 'prism -version' and retry. See NATIVE-INSTALL.md."
+        )
+
+
 def _executable(argument, label):
     """Resolve a caller-relative path or a command on PATH and validate it."""
     argument = os.fspath(argument)
@@ -206,6 +216,8 @@ def main(argv=None):
     root = Path(__file__).resolve().parent
     try:
         source = _source(args.source)
+        if args.mode in ("model-check", "verify"):
+            require_prism()
         if args.mode in ("typecheck", "subtype"):
             specification = _source(args.specification)
             promt = resolve_tool(root, "promt", args.promt_bin)
