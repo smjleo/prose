@@ -16,6 +16,8 @@ The artifact contains two tools for probabilistic multiparty sessions:
 - **Prose** translates type contexts to PRISM and checks safety,
   deadlock-freedom and liveness.
 
+We recommend reading this README.md in a frontend that renders the markdown commands.
+
 ## Requirements and installation
 
 We support the installation of our artifact either through Docker or natively.
@@ -35,6 +37,8 @@ docker build -t promt-prose .
 docker run -it --name artifact promt-prose
 ```
 
+The final docker image takes up ~1.3G of space, and took ~6min to build.
+
 The shell starts in `/opt/artifact`, containing both projects, examples and
 scripts. All subsequent commands in this README run from that directory,
 unless marked as host commands. The default **runtime image** includes the
@@ -48,12 +52,16 @@ docker build --target builder -t promt-prose-builder .
 docker run -it --name artifact-builder promt-prose-builder
 ```
 
+The final image that includes build tools uses ~8.38G of space, and took ~7min to build.
+
 This optional image includes GHC, Cabal, OCaml, opam and Dune. Inside it, rebuild
 with `(cd promt && cabal build exe:promt --offline)` or
 `(cd prose && dune build bin/main.exe)`.
 
 The tools are built with GHC 9.6.7, Cabal 3.12.1.0, OCaml 5.2.0, opam 2.5.2
 and Dune 3.23.1. Both images include PRISM 4.10.1 and Java 21.
+
+Both docker images include the tool "vim" to edit files if desired.
 
 ### Native installation
 
