@@ -1,0 +1,5 @@
+(* Figure 9, example 6. *)
+
+p : mu t . (+) { q ! 0.5 : m . t, r ! 0.5 : m . t }
+q : mu t . & { p ? m . t }
+r : mu t . & { p ? m . t }

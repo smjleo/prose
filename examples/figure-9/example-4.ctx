@@ -1,0 +1,4 @@
+(* Figure 9, example 4. *)
+
+p : & { q ? m . end }
+q : (+) { p ! 0.5 : m . end, r ! 0.5 : m . end }

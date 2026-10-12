@@ -4,6 +4,7 @@ This is the artifact for POPL paper submission **#484**, "Model-Checking
 Probabilistic Multiparty Session Types". It should reproduce:
 
 - **Table 1:** inference, translation, model-checking and end-to-end timings.
+- **Figure 9:** examples separating safety, deadlock freedom and liveness.
 - **Figure 12:** verification times and deadlock-freedom probabilities for
   concrete sessions and their typing contexts.
 
@@ -226,6 +227,34 @@ This section describes the steps needed to reproduce the experiments conducted i
 We expect all probability results to be identical up to floating-point rounding. The
 runtime measurements may vary depending on the machine, but should exhibit similar trends.
 
+### Safety, deadlock freedom and liveness
+
+The seven contexts in `examples/figure-9/` reproduce the examples in Figure 9.
+Run them with:
+
+```sh
+for context in examples/figure-9/*.ctx; do
+  printf '\n%s\n' "$context"
+  ./run.py model-check "$context" || exit 1
+done
+```
+
+All seven report `true` for safety. The reported probability bounds are:
+
+| Figure 9 example | Deadlock-freedom lower bound | Liveness lower bound |
+| ---: | ---: | ---: |
+| 1 | 0 | 0 |
+| 2 | 0.5 | 0 |
+| 3 | 1 | 0 |
+| 4 | 0.5 | 0.5 |
+| 5 | 1 | 0.5 |
+| 6 | 1 | 1 |
+| 7 | 1 | 1 |
+
+Examples 3, 5, 6 and 7 are deadlock-free. Examples 6 and 7 are almost surely
+live, but only 7 is live in the paper's non-probabilistic sense: in 6, always
+sending to `q` leaves `r` waiting forever, an execution with probability zero.
+
 ### Combined timing table
 
 This section walks through how to reproduce the results presented in table 1 of the
@@ -394,6 +423,7 @@ LICENSE                       MIT licence
 examples/
   *.promt                     process definitions for paper benchmarks and examples
   *.ctx                       type specifications for paper benchmarks and examples
+  figure-9/                   contexts illustrating the property relationships
 promt/
   app/                        PROMT command-line interface
   src/Frontend/               parser for process and type-context
