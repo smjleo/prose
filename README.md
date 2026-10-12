@@ -29,7 +29,7 @@ Install and start Docker for your host:
 
 - **Linux (x86-64 or ARM64):** install [Docker Engine](https://docs.docker.com/engine/install/).
 - **macOS (Intel or Apple Silicon):** install and start
-  [Docker Desktop](https://docs.docker.com/desktop/setup/install/mac-install/).
+  [Docker Desktop](https://docs.docker.com/desktop/setup/install/mac-install/) (or [OrbStack](https://docs.orbstack.dev/install))
 
 Then, build the image and enter its shell from this directory:
 
@@ -42,9 +42,9 @@ The final docker image takes up ~1.3G of space, and took ~6min to build.
 
 The shell starts in `/opt/artifact`, containing both projects, examples and
 scripts. All subsequent commands in this README run from that directory,
-unless marked as host commands. The default **runtime image** includes the
-compiled `promt` and `prose` tools, PRISM, Java, Python plotting dependencies,
-source files and examples.
+unless marked as host commands. The default **runtime image**, as built by 
+the commands above, includes the compiled `promt` and `prose` tools, 
+PRISM, Java, Python plotting dependencies, source files and examples.
 
 To also build an image for modifying and recompiling the tools:
 
@@ -203,15 +203,6 @@ This should report three successful session measurements and three successful
 context measurements, and write `factorial_probabilities.pdf` and
 `factorial_times.pdf`. Open both files to check that the plots can be viewed:
 
-```sh
-# Native macOS:
-open factorial_probabilities.pdf factorial_times.pdf
-
-# Native Linux with a graphical desktop:
-xdg-open factorial_probabilities.pdf
-xdg-open factorial_times.pdf
-```
-
 With Docker, first copy the PDFs out from a **host terminal**:
 
 ```sh
@@ -220,6 +211,15 @@ docker cp artifact:/opt/artifact/factorial_times.pdf .
 ```
 
 Then check they display correctly using your host's PDF viewer.
+
+```sh
+# Native macOS:
+open factorial_probabilities.pdf factorial_times.pdf
+
+# Native Linux with a graphical desktop:
+xdg-open factorial_probabilities.pdf
+xdg-open factorial_times.pdf
+```
 
 ## Reproducing the experiments
 
