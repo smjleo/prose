@@ -62,8 +62,8 @@ including the compilers, PRISM and plotting dependencies.
 
 ## Sanity-check instructions
 
-The following walkthrough exercises all five supported commands of the tool, namely;
-`infer`, `typecheck`, `subtype`, `verify`, `model-check`
+The following walkthrough exercises four supported commands of the tool, namely;
+`infer`, `typecheck`, `verify`, `model-check`
 using the recursive process from Section 6.3 of the paper.
 Run these commands from the artifact root.
 
@@ -97,30 +97,7 @@ mkdir -p results
 
 The `.ctx` format is shared by inference, specifications and model checking.
 
-### 2. Check subtyping against a broader specification
-
-`examples/ex-6-3.ctx` contains `T_spec`, obtained by adding a nondeterministic
-alternative `q ! cancel . end` to `T_inf`:
-
-```text
-p : (+) { q ! 1.0 : m . mu t .
-      (+) { q ! 0.5 : m . t, r ! 0.5 : m . end } }
-    + (+) { q ! 1.0 : cancel . end }
-```
-
-Check that `T_inf <= T_spec`:
-
-```sh
-./run.py subtype results/ex-6-3-inferred.ctx examples/ex-6-3.ctx
-```
-
-Expected output:
-
-```text
-  p : OK  (inferred <= specified)
-```
-
-### 3. Typecheck the process against the specification
+### 2. Typecheck the process against the specification
 
 ```sh
 ./run.py typecheck examples/ex-6-3.promt examples/ex-6-3.ctx
@@ -130,7 +107,7 @@ This infers the process's type and checks it against `T_spec`, producing the
 same `p : OK` verdict without needing an intermediate file. Both files must
 contain exactly the same participant names.
 
-### 4. Verify a complete session
+### 3. Verify a complete session
 
 The process above mentions `q` and `r` but does not define them. The file
 `examples/ex-6-3-session.promt` keeps `p` unchanged and adds:
@@ -159,7 +136,7 @@ Liveness (lower bound)
 Result: 0.5 (exact floating point)
 ```
 
-### 5. Model check the exported context
+### 4. Model check the exported context
 
 The same pipeline can be split into two steps, inferring the type and exporting it
 to a file, before model-checking the result:
@@ -187,7 +164,7 @@ done
 
 All participant verdicts should be `OK`.
 
-### 6. Compare sessions and contexts, and view the plots
+### 5. Compare sessions and contexts, and view the plots
 
 To check the plotting software runs properly, run the first three cases 
 of the Figure 12 "sessions vs. typing-context" comparison (roughly one minute):
@@ -261,6 +238,7 @@ mkdir -p results
 ```
 
 This defaults to 30 timed runs per measurement, after discarding one warmup run.
+Running the above benchmark command took 13m 10s in total on our machine.
 Values are milliseconds, reported as **mean ± standard error**, excluding any
 build or warmup times.
 Add `--latex` to print the table in LaTeX format.
@@ -400,7 +378,7 @@ Recursion must be bound and guarded.
 ### Directory structure
 
 ```text
-run.py                        infer, typecheck, subtype, model-check and verify
+run.py                        infer, typecheck, model-check and verify
 benchmark.py                  combined timing table and raw samples
 compare-session-types.sh      compare session and type-context model checking
 Dockerfile, docker/           image build, dependencies and container checks
